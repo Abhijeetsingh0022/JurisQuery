@@ -1,0 +1,87 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: var(--font-sans);
+  --font-serif: var(--font-serif);
+
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-surface: var(--surface);
+
+  --animate-fade-in: fade-in 0.5s ease-out;
+  --animate-slide-up: slide-up 0.5s ease-out;
+
+  @keyframes fade-in {
+    from {
+      opacity: 0;
+    }
+
+    to {
+      opacity: 1;
+    }
+  }
+
+  @keyframes slide-up {
+    from {
+      transform: translateY(20px);
+      opacity: 0;
+    }
+
+    to {
+      transform: translateY(0);
+      opacity: 1;
+    }
+  }
+}
+
+:root {
+  /* JurisQuery Palette */
+  --deep-navy: #2a3b4e;
+  --soft-cream: #f7f3f1;
+  --pure-white: #ffffff;
+  --text-dark: #1a1a1a;
+
+  --background: var(--soft-cream);
+  --foreground: var(--text-dark);
+  --primary: var(--deep-navy);
+  --primary-foreground: var(--pure-white);
+  --surface: var(--pure-white);
+}
+
+/* Dark mode support - currently unused but prepared
+@media (prefers-color-scheme: dark) {
+  :root {
+  }
+} 
+*/
+
+body {
+  background-color: var(--background);
+  color: var(--foreground);
+}
+
+@layer utilities {
+  .bg-size-200 {
+    background-size: 200% 200%;
+  }
+
+  .animate-gradient {
+    animation: gradient 8s ease infinite;
+  }
+
+  @keyframes gradient {
+    0% {
+      background-position: 0% 50%;
+    }
+
+    50% {
+      background-position: 100% 50%;
+    }
+
+    100% {
+      background-position: 0% 50%;
+    }
+  }
+}
