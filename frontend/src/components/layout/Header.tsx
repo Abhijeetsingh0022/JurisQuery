@@ -2,13 +2,11 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import Image from "next/image";
+
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/common/Button";
 import { Menu, X } from "lucide-react";
 import {
-    SignInButton,
-    SignUpButton,
     SignedIn,
     SignedOut,
     UserButton,
@@ -44,15 +42,6 @@ export function Header() {
             <div className="container mx-auto px-4 md:px-6 flex items-center justify-between">
                 {/* Logo */}
                 <Link href="/" className="flex items-center gap-3 group">
-                    <div className="relative w-10 h-10 md:w-12 md:h-12 transition-transform duration-300 group-hover:scale-105">
-                        <Image
-                            src="/JurisQuery-logo.svg"
-                            alt="JurisQuery Logo"
-                            fill
-                            className="object-contain"
-                            priority
-                        />
-                    </div>
                     <span className="font-serif text-xl md:text-2xl font-bold text-primary tracking-tight group-hover:text-primary/90 transition-colors">
                         JurisQuery.
                     </span>
@@ -71,16 +60,16 @@ export function Header() {
                     ))}
 
                     <SignedOut>
-                        <SignInButton mode="modal">
+                        <Link href="/sign-in">
                             <Button variant="ghost" className="font-medium">
                                 Sign In
                             </Button>
-                        </SignInButton>
-                        <SignUpButton mode="modal">
+                        </Link>
+                        <Link href="/sign-up">
                             <Button className="rounded-full font-semibold shadow-md hover:shadow-lg">
                                 Get Started
                             </Button>
-                        </SignUpButton>
+                        </Link>
                     </SignedOut>
 
                     <SignedIn>
@@ -88,7 +77,36 @@ export function Header() {
                             appearance={{
                                 elements: {
                                     avatarBox: "w-10 h-10",
+                                    userButtonPopoverCard: "shadow-2xl border-0 rounded-2xl bg-white",
+                                    userButtonPopoverFooter: "hidden", // Hide "Secured by Clerk" from popover
+                                    userButtonPopoverActionButton: "hover:bg-soft-cream text-foreground",
+                                    userButtonPopoverActionButtonText: "text-foreground font-medium",
+                                    userButtonPopoverActionButtonIcon: "text-primary",
                                 },
+                                variables: {
+                                    colorPrimary: "#2a3b4e",
+                                    colorText: "#1a1a1a",
+                                    colorBackground: "#ffffff",
+                                    colorInputBackground: "#f9fafb",
+                                    borderRadius: "0.75rem",
+                                }
+                            }}
+                            userProfileProps={{
+                                appearance: {
+                                    elements: {
+                                        card: "shadow-2xl border-0 rounded-2xl bg-white",
+                                        footer: "hidden", // Hide "Secured by Clerk" from modal
+                                        navbar: "hidden",
+                                        headerTitle: "font-serif text-2xl text-primary font-bold",
+                                        headerSubtitle: "text-foreground/70",
+                                    },
+                                    variables: {
+                                        colorPrimary: "#2a3b4e",
+                                        colorText: "#1a1a1a",
+                                        colorBackground: "#ffffff",
+                                        borderRadius: "0.75rem",
+                                    }
+                                }
                             }}
                         />
                     </SignedIn>
@@ -119,21 +137,33 @@ export function Header() {
                         ))}
 
                         <SignedOut>
-                            <SignInButton mode="modal">
+                            <Link href="/sign-in" onClick={() => setIsMobileMenuOpen(false)}>
                                 <Button variant="outline" className="w-full">
                                     Sign In
                                 </Button>
-                            </SignInButton>
-                            <SignUpButton mode="modal">
+                            </Link>
+                            <Link href="/sign-up" onClick={() => setIsMobileMenuOpen(false)}>
                                 <Button className="w-full">
                                     Get Started
                                 </Button>
-                            </SignUpButton>
+                            </Link>
                         </SignedOut>
 
                         <SignedIn>
                             <div className="flex items-center gap-3 py-2">
-                                <UserButton />
+                                <UserButton
+                                    appearance={{
+                                        elements: {
+                                            avatarBox: "w-10 h-10",
+                                            userButtonPopoverCard: "shadow-2xl border-0 rounded-2xl bg-white",
+                                            userButtonPopoverFooter: "hidden",
+                                        },
+                                        variables: {
+                                            colorPrimary: "#2a3b4e",
+                                            borderRadius: "0.75rem",
+                                        }
+                                    }}
+                                />
                                 <span className="text-sm text-foreground/70">My Account</span>
                             </div>
                         </SignedIn>
