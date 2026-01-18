@@ -115,4 +115,10 @@ body {
       transform: translate(0px, 0px) scale(1);
     }
   }
+
+  /* Dot Grid Pattern */
+  .bg-dot-pattern {
+    background-image: radial-gradient(circle, rgba(42, 59, 78, 0.15) 1px, transparent 1px);
+    background-size: 24px 24px;
+  }
 }

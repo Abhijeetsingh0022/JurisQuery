@@ -6,7 +6,7 @@ import { ArrowRight } from "lucide-react";
 
 export function Hero() {
     return (
-        <section className="relative pt-32 pb-24 md:pt-48 md:pb-32 overflow-hidden bg-background">
+        <section className="relative pt-32 pb-24 md:pt-48 md:pb-32 overflow-hidden">
             {/* Premium Background Effects */}
             <div className="absolute inset-0 overflow-hidden pointer-events-none">
                 <div className="absolute top-[-20%] right-[-10%] w-[800px] h-[800px] bg-primary/5 rounded-full blur-[100px] opacity-40 animate-pulse" />

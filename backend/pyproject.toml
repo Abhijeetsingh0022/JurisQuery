@@ -1,0 +1,64 @@
+[project]
+name = "jurisquery-backend"
+version = "0.1.0"
+description = "JurisQuery RAG Backend API - Legal Document Analysis"
+requires-python = ">=3.12"
+readme = "README.md"
+license = { text = "MIT" }
+authors = [{ name = "JurisQuery Team" }]
+
+dependencies = [
+    # FastAPI & Server
+    "fastapi>=0.115.0",
+    "uvicorn[standard]>=0.32.0",
+    "python-multipart>=0.0.9",
+    # Database
+    "sqlalchemy>=2.0.0",
+    "asyncpg>=0.30.0",
+    "alembic>=1.14.0",
+    # Pydantic
+    "pydantic>=2.10.0",
+    "pydantic-settings>=2.6.0",
+    # RAG Framework
+    "llama-index>=0.12.0",
+    "llama-index-llms-gemini>=0.4.0",
+    "llama-index-embeddings-gemini>=0.3.0",
+    "llama-index-vector-stores-qdrant>=0.4.0",
+    # Document Processing
+    "pypdf>=5.0.0",
+    "python-docx>=1.1.0",
+    # Vector Database
+    "qdrant-client>=1.12.0",
+    # Cloud Storage
+    "cloudinary>=1.40.0",
+    # Utilities
+    "python-jose[cryptography]>=3.3.0",
+    "passlib[bcrypt]>=1.7.4",
+    "httpx>=0.28.0",
+    "tenacity>=9.0.0",
+    "email-validator>=2.3.0",
+    "google-genai>=1.59.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0.0",
+    "pytest-asyncio>=0.24.0",
+    "httpx>=0.28.0",
+    "ruff>=0.8.0",
+]
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "SIM"]
+ignore = ["E501"]
+
+[tool.ruff.format]
+quote-style = "double"
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+testpaths = ["tests"]

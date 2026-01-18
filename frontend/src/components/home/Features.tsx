@@ -33,7 +33,7 @@ const features = [
 
 export function Features() {
     return (
-        <section id="features" className="py-24 bg-surface text-foreground relative z-10">
+        <section id="features" className="py-24 relative z-10 text-foreground">
             <div className="container mx-auto px-4 md:px-6">
                 <div className="text-center max-w-3xl mx-auto mb-16">
                     <motion.span

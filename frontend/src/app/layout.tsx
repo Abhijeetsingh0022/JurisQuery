@@ -1,8 +1,6 @@
 import type { Metadata } from "next";
 import { Outfit, Playfair_Display } from "next/font/google";
 import { ClerkProvider } from "@clerk/nextjs";
-import { Header } from "@/components/layout/Header";
-import { Footer } from "@/components/layout/Footer";
 import "./globals.css";
 import { cn } from "@/lib/utils";
 
@@ -36,11 +34,7 @@ export default function RootLayout({
             "antialiased bg-background text-foreground font-sans"
           )}
         >
-          <Header />
-          <main className="min-h-screen">
-            {children}
-          </main>
-          <Footer />
+          {children}
         </body>
       </html>
     </ClerkProvider>

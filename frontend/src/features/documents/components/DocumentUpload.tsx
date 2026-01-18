@@ -1,0 +1,264 @@
+'use client';
+
+import { useState, useCallback } from 'react';
+import { useDropzone } from 'react-dropzone';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Upload, FileText, CheckCircle2, AlertCircle, Loader2, X } from 'lucide-react';
+import { uploadDocument, getDocumentStatus } from '@/services/ragService';
+import type { Document, DocumentStatus } from '@/types/documents.types';
+
+interface DocumentUploadProps {
+    onUploadComplete?: (document: Document) => void;
+    onError?: (error: Error) => void;
+}
+
+const statusMessages: Record<DocumentStatus, string> = {
+    pending: 'Preparing upload...',
+    uploading: 'Uploading document...',
+    processing: 'Extracting text...',
+    vectorizing: 'Creating embeddings...',
+    ready: 'Document ready!',
+    failed: 'Processing failed',
+};
+
+const statusIcons: Record<DocumentStatus, React.ReactNode> = {
+    pending: <Loader2 className="h-5 w-5 animate-spin text-blue-500" />,
+    uploading: <Loader2 className="h-5 w-5 animate-spin text-blue-500" />,
+    processing: <Loader2 className="h-5 w-5 animate-spin text-amber-500" />,
+    vectorizing: <Loader2 className="h-5 w-5 animate-spin text-purple-500" />,
+    ready: <CheckCircle2 className="h-5 w-5 text-green-500" />,
+    failed: <AlertCircle className="h-5 w-5 text-red-500" />,
+};
+
+export default function DocumentUpload({ onUploadComplete, onError }: DocumentUploadProps) {
+    const [isUploading, setIsUploading] = useState(false);
+    const [uploadProgress, setUploadProgress] = useState(0);
+    const [processingStatus, setProcessingStatus] = useState<DocumentStatus | null>(null);
+    const [currentFile, setCurrentFile] = useState<File | null>(null);
+    const [error, setError] = useState<string | null>(null);
+
+    const pollStatus = useCallback(async (documentId: string) => {
+        const maxAttempts = 60; // 5 minutes with 5s intervals
+        let attempts = 0;
+
+        const poll = async () => {
+            try {
+                const status = await getDocumentStatus(documentId);
+                setProcessingStatus(status.status);
+
+                if (status.status === 'ready') {
+                    // Fetch full document
+                    const document = await import('@/services/ragService').then(m => m.getDocument(documentId));
+                    onUploadComplete?.(document);
+                    setTimeout(() => {
+                        setIsUploading(false);
+                        setCurrentFile(null);
+                        setProcessingStatus(null);
+                    }, 2000);
+                } else if (status.status === 'failed') {
+                    setError(status.error_message || 'Processing failed');
+                    setIsUploading(false);
+                } else if (attempts < maxAttempts) {
+                    attempts++;
+                    setTimeout(poll, 5000);
+                }
+            } catch (err) {
+                console.error('Status poll error:', err);
+                attempts++;
+                if (attempts < maxAttempts) {
+                    setTimeout(poll, 5000);
+                }
+            }
+        };
+
+        poll();
+    }, [onUploadComplete]);
+
+    const handleUpload = useCallback(async (file: File) => {
+        setIsUploading(true);
+        setCurrentFile(file);
+        setError(null);
+        setUploadProgress(0);
+        setProcessingStatus('uploading');
+
+        try {
+            const document = await uploadDocument(file, (progress) => {
+                setUploadProgress(progress);
+            });
+
+            setProcessingStatus(document.status);
+
+            if (document.status === 'ready') {
+                onUploadComplete?.(document);
+                setTimeout(() => {
+                    setIsUploading(false);
+                    setCurrentFile(null);
+                }, 2000);
+            } else if (document.status !== 'failed') {
+                // Start polling for status
+                pollStatus(document.id);
+            }
+        } catch (err) {
+            const error = err instanceof Error ? err : new Error('Upload failed');
+            setError(error.message);
+            setIsUploading(false);
+            setProcessingStatus(null);
+            onError?.(error);
+        }
+    }, [onUploadComplete, onError, pollStatus]);
+
+    const onDrop = useCallback((acceptedFiles: File[]) => {
+        const file = acceptedFiles[0];
+        if (file) {
+            handleUpload(file);
+        }
+    }, [handleUpload]);
+
+    const { getRootProps, getInputProps, isDragActive, isDragReject } = useDropzone({
+        onDrop,
+        accept: {
+            'application/pdf': ['.pdf'],
+            'application/vnd.openxmlformats-officedocument.wordprocessingml.document': ['.docx'],
+            'text/plain': ['.txt'],
+        },
+        maxFiles: 1,
+        maxSize: 50 * 1024 * 1024, // 50MB
+        disabled: isUploading,
+    });
+
+    const cancelUpload = () => {
+        setIsUploading(false);
+        setCurrentFile(null);
+        setProcessingStatus(null);
+        setError(null);
+        setUploadProgress(0);
+    };
+
+    return (
+        <div className="w-full">
+            <AnimatePresence mode="wait">
+                {!isUploading ? (
+                    <motion.div
+                        key="dropzone"
+                        initial={{ opacity: 0, scale: 0.95 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        exit={{ opacity: 0, scale: 0.95 }}
+                        transition={{ duration: 0.2 }}
+                    >
+                        <div
+                            {...getRootProps()}
+                            className={`
+                relative overflow-hidden rounded-2xl border-2 border-dashed p-12
+                transition-all duration-300 cursor-pointer
+                ${isDragActive ? 'border-blue-500 bg-blue-50/50 dark:bg-blue-900/20' : ''}
+                ${isDragReject ? 'border-red-500 bg-red-50/50 dark:bg-red-900/20' : ''}
+                ${!isDragActive && !isDragReject ? 'border-gray-300 dark:border-gray-700 hover:border-blue-400 hover:bg-gray-50/50 dark:hover:bg-gray-800/50' : ''}
+              `}
+                        >
+                            <input {...getInputProps()} />
+
+                            <div className="flex flex-col items-center gap-4 text-center">
+                                <div className={`
+                  p-4 rounded-full transition-colors duration-300
+                  ${isDragActive ? 'bg-blue-100 dark:bg-blue-900/50' : 'bg-gray-100 dark:bg-gray-800'}
+                `}>
+                                    <Upload className={`
+                    h-8 w-8 transition-colors duration-300
+                    ${isDragActive ? 'text-blue-600' : 'text-gray-500 dark:text-gray-400'}
+                  `} />
+                                </div>
+
+                                <div>
+                                    <p className="text-lg font-medium text-gray-900 dark:text-white">
+                                        {isDragActive ? 'Drop your document here' : 'Drag & drop a legal document'}
+                                    </p>
+                                    <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
+                                        or click to browse • PDF, DOCX, TXT up to 50MB
+                                    </p>
+                                </div>
+                            </div>
+
+                            {/* Animated border gradient */}
+                            {isDragActive && (
+                                <motion.div
+                                    className="absolute inset-0 -z-10 bg-gradient-to-r from-blue-500/20 via-purple-500/20 to-blue-500/20"
+                                    animate={{ opacity: [0.5, 1, 0.5] }}
+                                    transition={{ duration: 2, repeat: Infinity }}
+                                />
+                            )}
+                        </div>
+                    </motion.div>
+                ) : (
+                    <motion.div
+                        key="uploading"
+                        initial={{ opacity: 0, scale: 0.95 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        exit={{ opacity: 0, scale: 0.95 }}
+                        className="rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 p-6"
+                    >
+                        <div className="flex items-start gap-4">
+                            <div className="p-3 rounded-xl bg-blue-50 dark:bg-blue-900/30">
+                                <FileText className="h-6 w-6 text-blue-600" />
+                            </div>
+
+                            <div className="flex-1 min-w-0">
+                                <div className="flex items-center justify-between">
+                                    <p className="font-medium text-gray-900 dark:text-white truncate">
+                                        {currentFile?.name}
+                                    </p>
+                                    <button
+                                        onClick={cancelUpload}
+                                        className="p-1 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-full transition-colors"
+                                    >
+                                        <X className="h-4 w-4 text-gray-500" />
+                                    </button>
+                                </div>
+
+                                <p className="mt-1 text-sm text-gray-500">
+                                    {currentFile && `${(currentFile.size / 1024 / 1024).toFixed(2)} MB`}
+                                </p>
+
+                                {/* Progress bar */}
+                                <div className="mt-3">
+                                    <div className="h-2 bg-gray-100 dark:bg-gray-800 rounded-full overflow-hidden">
+                                        <motion.div
+                                            className="h-full bg-gradient-to-r from-blue-500 to-purple-500 rounded-full"
+                                            initial={{ width: 0 }}
+                                            animate={{
+                                                width: processingStatus === 'uploading'
+                                                    ? `${uploadProgress}%`
+                                                    : processingStatus === 'processing' ? '60%'
+                                                        : processingStatus === 'vectorizing' ? '85%'
+                                                            : processingStatus === 'ready' ? '100%'
+                                                                : `${uploadProgress}%`
+                                            }}
+                                            transition={{ duration: 0.3 }}
+                                        />
+                                    </div>
+                                </div>
+
+                                {/* Status message */}
+                                <div className="mt-3 flex items-center gap-2">
+                                    {processingStatus && statusIcons[processingStatus]}
+                                    <span className="text-sm text-gray-600 dark:text-gray-400">
+                                        {processingStatus ? statusMessages[processingStatus] : 'Starting upload...'}
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+
+                        {error && (
+                            <motion.div
+                                initial={{ opacity: 0, y: -10 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                className="mt-4 p-3 rounded-lg bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 text-sm"
+                            >
+                                {error}
+                            </motion.div>
+                        )}
+                    </motion.div>
+                )}
+            </AnimatePresence>
+        </div>
+    );
+}
