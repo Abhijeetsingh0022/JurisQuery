@@ -218,31 +218,65 @@ export default function DocumentUpload({ onUploadComplete, onError }: DocumentUp
                                     {currentFile && `${(currentFile.size / 1024 / 1024).toFixed(2)} MB`}
                                 </p>
 
-                                {/* Progress bar */}
-                                <div className="mt-3">
-                                    <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
-                                        <motion.div
-                                            className="h-full bg-gradient-to-r from-blue-500 to-blue-600 rounded-full"
-                                            initial={{ width: 0 }}
-                                            animate={{
-                                                width: processingStatus === 'uploading'
-                                                    ? `${uploadProgress}%`
-                                                    : processingStatus === 'processing' ? '60%'
-                                                        : processingStatus === 'vectorizing' ? '85%'
-                                                            : processingStatus === 'ready' ? '100%'
-                                                                : `${uploadProgress}%`
-                                            }}
-                                            transition={{ duration: 0.3 }}
-                                        />
-                                    </div>
-                                </div>
+                                {/* Timeline Stepper */}
+                                <div className="mt-6 mb-2 px-4">
+                                    <div className="relative flex justify-between items-start">
+                                        {/* Connecting Line - positioned to connect circle centers */}
+                                        <div className="absolute top-4 left-4 right-4 -translate-y-1/2">
+                                            <div className="h-0.5 w-full bg-gray-200 rounded-full overflow-hidden">
+                                                <motion.div
+                                                    className="h-full bg-blue-600 origin-left"
+                                                    initial={{ scaleX: 0 }}
+                                                    animate={{
+                                                        scaleX: processingStatus === 'ready' ? 1
+                                                            : processingStatus === 'vectorizing' ? 0.75
+                                                                : processingStatus === 'processing' ? 0.5
+                                                                    : 0.15
+                                                    }}
+                                                    transition={{ duration: 0.5, ease: "easeInOut" }}
+                                                />
+                                            </div>
+                                        </div>
 
-                                {/* Status message */}
-                                <div className="mt-3 flex items-center gap-2">
-                                    {processingStatus && statusIcons[processingStatus]}
-                                    <span className="text-sm text-gray-600">
-                                        {processingStatus ? statusMessages[processingStatus] : 'Starting upload...'}
-                                    </span>
+                                        {/* Steps */}
+                                        {[
+                                            { id: 'uploading', label: 'Upload', icon: Upload },
+                                            { id: 'processing', label: 'Extract', icon: FileText },
+                                            { id: 'vectorizing', label: 'Vectorize', icon: Loader2 },
+                                            { id: 'ready', label: 'Ready', icon: CheckCircle2 }
+                                        ].map((step, index) => {
+                                            const stepOrder = ['uploading', 'processing', 'vectorizing', 'ready'];
+                                            const currentStepIndex = stepOrder.indexOf(processingStatus || 'uploading');
+                                            const stepIndex = stepOrder.indexOf(step.id);
+                                            const isActive = stepIndex <= currentStepIndex;
+                                            const isCurrent = step.id === processingStatus;
+
+                                            return (
+                                                <div key={step.id} className="relative flex flex-col items-center z-10" style={{ minWidth: '60px' }}>
+                                                    <motion.div
+                                                        className={`
+                                                            w-8 h-8 rounded-full flex items-center justify-center border-2 bg-white transition-colors duration-300
+                                                            ${isActive ? 'border-blue-600 text-blue-600' : 'border-gray-200 text-gray-400'}
+                                                            ${isCurrent ? 'ring-4 ring-blue-50' : ''}
+                                                        `}
+                                                        animate={{
+                                                            scale: isCurrent ? 1.1 : 1,
+                                                            borderColor: isActive ? '#2563eb' : '#e5e7eb'
+                                                        }}
+                                                    >
+                                                        {isActive && !isCurrent && step.id !== 'ready' ? (
+                                                            <CheckCircle2 className="w-5 h-5" />
+                                                        ) : (
+                                                            <step.icon className={`w-4 h-4 ${isCurrent && step.id !== 'ready' ? 'animate-spin' : ''}`} />
+                                                        )}
+                                                    </motion.div>
+                                                    <span className={`mt-2 text-xs font-medium text-center transition-colors duration-300 ${isActive ? 'text-gray-900' : 'text-gray-400'}`}>
+                                                        {step.label}
+                                                    </span>
+                                                </div>
+                                            );
+                                        })}
+                                    </div>
                                 </div>
                             </div>
                         </div>

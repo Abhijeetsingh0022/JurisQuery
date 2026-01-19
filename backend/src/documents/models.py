@@ -70,6 +70,12 @@ class Document(BaseModel):
     )
 
 
+class ChunkType(StrEnum):
+    """Type of document chunk."""
+    PARENT = "parent"
+    CHILD = "child"
+
+
 class DocumentChunk(BaseModel):
     """Document chunk model for storing text segments."""
 
@@ -90,6 +96,18 @@ class DocumentChunk(BaseModel):
     # Location in document
     page_number: Mapped[int | None] = mapped_column(nullable=True)
     paragraph_number: Mapped[int | None] = mapped_column(nullable=True)
+    section_title: Mapped[str | None] = mapped_column(String(500), nullable=True)
+
+    # Parent-Child Hierarchy
+    chunk_type: Mapped[str] = mapped_column(
+        String(20), default=ChunkType.PARENT, nullable=False
+    )
+    parent_chunk_id: Mapped[uuid.UUID | None] = mapped_column(
+        UUID(as_uuid=True),
+        ForeignKey("document_chunks.id", ondelete="CASCADE"),
+        nullable=True,
+        index=True,
+    )
 
     # Vector store reference
     vector_id: Mapped[str | None] = mapped_column(String(255), nullable=True)
@@ -99,3 +117,15 @@ class DocumentChunk(BaseModel):
 
     # Relationships
     document: Mapped["Document"] = relationship("Document", back_populates="chunks")
+    children: Mapped[list["DocumentChunk"]] = relationship(
+        "DocumentChunk",
+        back_populates="parent",
+        cascade="all, delete-orphan",
+        foreign_keys="DocumentChunk.parent_chunk_id",
+    )
+    parent: Mapped["DocumentChunk | None"] = relationship(
+        "DocumentChunk",
+        back_populates="children",
+        remote_side="DocumentChunk.id",
+        foreign_keys="DocumentChunk.parent_chunk_id",
+    )

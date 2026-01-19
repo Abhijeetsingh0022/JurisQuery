@@ -137,16 +137,31 @@ async def send_message(
     Returns:
         Message: AI response message
     """
-    # Get session
-    query = select(ChatSession).where(ChatSession.id == session_id)
-    result = await db.execute(query)
-    session = result.scalar_one_or_none()
+    # Get chat history (exclude current empty list check, we rely on session relationship)
+    # We need to manually load messages if not eagerly loaded or rely on what's available
+    # The get_session call uses selectinload, but here we did a simple select.
+    # Let's optimize by eager loading messages for the session here too.
     
+    # Re-query session with messages
+    stmt = (
+        select(ChatSession)
+        .where(ChatSession.id == session_id)
+        .options(selectinload(ChatSession.messages))
+    )
+    result = await db.execute(stmt)
+    session = result.scalar_one_or_none()
+
     if not session:
         raise NotFoundError("Chat session")
-    
+        
     if session.user_id != user_id:
         raise ForbiddenError()
+
+    # Format history
+    history = [
+        {"role": m.role, "content": m.content} 
+        for m in session.messages
+    ]
     
     # Save user message
     user_message = Message(
@@ -156,12 +171,16 @@ async def send_message(
     )
     db.add(user_message)
     
+    # Add current message to history for RAG context
+    history.append({"role": "user", "content": content})
+    
     # Get AI response using RAG
     response = await rag_service.query_document(
         db=db,
         document_id=session.document_id,
         query=content,
         user_id=user_id,
+        chat_history=history,
     )
     
     # Save assistant message

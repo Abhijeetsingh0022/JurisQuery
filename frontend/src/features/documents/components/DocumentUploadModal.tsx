@@ -43,17 +43,17 @@ export default function DocumentUploadModal({
                             leaveFrom="opacity-100 scale-100"
                             leaveTo="opacity-0 scale-95"
                         >
-                            <Dialog.Panel className="w-full max-w-2xl transform overflow-hidden rounded-2xl bg-white dark:bg-gray-900 p-6 text-left align-middle shadow-xl transition-all border border-gray-200 dark:border-gray-800">
+                            <Dialog.Panel className="w-full max-w-2xl transform overflow-hidden rounded-2xl bg-white p-6 text-left align-middle shadow-xl transition-all border border-gray-200">
                                 <div className="flex items-center justify-between mb-6">
                                     <Dialog.Title
                                         as="h3"
-                                        className="text-lg font-semibold leading-6 text-gray-900 dark:text-white"
+                                        className="text-lg font-semibold leading-6 text-gray-900"
                                     >
                                         Upload Document
                                     </Dialog.Title>
                                     <button
                                         onClick={onClose}
-                                        className="rounded-lg p-1 text-gray-400 hover:text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+                                        className="rounded-lg p-1 text-gray-400 hover:text-gray-500 hover:bg-gray-100 transition-colors"
                                     >
                                         <X className="h-5 w-5" />
                                     </button>

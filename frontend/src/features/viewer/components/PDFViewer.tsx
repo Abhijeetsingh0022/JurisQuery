@@ -65,14 +65,9 @@ export default function PDFViewer({ url, className = '', activeCitation }: PDFVi
                 }
             });
 
-            // If no exact match, highlight first few paragraphs on that page
+            // If no exact match, just log warning
             if (!foundMatch) {
-                const firstSpans = Array.from(textSpans).slice(0, 15);
-                firstSpans.forEach((span) => {
-                    if (span.textContent && span.textContent.trim().length > 5) {
-                        span.classList.add('citation-highlight');
-                    }
-                });
+                console.warn('Citation text match failed for:', searchSnippet);
             }
         }, 800);
     };

@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useUser } from '@clerk/nextjs';
 import {
-    LayoutDashboard, FolderOpen, History, Settings, HelpCircle
+    LayoutDashboard, FolderOpen, History, Settings, HelpCircle, Scale
 } from 'lucide-react';
 
 export default function Sidebar() {
@@ -23,6 +23,12 @@ export default function Sidebar() {
             label: 'Documents',
             href: '/dashboard',
             isActive: pathname?.startsWith('/documents')
+        },
+        {
+            icon: Scale,
+            label: 'IPC Predictor',
+            href: '/ipc-predictor',
+            isActive: pathname?.startsWith('/ipc-predictor')
         },
         {
             icon: History,

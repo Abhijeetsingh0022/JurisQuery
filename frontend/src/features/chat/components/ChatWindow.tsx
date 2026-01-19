@@ -77,30 +77,30 @@ export default function ChatWindow({ documentId, sessionId, onCitationClick }: C
     };
 
     return (
-        <div className="flex flex-col h-full bg-white">
+        <div className="flex flex-col h-full bg-[#f7f3f1]">
             {/* Messages */}
-            <div className="flex-1 overflow-y-auto p-4 space-y-4">
+            <div className="flex-1 overflow-y-auto p-6 space-y-6">
                 {messages.length === 0 ? (
                     <motion.div
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
-                        className="text-center py-12"
+                        className="flex flex-col items-center justify-center h-full pb-20"
                     >
-                        <div className="mx-auto w-16 h-16 rounded-full bg-gradient-to-br from-blue-500/10 to-purple-500/10 flex items-center justify-center mb-4">
-                            <Sparkles className="h-8 w-8 text-blue-500" />
+                        <div className="w-20 h-20 rounded-2xl bg-white shadow-lg flex items-center justify-center mb-6 rotate-3 transform transition-transform hover:rotate-0">
+                            <Sparkles className="h-10 w-10 text-[#2a3b4e]" />
                         </div>
-                        <h3 className="text-lg font-serif font-medium text-gray-900">
+                        <h3 className="text-2xl font-serif font-bold text-[#2a3b4e] mb-3">
                             Start a conversation
                         </h3>
-                        <p className="mt-2 text-sm font-sans text-gray-500 max-w-sm mx-auto">
-                            Ask any question about your legal document and get instant answers with citations.
+                        <p className="text-base font-sans text-gray-600 max-w-md text-center leading-relaxed">
+                            Ask any question about your legal document. I'll analyze every clause and provide citation-backed answers.
                         </p>
-                        <div className="mt-6 flex flex-wrap justify-center gap-2">
+                        <div className="mt-8 flex flex-wrap justify-center gap-3">
                             {['What are the key terms?', 'Find indemnification clauses', 'Summarize this contract'].map((q) => (
                                 <button
                                     key={q}
                                     onClick={() => setInput(q)}
-                                    className="px-3 py-1.5 text-sm rounded-full border border-gray-200 hover:border-blue-400 hover:bg-blue-50 transition-colors"
+                                    className="px-4 py-2 text-sm font-medium text-gray-700 bg-white rounded-xl shadow-sm border border-gray-100 hover:border-[#2a3b4e]/30 hover:shadow-md transition-all duration-300 transform hover:-translate-y-0.5"
                                 >
                                     {q}
                                 </button>
@@ -108,36 +108,41 @@ export default function ChatWindow({ documentId, sessionId, onCitationClick }: C
                         </div>
                     </motion.div>
                 ) : (
-                    <AnimatePresence>
+                    <AnimatePresence mode="popLayout">
                         {messages.map((message, index) => (
                             <motion.div
                                 key={message.id}
                                 initial={{ opacity: 0, y: 10 }}
                                 animate={{ opacity: 1, y: 0 }}
                                 exit={{ opacity: 0 }}
-                                transition={{ delay: index * 0.05 }}
+                                layout
                                 className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
                             >
                                 <div
-                                    className={`max-w-[85%] rounded-2xl px-4 py-3 ${message.role === 'user'
-                                        ? 'bg-blue-600 text-white'
-                                        : 'bg-gray-100 text-gray-900'
+                                    className={`relative max-w-[85%] rounded-2xl px-5 py-4 shadow-sm ${message.role === 'user'
+                                        ? 'bg-[#2a3b4e] text-white rounded-br-none'
+                                        : 'bg-white text-gray-900 rounded-bl-none border border-gray-100'
                                         }`}
                                 >
-                                    <p className="text-sm whitespace-pre-wrap">{message.content}</p>
+                                    <p className="text-[15px] leading-relaxed whitespace-pre-wrap font-sans">
+                                        {message.content}
+                                    </p>
 
                                     {/* Citations */}
                                     {message.citations && message.citations.length > 0 && (
-                                        <div className="mt-3 pt-3 border-t border-gray-200/20">
-                                            <p className="text-xs font-medium opacity-70 mb-2">Sources:</p>
-                                            <div className="flex flex-wrap gap-1.5">
+                                        <div className="mt-4 pt-3 border-t border-gray-100">
+                                            <p className="text-xs font-semibold uppercase tracking-wider opacity-60 mb-2 flex items-center gap-1">
+                                                <FileText className="h-3 w-3" />
+                                                Sources
+                                            </p>
+                                            <div className="flex flex-wrap gap-2">
                                                 {message.citations.map((citation, i) => (
                                                     <button
                                                         key={citation.chunk_id}
                                                         onClick={() => onCitationClick?.(citation)}
-                                                        className="inline-flex items-center gap-1 px-2 py-1 text-xs rounded-md bg-black/10 hover:bg-black/20 transition-colors"
+                                                        className="group inline-flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-medium rounded-lg bg-gray-50 hover:bg-amber-50 text-gray-600 hover:text-amber-700 border border-gray-200 hover:border-amber-200 transition-all"
                                                     >
-                                                        <FileText className="h-3 w-3" />
+                                                        <span className="w-1.5 h-1.5 rounded-full bg-amber-400 group-hover:scale-110 transition-transform" />
                                                         Page {citation.page_number || '?'}, Para {citation.paragraph_number || '?'}
                                                     </button>
                                                 ))}
@@ -157,10 +162,26 @@ export default function ChatWindow({ documentId, sessionId, onCitationClick }: C
                         animate={{ opacity: 1 }}
                         className="flex justify-start"
                     >
-                        <div className="bg-gray-100 rounded-2xl px-4 py-3">
-                            <div className="flex items-center gap-2 text-gray-500">
-                                <Loader2 className="h-4 w-4 animate-spin" />
-                                <span className="text-sm">Analyzing document...</span>
+                        <div className="bg-white border border-gray-100 rounded-2xl rounded-bl-none px-5 py-4 shadow-sm">
+                            <div className="flex items-center gap-3 text-gray-500">
+                                <div className="flex gap-1">
+                                    <motion.div
+                                        className="w-1.5 h-1.5 bg-[#2a3b4e] rounded-full"
+                                        animate={{ scale: [1, 1.5, 1] }}
+                                        transition={{ duration: 1, repeat: Infinity, delay: 0 }}
+                                    />
+                                    <motion.div
+                                        className="w-1.5 h-1.5 bg-[#2a3b4e] rounded-full"
+                                        animate={{ scale: [1, 1.5, 1] }}
+                                        transition={{ duration: 1, repeat: Infinity, delay: 0.2 }}
+                                    />
+                                    <motion.div
+                                        className="w-1.5 h-1.5 bg-[#2a3b4e] rounded-full"
+                                        animate={{ scale: [1, 1.5, 1] }}
+                                        transition={{ duration: 1, repeat: Infinity, delay: 0.4 }}
+                                    />
+                                </div>
+                                <span className="text-xs font-medium tracking-wide uppercase">Analyzing</span>
                             </div>
                         </div>
                     </motion.div>
@@ -169,12 +190,12 @@ export default function ChatWindow({ documentId, sessionId, onCitationClick }: C
                 {/* Error message */}
                 {error && (
                     <motion.div
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        className="flex items-center gap-2 p-3 rounded-lg bg-red-50 text-red-600 text-sm"
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        className="flex items-center gap-3 p-4 rounded-xl bg-red-50 text-red-700 border border-red-100 shadow-sm"
                     >
-                        <AlertCircle className="h-4 w-4 flex-shrink-0" />
-                        {error}
+                        <AlertCircle className="h-5 w-5 flex-shrink-0" />
+                        <p className="text-sm font-medium">{error}</p>
                     </motion.div>
                 )}
 
@@ -182,8 +203,9 @@ export default function ChatWindow({ documentId, sessionId, onCitationClick }: C
             </div>
 
             {/* Input */}
-            <div className="flex-shrink-0 p-4 border-t border-gray-200">
-                <form onSubmit={handleSubmit} className="relative">
+            <div className="flex-shrink-0 p-6 bg-white border-t border-gray-200/50 shadow-[0_-4px_20px_rgba(0,0,0,0.02)] z-10">
+                <form onSubmit={handleSubmit} className="relative group">
+                    <div className="absolute inset-0 bg-gradient-to-r from-blue-500/5 to-purple-500/5 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
                     <textarea
                         ref={inputRef}
                         value={input}
@@ -191,20 +213,22 @@ export default function ChatWindow({ documentId, sessionId, onCitationClick }: C
                         onKeyDown={handleKeyDown}
                         placeholder="Ask a question about your document..."
                         rows={1}
-                        className="w-full resize-none rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 pr-12 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        className="w-full resize-none rounded-2xl border border-gray-200 bg-gray-50/50 px-5 py-4 pr-14 text-sm focus:outline-none focus:ring-2 focus:ring-[#2a3b4e]/10 focus:border-[#2a3b4e]/30 focus:bg-white transition-all placeholder:text-gray-400"
                         disabled={isLoading}
+                        style={{ minHeight: '52px', maxHeight: '150px' }}
                     />
                     <button
                         type="submit"
                         disabled={!input.trim() || isLoading}
-                        className="absolute right-2 top-1/2 -translate-y-1/2 p-2 rounded-lg bg-blue-600 text-white disabled:opacity-50 disabled:cursor-not-allowed hover:bg-blue-700 transition-colors"
+                        className="absolute right-2 top-1/2 -translate-y-1/2 p-2.5 rounded-xl bg-[#2a3b4e] text-white shadow-md disabled:opacity-50 disabled:cursor-not-allowed hover:bg-[#1f2b3a] hover:shadow-lg transition-all duration-200 transform hover:scale-105 active:scale-95"
                     >
                         <Send className="h-4 w-4" />
                     </button>
                 </form>
-                <p className="mt-2 text-xs text-gray-500 text-center">
-                    JurisQuery AI can make mistakes. Verify important information.
-                </p>
+                <div className="mt-3 flex items-center justify-center gap-2 text-[10px] text-gray-400 font-medium tracking-wide uppercase">
+                    <Sparkles className="h-3 w-3" />
+                    <span>AI-Powered Analysis</span>
+                </div>
             </div>
         </div>
     );

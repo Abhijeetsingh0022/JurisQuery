@@ -16,6 +16,7 @@ from src.auth.router import router as auth_router
 from src.documents.router import router as documents_router
 from src.rag.router import router as rag_router
 from src.chat.router import router as chat_router
+from src.ipc.router import router as ipc_router
 
 
 @asynccontextmanager
@@ -56,6 +57,7 @@ app.include_router(auth_router, prefix="/api/auth", tags=["Authentication"])
 app.include_router(documents_router, prefix="/api/documents", tags=["Documents"])
 app.include_router(rag_router, prefix="/api/rag", tags=["RAG"])
 app.include_router(chat_router, prefix="/api/chat", tags=["Chat"])
+app.include_router(ipc_router, prefix="/api/v1/ipc", tags=["IPC Sections"])
 
 
 @app.get("/", tags=["Health"])

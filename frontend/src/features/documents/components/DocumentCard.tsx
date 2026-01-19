@@ -53,9 +53,9 @@ export default function DocumentCard({ document, onSelect, onDelete }: DocumentC
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
             className={`
-        group relative rounded-xl border bg-white dark:bg-gray-900 p-4
+        group relative rounded-xl border bg-white p-4
         transition-all duration-200 overflow-hidden
-        ${isReady ? 'border-gray-200 dark:border-gray-700 cursor-pointer hover:shadow-lg hover:border-blue-300' : 'border-gray-200 dark:border-gray-700'}
+        ${isReady ? 'border-gray-200 cursor-pointer hover:shadow-lg hover:border-blue-300' : 'border-gray-200'}
       `}
             onClick={() => isReady && onSelect?.(document)}
         >
@@ -72,7 +72,7 @@ export default function DocumentCard({ document, onSelect, onDelete }: DocumentC
                 <div className="flex-1 min-w-0">
                     <div className="flex items-start justify-between gap-2">
                         <div className="min-w-0">
-                            <h3 className="font-medium text-gray-900 dark:text-white truncate">
+                            <h3 className="font-medium text-gray-900 truncate">
                                 {document.original_filename}
                             </h3>
                             <p className="mt-0.5 text-xs text-gray-500">
@@ -110,7 +110,7 @@ export default function DocumentCard({ document, onSelect, onDelete }: DocumentC
 
                     {/* Error message */}
                     {document.status === 'failed' && document.error_message && (
-                        <p className="mt-2 text-xs text-red-600 dark:text-red-400">
+                        <p className="mt-2 text-xs text-red-600">
                             {document.error_message}
                         </p>
                     )}
@@ -123,7 +123,7 @@ export default function DocumentCard({ document, onSelect, onDelete }: DocumentC
                             e.stopPropagation();
                             onDelete(document);
                         }}
-                        className="opacity-0 group-hover:opacity-100 p-1.5 rounded-lg hover:bg-red-100 dark:hover:bg-red-900/30 text-gray-400 hover:text-red-600 transition-all"
+                        className="opacity-0 group-hover:opacity-100 p-1.5 rounded-lg hover:bg-red-100 text-gray-400 hover:text-red-600 transition-all"
                     >
                         <Trash2 className="h-4 w-4" />
                     </button>
@@ -135,9 +135,9 @@ export default function DocumentCard({ document, onSelect, onDelete }: DocumentC
                 <motion.div
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
-                    className="mt-3 pt-3 border-t border-gray-100 dark:border-gray-800"
+                    className="mt-3 pt-3 border-t border-gray-100"
                 >
-                    <div className="flex items-center gap-2 text-sm text-blue-600 dark:text-blue-400 font-medium">
+                    <div className="flex items-center gap-2 text-sm text-blue-600 font-medium">
                         <MessageSquare className="h-4 w-4" />
                         <span>Chat with this document</span>
                     </div>

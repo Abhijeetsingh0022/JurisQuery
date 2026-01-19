@@ -96,20 +96,21 @@ export default function DocumentAnalysisPage() {
         <div className="h-screen bg-gray-50 flex flex-col overflow-hidden">
             <main className="flex-1 flex flex-col overflow-hidden">
                 {/* Header with Title and Back Button Logic */}
-                <header className="h-16 bg-white border-b border-gray-200 flex items-center justify-between px-6 flex-none">
+                {/* Header with Title and Back Button Logic */}
+                <header className="h-16 bg-[#2a3b4e] border-b border-[#1f2b3a] flex items-center justify-between px-6 flex-none shadow-md z-20">
                     <div className="flex items-center gap-4">
                         <button
                             onClick={() => router.back()}
-                            className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+                            className="p-2 hover:bg-white/10 rounded-xl transition-all duration-200 text-gray-300 hover:text-white group"
                         >
-                            <ArrowLeft className="h-5 w-5 text-gray-600" />
+                            <ArrowLeft className="h-5 w-5 group-hover:-translate-x-0.5 transition-transform" />
                         </button>
                         <div className="min-w-0">
-                            <h1 className="text-lg font-semibold text-gray-900 truncate max-w-xl">
+                            <h1 className="text-lg font-serif font-medium text-white truncate max-w-xl tracking-wide">
                                 {document.original_filename}
                             </h1>
-                            <p className="text-xs text-gray-500 flex items-center gap-2">
-                                <span className={`inline-block w-2 h-2 rounded-full ${document.status === 'ready' ? 'bg-green-500' : 'bg-amber-500'
+                            <p className="text-[11px] text-gray-400 flex items-center gap-2 font-medium uppercase tracking-wider">
+                                <span className={`inline-block w-1.5 h-1.5 rounded-full ${document.status === 'ready' ? 'bg-green-400 shadow-[0_0_8px_rgba(74,222,128,0.5)]' : 'bg-amber-500'
                                     }`} />
                                 {document.status === 'ready' ? 'Ready for Analysis' : 'Processing...'}
                             </p>
@@ -121,7 +122,7 @@ export default function DocumentAnalysisPage() {
                             href={document.file_url}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="p-2 hover:bg-gray-100 rounded-lg transition-colors text-gray-600"
+                            className="p-2 hover:bg-white/10 rounded-xl transition-colors text-gray-300 hover:text-white"
                             title="Download original"
                         >
                             <Download className="h-5 w-5" />
