@@ -121,4 +121,25 @@ body {
     background-image: radial-gradient(circle, rgba(42, 59, 78, 0.15) 1px, transparent 1px);
     background-size: 24px 24px;
   }
+
+  /* Citation Text Highlight */
+  .citation-highlight {
+    background-color: rgba(250, 204, 21, 0.5) !important;
+    border-radius: 2px;
+    animation: highlight-pulse 2s ease-in-out;
+  }
+
+  @keyframes highlight-pulse {
+    0% {
+      background-color: rgba(250, 204, 21, 0.8);
+    }
+
+    50% {
+      background-color: rgba(250, 204, 21, 0.3);
+    }
+
+    100% {
+      background-color: rgba(250, 204, 21, 0.5);
+    }
+  }
 }

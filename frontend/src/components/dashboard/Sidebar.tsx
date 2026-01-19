@@ -1,20 +1,42 @@
 'use client';
 
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import { useUser } from '@clerk/nextjs';
 import {
     LayoutDashboard, FolderOpen, History, Settings, HelpCircle
 } from 'lucide-react';
 
-const navLinks = [
-    { icon: LayoutDashboard, label: 'Dashboard', href: '/dashboard', active: true },
-    { icon: FolderOpen, label: 'Documents', href: '/dashboard', active: false },
-    { icon: History, label: 'History', href: '#', active: false },
-    { icon: Settings, label: 'Settings', href: '#', active: false },
-];
-
 export default function Sidebar() {
     const { user } = useUser();
+    const pathname = usePathname();
+
+    const navLinks = [
+        {
+            icon: LayoutDashboard,
+            label: 'Dashboard',
+            href: '/dashboard',
+            isActive: pathname === '/dashboard'
+        },
+        {
+            icon: FolderOpen,
+            label: 'Documents',
+            href: '/dashboard',
+            isActive: pathname?.startsWith('/documents')
+        },
+        {
+            icon: History,
+            label: 'History',
+            href: '#',
+            isActive: false
+        },
+        {
+            icon: Settings,
+            label: 'Settings',
+            href: '#',
+            isActive: false
+        },
+    ];
 
     return (
         <aside className="w-64 bg-white border-r border-gray-200 flex flex-col">
@@ -31,7 +53,7 @@ export default function Sidebar() {
                     <Link
                         key={link.label}
                         href={link.href}
-                        className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${link.active
+                        className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${link.isActive
                             ? 'bg-primary/10 text-primary'
                             : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'
                             }`}

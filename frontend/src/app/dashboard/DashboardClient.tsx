@@ -7,18 +7,18 @@ import {
     Sidebar,
     TopHeader,
     StatsCards,
-    QuickActions,
     DocumentsList
 } from '@/components/dashboard';
 import { getDocuments, deleteDocument } from '@/services/ragService';
 import type { Document } from '@/types/documents.types';
+import DocumentUploadModal from '@/features/documents/components/DocumentUploadModal';
 
 export default function DashboardClient() {
     const { user } = useUser();
     const [documents, setDocuments] = useState<Document[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
-    const [showUpload, setShowUpload] = useState(false);
+    const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
 
     const fetchDocuments = useCallback(async () => {
         setIsLoading(true);
@@ -39,7 +39,7 @@ export default function DashboardClient() {
 
     const handleUploadComplete = (document: Document) => {
         setDocuments((prev) => [document, ...prev]);
-        setShowUpload(false);
+        setIsUploadModalOpen(false);
     };
 
     const handleDeleteDocument = async (document: Document) => {
@@ -78,13 +78,6 @@ export default function DashboardClient() {
 
                     <StatsCards stats={stats} />
 
-                    <QuickActions
-                        showUpload={showUpload}
-                        setShowUpload={setShowUpload}
-                        onUploadComplete={handleUploadComplete}
-                        onError={(err) => setError(err.message)}
-                    />
-
                     <DocumentsList
                         documents={documents}
                         isLoading={isLoading}
@@ -92,10 +85,16 @@ export default function DashboardClient() {
                         onRefresh={fetchDocuments}
                         onSelect={(d) => window.location.href = `/documents/${d.id}`}
                         onDelete={handleDeleteDocument}
-                        onUploadClick={() => setShowUpload(true)}
+                        onUploadClick={() => setIsUploadModalOpen(true)}
                     />
                 </div>
             </main>
+
+            <DocumentUploadModal
+                isOpen={isUploadModalOpen}
+                onClose={() => setIsUploadModalOpen(false)}
+                onUploadComplete={handleUploadComplete}
+            />
         </div>
     );
 }

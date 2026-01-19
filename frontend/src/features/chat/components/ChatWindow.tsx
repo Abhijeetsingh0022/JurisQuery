@@ -77,20 +77,7 @@ export default function ChatWindow({ documentId, sessionId, onCitationClick }: C
     };
 
     return (
-        <div className="flex flex-col h-full bg-white dark:bg-gray-900">
-            {/* Header */}
-            <div className="flex-shrink-0 px-4 py-3 border-b border-gray-200 dark:border-gray-700">
-                <div className="flex items-center gap-2">
-                    <div className="p-1.5 rounded-lg bg-gradient-to-br from-blue-500 to-purple-600">
-                        <Sparkles className="h-4 w-4 text-white" />
-                    </div>
-                    <div>
-                        <h2 className="text-sm font-semibold text-gray-900 dark:text-white">JurisQuery AI</h2>
-                        <p className="text-xs text-gray-500">Ask questions about your document</p>
-                    </div>
-                </div>
-            </div>
-
+        <div className="flex flex-col h-full bg-white">
             {/* Messages */}
             <div className="flex-1 overflow-y-auto p-4 space-y-4">
                 {messages.length === 0 ? (
@@ -102,10 +89,10 @@ export default function ChatWindow({ documentId, sessionId, onCitationClick }: C
                         <div className="mx-auto w-16 h-16 rounded-full bg-gradient-to-br from-blue-500/10 to-purple-500/10 flex items-center justify-center mb-4">
                             <Sparkles className="h-8 w-8 text-blue-500" />
                         </div>
-                        <h3 className="text-lg font-medium text-gray-900 dark:text-white">
+                        <h3 className="text-lg font-serif font-medium text-gray-900">
                             Start a conversation
                         </h3>
-                        <p className="mt-2 text-sm text-gray-500 max-w-sm mx-auto">
+                        <p className="mt-2 text-sm font-sans text-gray-500 max-w-sm mx-auto">
                             Ask any question about your legal document and get instant answers with citations.
                         </p>
                         <div className="mt-6 flex flex-wrap justify-center gap-2">
@@ -113,7 +100,7 @@ export default function ChatWindow({ documentId, sessionId, onCitationClick }: C
                                 <button
                                     key={q}
                                     onClick={() => setInput(q)}
-                                    className="px-3 py-1.5 text-sm rounded-full border border-gray-200 dark:border-gray-700 hover:border-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors"
+                                    className="px-3 py-1.5 text-sm rounded-full border border-gray-200 hover:border-blue-400 hover:bg-blue-50 transition-colors"
                                 >
                                     {q}
                                 </button>
@@ -133,22 +120,22 @@ export default function ChatWindow({ documentId, sessionId, onCitationClick }: C
                             >
                                 <div
                                     className={`max-w-[85%] rounded-2xl px-4 py-3 ${message.role === 'user'
-                                            ? 'bg-blue-600 text-white'
-                                            : 'bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white'
+                                        ? 'bg-blue-600 text-white'
+                                        : 'bg-gray-100 text-gray-900'
                                         }`}
                                 >
                                     <p className="text-sm whitespace-pre-wrap">{message.content}</p>
 
                                     {/* Citations */}
                                     {message.citations && message.citations.length > 0 && (
-                                        <div className="mt-3 pt-3 border-t border-gray-200/20 dark:border-gray-700">
+                                        <div className="mt-3 pt-3 border-t border-gray-200/20">
                                             <p className="text-xs font-medium opacity-70 mb-2">Sources:</p>
                                             <div className="flex flex-wrap gap-1.5">
                                                 {message.citations.map((citation, i) => (
                                                     <button
                                                         key={citation.chunk_id}
                                                         onClick={() => onCitationClick?.(citation)}
-                                                        className="inline-flex items-center gap-1 px-2 py-1 text-xs rounded-md bg-black/10 dark:bg-white/10 hover:bg-black/20 dark:hover:bg-white/20 transition-colors"
+                                                        className="inline-flex items-center gap-1 px-2 py-1 text-xs rounded-md bg-black/10 hover:bg-black/20 transition-colors"
                                                     >
                                                         <FileText className="h-3 w-3" />
                                                         Page {citation.page_number || '?'}, Para {citation.paragraph_number || '?'}
@@ -170,7 +157,7 @@ export default function ChatWindow({ documentId, sessionId, onCitationClick }: C
                         animate={{ opacity: 1 }}
                         className="flex justify-start"
                     >
-                        <div className="bg-gray-100 dark:bg-gray-800 rounded-2xl px-4 py-3">
+                        <div className="bg-gray-100 rounded-2xl px-4 py-3">
                             <div className="flex items-center gap-2 text-gray-500">
                                 <Loader2 className="h-4 w-4 animate-spin" />
                                 <span className="text-sm">Analyzing document...</span>
@@ -184,7 +171,7 @@ export default function ChatWindow({ documentId, sessionId, onCitationClick }: C
                     <motion.div
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
-                        className="flex items-center gap-2 p-3 rounded-lg bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 text-sm"
+                        className="flex items-center gap-2 p-3 rounded-lg bg-red-50 text-red-600 text-sm"
                     >
                         <AlertCircle className="h-4 w-4 flex-shrink-0" />
                         {error}
@@ -195,7 +182,7 @@ export default function ChatWindow({ documentId, sessionId, onCitationClick }: C
             </div>
 
             {/* Input */}
-            <div className="flex-shrink-0 p-4 border-t border-gray-200 dark:border-gray-700">
+            <div className="flex-shrink-0 p-4 border-t border-gray-200">
                 <form onSubmit={handleSubmit} className="relative">
                     <textarea
                         ref={inputRef}
@@ -204,7 +191,7 @@ export default function ChatWindow({ documentId, sessionId, onCitationClick }: C
                         onKeyDown={handleKeyDown}
                         placeholder="Ask a question about your document..."
                         rows={1}
-                        className="w-full resize-none rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 px-4 py-3 pr-12 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        className="w-full resize-none rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 pr-12 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                         disabled={isLoading}
                     />
                     <button

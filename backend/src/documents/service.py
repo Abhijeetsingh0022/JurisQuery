@@ -82,10 +82,10 @@ async def upload_document(
     
     db.add(document)
     await db.flush()
+    await db.commit()
     await db.refresh(document)
     
-    # TODO: Trigger async processing task
-    # await process_document_task.delay(str(document.id))
+    
     
     return document
 
@@ -166,7 +166,16 @@ async def delete_document(
     user_id: str,
 ) -> None:
     """Delete a document and its associated data."""
+    from src.rag.vectorstore import QdrantVectorStore
+    
     document = await get_document(db, document_id, user_id)
+    
+    # Delete vectors from Qdrant
+    try:
+        vectorstore = QdrantVectorStore()
+        await vectorstore.delete_by_document(str(document_id))
+    except Exception:
+        pass  # Continue even if vector deletion fails
     
     # Delete from Cloudinary
     storage = CloudinaryStorage()
@@ -174,3 +183,4 @@ async def delete_document(
     
     # Delete from database (cascades to chunks)
     await db.delete(document)
+    await db.commit()

@@ -5,17 +5,18 @@ Handles document upload, listing, and management.
 
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, File, UploadFile, status
+from fastapi import APIRouter, Depends, File, UploadFile, status, BackgroundTasks
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.auth.dependencies import get_current_user
-from src.database import get_db
+from src.database import get_db, async_session_maker
 from src.documents import service
 from src.documents.schemas import (
     DocumentListResponse,
     DocumentResponse,
     DocumentStatusResponse,
 )
+from src.rag.service import process_document_for_rag
 
 router = APIRouter()
 
@@ -28,16 +29,26 @@ router = APIRouter()
     description="Upload a legal document (PDF, DOCX, TXT) for RAG analysis.",
 )
 async def upload_document(
+    background_tasks: BackgroundTasks,
     file: UploadFile = File(...),
     db: AsyncSession = Depends(get_db),
     current_user: dict = Depends(get_current_user),
 ):
     """Upload and process a legal document."""
-    return await service.upload_document(
+    document = await service.upload_document(
         db=db,
         file=file,
         user_id=current_user["id"],
     )
+    
+    # Trigger background processing
+    background_tasks.add_task(
+        process_document_for_rag,
+        document_id=document.id,
+        session_factory=async_session_maker,
+    )
+    
+    return document
 
 
 @router.get(

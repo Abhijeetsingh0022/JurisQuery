@@ -28,7 +28,16 @@ class Settings(BaseSettings):
 
     # AI Services
     gemini_api_key: str
+    gemini_api_key_2: str | None = None
     groq_api_key: str | None = None
+
+    @property
+    def gemini_api_keys(self) -> list[str]:
+        """Return list of available Gemini API keys for rotation."""
+        keys = [self.gemini_api_key]
+        if self.gemini_api_key_2:
+            keys.append(self.gemini_api_key_2)
+        return keys
 
     # Vector Database (Qdrant)
     qdrant_url: str

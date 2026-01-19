@@ -25,7 +25,7 @@ const statusIcons: Record<DocumentStatus, React.ReactNode> = {
     pending: <Loader2 className="h-5 w-5 animate-spin text-blue-500" />,
     uploading: <Loader2 className="h-5 w-5 animate-spin text-blue-500" />,
     processing: <Loader2 className="h-5 w-5 animate-spin text-amber-500" />,
-    vectorizing: <Loader2 className="h-5 w-5 animate-spin text-purple-500" />,
+    vectorizing: <Loader2 className="h-5 w-5 animate-spin text-blue-500" />,
     ready: <CheckCircle2 className="h-5 w-5 text-green-500" />,
     failed: <AlertCircle className="h-5 w-5 text-red-500" />,
 };
@@ -150,9 +150,9 @@ export default function DocumentUpload({ onUploadComplete, onError }: DocumentUp
                             className={`
                 relative overflow-hidden rounded-2xl border-2 border-dashed p-12
                 transition-all duration-300 cursor-pointer
-                ${isDragActive ? 'border-blue-500 bg-blue-50/50 dark:bg-blue-900/20' : ''}
-                ${isDragReject ? 'border-red-500 bg-red-50/50 dark:bg-red-900/20' : ''}
-                ${!isDragActive && !isDragReject ? 'border-gray-300 dark:border-gray-700 hover:border-blue-400 hover:bg-gray-50/50 dark:hover:bg-gray-800/50' : ''}
+                ${isDragActive ? 'border-blue-500 bg-blue-50/50' : ''}
+                ${isDragReject ? 'border-red-500 bg-red-50/50' : ''}
+                ${!isDragActive && !isDragReject ? 'border-gray-300 hover:border-blue-400 hover:bg-gray-50/50' : ''}
               `}
                         >
                             <input {...getInputProps()} />
@@ -160,19 +160,19 @@ export default function DocumentUpload({ onUploadComplete, onError }: DocumentUp
                             <div className="flex flex-col items-center gap-4 text-center">
                                 <div className={`
                   p-4 rounded-full transition-colors duration-300
-                  ${isDragActive ? 'bg-blue-100 dark:bg-blue-900/50' : 'bg-gray-100 dark:bg-gray-800'}
+                  ${isDragActive ? 'bg-blue-100' : 'bg-gray-100'}
                 `}>
                                     <Upload className={`
                     h-8 w-8 transition-colors duration-300
-                    ${isDragActive ? 'text-blue-600' : 'text-gray-500 dark:text-gray-400'}
+                    ${isDragActive ? 'text-blue-600' : 'text-gray-500'}
                   `} />
                                 </div>
 
                                 <div>
-                                    <p className="text-lg font-medium text-gray-900 dark:text-white">
+                                    <p className="text-lg font-medium text-gray-900">
                                         {isDragActive ? 'Drop your document here' : 'Drag & drop a legal document'}
                                     </p>
-                                    <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
+                                    <p className="mt-1 text-sm text-gray-500">
                                         or click to browse • PDF, DOCX, TXT up to 50MB
                                     </p>
                                 </div>
@@ -181,7 +181,7 @@ export default function DocumentUpload({ onUploadComplete, onError }: DocumentUp
                             {/* Animated border gradient */}
                             {isDragActive && (
                                 <motion.div
-                                    className="absolute inset-0 -z-10 bg-gradient-to-r from-blue-500/20 via-purple-500/20 to-blue-500/20"
+                                    className="absolute inset-0 -z-10 bg-gradient-to-r from-blue-500/20 via-blue-400/20 to-blue-500/20"
                                     animate={{ opacity: [0.5, 1, 0.5] }}
                                     transition={{ duration: 2, repeat: Infinity }}
                                 />
@@ -194,21 +194,21 @@ export default function DocumentUpload({ onUploadComplete, onError }: DocumentUp
                         initial={{ opacity: 0, scale: 0.95 }}
                         animate={{ opacity: 1, scale: 1 }}
                         exit={{ opacity: 0, scale: 0.95 }}
-                        className="rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 p-6"
+                        className="rounded-2xl border border-gray-200 bg-white p-6"
                     >
                         <div className="flex items-start gap-4">
-                            <div className="p-3 rounded-xl bg-blue-50 dark:bg-blue-900/30">
+                            <div className="p-3 rounded-xl bg-blue-50">
                                 <FileText className="h-6 w-6 text-blue-600" />
                             </div>
 
                             <div className="flex-1 min-w-0">
                                 <div className="flex items-center justify-between">
-                                    <p className="font-medium text-gray-900 dark:text-white truncate">
+                                    <p className="font-medium text-gray-900 truncate">
                                         {currentFile?.name}
                                     </p>
                                     <button
                                         onClick={cancelUpload}
-                                        className="p-1 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-full transition-colors"
+                                        className="p-1 hover:bg-gray-100 rounded-full transition-colors"
                                     >
                                         <X className="h-4 w-4 text-gray-500" />
                                     </button>
@@ -220,9 +220,9 @@ export default function DocumentUpload({ onUploadComplete, onError }: DocumentUp
 
                                 {/* Progress bar */}
                                 <div className="mt-3">
-                                    <div className="h-2 bg-gray-100 dark:bg-gray-800 rounded-full overflow-hidden">
+                                    <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
                                         <motion.div
-                                            className="h-full bg-gradient-to-r from-blue-500 to-purple-500 rounded-full"
+                                            className="h-full bg-gradient-to-r from-blue-500 to-blue-600 rounded-full"
                                             initial={{ width: 0 }}
                                             animate={{
                                                 width: processingStatus === 'uploading'
@@ -240,7 +240,7 @@ export default function DocumentUpload({ onUploadComplete, onError }: DocumentUp
                                 {/* Status message */}
                                 <div className="mt-3 flex items-center gap-2">
                                     {processingStatus && statusIcons[processingStatus]}
-                                    <span className="text-sm text-gray-600 dark:text-gray-400">
+                                    <span className="text-sm text-gray-600">
                                         {processingStatus ? statusMessages[processingStatus] : 'Starting upload...'}
                                     </span>
                                 </div>
@@ -251,7 +251,7 @@ export default function DocumentUpload({ onUploadComplete, onError }: DocumentUp
                             <motion.div
                                 initial={{ opacity: 0, y: -10 }}
                                 animate={{ opacity: 1, y: 0 }}
-                                className="mt-4 p-3 rounded-lg bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 text-sm"
+                                className="mt-4 p-3 rounded-lg bg-red-50 text-red-600 text-sm"
                             >
                                 {error}
                             </motion.div>

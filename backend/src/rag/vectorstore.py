@@ -9,6 +9,7 @@ from qdrant_client.models import (
     FieldCondition,
     Filter,
     MatchValue,
+    PayloadSchemaType,
     PointStruct,
     VectorParams,
 )
@@ -29,7 +30,7 @@ class QdrantVectorStore:
         self.dimension = 768  # Gemini embedding dimension
 
     async def ensure_collection(self) -> None:
-        """Ensure the collection exists, create if not."""
+        """Ensure the collection exists with proper indexes, create if not."""
         collections = self.client.get_collections().collections
         collection_names = [c.name for c in collections]
 
@@ -41,6 +42,18 @@ class QdrantVectorStore:
                     distance=Distance.COSINE,
                 ),
             )
+        
+        # Ensure payload index for document_id exists (idempotent - recreate if needed)
+        # This is needed for filtering queries by document_id
+        try:
+            self.client.create_payload_index(
+                collection_name=self.collection_name,
+                field_name="document_id",
+                field_schema=PayloadSchemaType.KEYWORD,
+            )
+        except Exception:
+            # Index already exists, ignore
+            pass
 
     async def upsert(
         self,
@@ -100,9 +113,12 @@ class QdrantVectorStore:
         Returns:
             list[dict]: List of search results with chunk_id and score
         """
-        results = self.client.search(
+        # Ensure collection and indexes exist
+        await self.ensure_collection()
+        
+        response = self.client.query_points(
             collection_name=self.collection_name,
-            query_vector=query_vector,
+            query=query_vector,
             query_filter=Filter(
                 must=[
                     FieldCondition(
@@ -113,6 +129,7 @@ class QdrantVectorStore:
             ),
             limit=top_k,
         )
+        results = response.points
 
         return [
             {
