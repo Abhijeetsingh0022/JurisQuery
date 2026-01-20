@@ -93,56 +93,58 @@ export default function DocumentAnalysisPage() {
         : null;
 
     return (
-        <div className="h-screen bg-gray-50 flex flex-col overflow-hidden">
-            <main className="flex-1 flex flex-col overflow-hidden">
+        <div className="h-[calc(100vh)] -m-8 bg-[#f7f3f1] flex flex-col overflow-hidden">
+            <main className="flex-1 flex flex-col overflow-hidden w-full max-w-[1920px] mx-auto">
                 {/* Header with Title and Back Button Logic */}
-                {/* Header with Title and Back Button Logic */}
-                <header className="h-16 bg-[#2a3b4e] border-b border-[#1f2b3a] flex items-center justify-between px-6 flex-none shadow-md z-20">
-                    <div className="flex items-center gap-4">
-                        <button
-                            onClick={() => router.back()}
-                            className="p-2 hover:bg-white/10 rounded-xl transition-all duration-200 text-gray-300 hover:text-white group"
-                        >
-                            <ArrowLeft className="h-5 w-5 group-hover:-translate-x-0.5 transition-transform" />
-                        </button>
-                        <div className="min-w-0">
-                            <h1 className="text-lg font-serif font-medium text-white truncate max-w-xl tracking-wide">
-                                {document.original_filename}
-                            </h1>
-                            <p className="text-[11px] text-gray-400 flex items-center gap-2 font-medium uppercase tracking-wider">
-                                <span className={`inline-block w-1.5 h-1.5 rounded-full ${document.status === 'ready' ? 'bg-green-400 shadow-[0_0_8px_rgba(74,222,128,0.5)]' : 'bg-amber-500'
-                                    }`} />
-                                {document.status === 'ready' ? 'Ready for Analysis' : 'Processing...'}
-                            </p>
+                <div className="px-4 py-4 flex-none">
+                    <header className="h-18 bg-white/80 backdrop-blur-md border border-white/20 rounded-2xl flex items-center justify-between px-6 shadow-sm z-20 transition-all hover:shadow-md hover:bg-white/90">
+                        <div className="flex items-center gap-4 py-3">
+                            <button
+                                onClick={() => router.back()}
+                                className="p-2.5 bg-[#f7f3f1] hover:bg-[#2a3b4e] hover:text-white rounded-xl transition-all duration-300 text-[#2a3b4e] group shadow-sm"
+                            >
+                                <ArrowLeft className="h-5 w-5 group-hover:-translate-x-0.5 transition-transform" />
+                            </button>
+                            <div className="min-w-0 flex flex-col">
+                                <h1 className="text-lg font-serif font-bold text-[#2a3b4e] truncate max-w-xl tracking-tight">
+                                    {document.original_filename}
+                                </h1>
+                                <p className="text-[10px] text-[#2a3b4e]/60 flex items-center gap-2 font-medium uppercase tracking-widest mt-0.5">
+                                    <span className={`inline-block w-1.5 h-1.5 rounded-full ${document.status === 'ready' ? 'bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.4)]' : 'bg-amber-500'
+                                        }`} />
+                                    {document.status === 'ready' ? 'Ready for Analysis' : 'Processing...'}
+                                </p>
+                            </div>
                         </div>
-                    </div>
 
-                    <div className="flex items-center gap-2">
-                        <a
-                            href={document.file_url}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="p-2 hover:bg-white/10 rounded-xl transition-colors text-gray-300 hover:text-white"
-                            title="Download original"
-                        >
-                            <Download className="h-5 w-5" />
-                        </a>
-                    </div>
-                </header>
+                        <div className="flex items-center gap-3">
+                            <a
+                                href={document.file_url}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="flex items-center gap-2 px-4 py-2.5 bg-[#2a3b4e] hover:bg-[#1f2b3a] rounded-xl transition-all text-white shadow-lg shadow-[#2a3b4e]/20 hover:shadow-[#2a3b4e]/30 group"
+                                title="Download original"
+                            >
+                                <span className="text-sm font-medium">Download</span>
+                                <Download className="h-4 w-4 group-hover:translate-y-0.5 transition-transform" />
+                            </a>
+                        </div>
+                    </header>
+                </div>
 
                 {/* Main Content - Split View */}
-                <div className="flex-1 flex overflow-hidden">
+                <div className="flex-1 flex overflow-hidden px-4 pb-4 gap-4">
                     {/* Left Panel - PDF Viewer */}
-                    <div className="flex-1 border-r border-gray-200 bg-white relative">
+                    <div className="flex-1 bg-white rounded-2xl shadow-sm border border-[#2a3b4e]/5 overflow-hidden relative group hover:border-[#2a3b4e]/10 transition-colors">
                         <PDFViewer
                             url={document.file_url}
-                            className="h-full border-none rounded-none"
+                            className="h-full border-none"
                             activeCitation={viewerCitation}
                         />
                     </div>
 
                     {/* Right Panel - Chat */}
-                    <div className="flex-1 flex flex-col h-full bg-white">
+                    <div className="flex-1 flex flex-col h-full bg-white rounded-2xl shadow-sm border border-[#2a3b4e]/5 overflow-hidden relative hover:border-[#2a3b4e]/10 transition-colors">
                         <ChatWindow
                             documentId={documentId}
                             onCitationClick={handleCitationClick}

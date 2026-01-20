@@ -10,8 +10,12 @@ from fastapi import UploadFile
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.documents.models import Document, DocumentStatus
-from src.documents.schemas import DocumentListResponse, DocumentStatusResponse
+from src.documents.models import Document, DocumentChunk, DocumentStatus
+from src.documents.schemas import (
+    DocumentChunkListResponse,
+    DocumentListResponse,
+    DocumentStatusResponse,
+)
 from src.exceptions import BadRequestError, NotFoundError
 from src.storage.cloudinary_storage import CloudinaryStorage
 
@@ -184,3 +188,36 @@ async def delete_document(
     # Delete from database (cascades to chunks)
     await db.delete(document)
     await db.commit()
+
+
+async def get_document_chunks(
+    db: AsyncSession,
+    document_id: UUID,
+    user_id: str,
+    skip: int = 0,
+    limit: int = 100,
+) -> DocumentChunkListResponse:
+    """Get chunks for a document."""
+    # First verify document existence and ownership
+    await get_document(db, document_id, user_id)
+    
+    # Count total chunks
+    count_query = (
+        select(func.count())
+        .select_from(DocumentChunk)
+        .where(DocumentChunk.document_id == document_id)
+    )
+    total = await db.scalar(count_query) or 0
+    
+    # Get chunks
+    query = (
+        select(DocumentChunk)
+        .where(DocumentChunk.document_id == document_id)
+        .order_by(DocumentChunk.chunk_index.asc())
+        .offset(skip)
+        .limit(limit)
+    )
+    result = await db.execute(query)
+    chunks = list(result.scalars().all())
+    
+    return DocumentChunkListResponse(chunks=chunks, total=total)

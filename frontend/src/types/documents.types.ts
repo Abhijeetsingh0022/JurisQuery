@@ -37,3 +37,16 @@ export interface DocumentStatusResponse {
     progress: number;
     error_message: string | null;
 }
+
+export interface DocumentChunk {
+    id: string;
+    chunk_index: number;
+    content: string;
+    page_number: number | null;
+    paragraph_number: number | null;
+}
+
+export interface DocumentChunkListResponse {
+    chunks: DocumentChunk[];
+    total: number;
+}

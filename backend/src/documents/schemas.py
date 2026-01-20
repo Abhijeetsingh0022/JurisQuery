@@ -69,3 +69,11 @@ class DocumentChunkResponse(BaseModel):
     paragraph_number: int | None = None
 
     model_config = {"from_attributes": True}
+
+
+class DocumentChunkListResponse(BaseModel):
+    """Schema for list of document chunks."""
+
+    chunks: list[DocumentChunkResponse]
+    total: int
+

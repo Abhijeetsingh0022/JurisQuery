@@ -83,9 +83,9 @@ export default function IPCPredictorPage() {
     };
 
     const getConfidenceColor = (confidence: number) => {
-        if (confidence >= 0.8) return 'text-green-600';
-        if (confidence >= 0.6) return 'text-yellow-600';
-        return 'text-orange-600';
+        if (confidence >= 0.8) return 'text-green-700';
+        if (confidence >= 0.6) return 'text-yellow-700';
+        return 'text-orange-700';
     };
 
     const getConfidenceBg = (confidence: number) => {
@@ -95,41 +95,41 @@ export default function IPCPredictorPage() {
     };
 
     return (
-        <div className="min-h-screen bg-gray-50 py-8">
-            <div className="max-w-4xl mx-auto px-4">
+        <div className="space-y-6">
+            <div className="max-w-4xl mx-auto">
                 {/* Header */}
                 <div className="text-center mb-8">
-                    <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-blue-100 mb-4">
-                        <Scale className="w-8 h-8 text-blue-600" />
+                    <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-[#2a3b4e]/5 mb-4">
+                        <Scale className="w-8 h-8 text-[#2a3b4e]" />
                     </div>
-                    <h1 className="text-3xl font-bold text-gray-900 mb-2">
+                    <h1 className="text-3xl font-bold font-serif text-[#2a3b4e] mb-2">
                         IPC Section Predictor
                     </h1>
-                    <p className="text-gray-600 max-w-xl mx-auto">
+                    <p className="text-[#2a3b4e]/70 max-w-xl mx-auto">
                         Describe a crime or incident and get predicted applicable IPC sections
                         with legal classification and punishment details.
                     </p>
                 </div>
 
                 {/* Input Section */}
-                <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 mb-6">
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                <div className="bg-white rounded-2xl shadow-sm border border-[#2a3b4e]/10 p-6 mb-6">
+                    <label className="block text-sm font-medium text-[#2a3b4e] mb-2">
                         Describe the Crime or Incident
                     </label>
                     <textarea
                         value={description}
                         onChange={(e) => setDescription(e.target.value)}
                         placeholder="e.g., A person broke into a house at night and stole jewelry worth Rs. 50,000. The owner was not present at that time..."
-                        className="w-full h-40 p-4 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none text-gray-900 placeholder:text-gray-400"
+                        className="w-full h-40 p-4 border border-[#2a3b4e]/10 rounded-xl focus:ring-2 focus:ring-[#2a3b4e]/20 focus:border-[#2a3b4e] resize-none text-[#2a3b4e] placeholder:text-[#2a3b4e]/40 outline-none"
                     />
                     <div className="flex items-center justify-between mt-4">
-                        <span className="text-sm text-gray-500">
+                        <span className="text-sm text-[#2a3b4e]/60">
                             {description.length} / 5000 characters
                         </span>
                         <button
                             onClick={handlePredict}
                             disabled={isLoading || description.length < 20}
-                            className="inline-flex items-center gap-2 px-6 py-3 bg-blue-600 text-white font-medium rounded-xl hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                            className="inline-flex items-center gap-2 px-6 py-3 bg-[#2a3b4e] text-white font-medium rounded-xl hover:bg-[#2a3b4e]/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                         >
                             {isLoading ? (
                                 <>
@@ -170,7 +170,7 @@ export default function IPCPredictorPage() {
                             exit={{ opacity: 0, y: 20 }}
                         >
                             {/* Stats */}
-                            <div className="flex items-center gap-4 mb-6 text-sm text-gray-500">
+                            <div className="flex items-center gap-4 mb-6 text-sm text-[#2a3b4e]/60">
                                 <span>Searched {result.total_sections_searched} sections</span>
                                 <span>•</span>
                                 <span>{result.processing_time_ms.toFixed(0)}ms</span>
@@ -191,14 +191,14 @@ export default function IPCPredictorPage() {
                                         >
                                             <div className="flex items-start justify-between">
                                                 <div className="flex items-center gap-3">
-                                                    <div className="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-gray-900 text-white font-bold">
+                                                    <div className="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-[#2a3b4e] text-white font-bold">
                                                         {prediction.section.section_number}
                                                     </div>
                                                     <div>
-                                                        <h3 className="font-semibold text-gray-900">
+                                                        <h3 className="font-semibold text-[#2a3b4e]">
                                                             IPC Section {prediction.section.section_number}
                                                         </h3>
-                                                        <p className="text-sm text-gray-600">
+                                                        <p className="text-sm text-[#2a3b4e]/80">
                                                             {prediction.section.offense || 'No offense title'}
                                                         </p>
                                                     </div>
@@ -214,31 +214,31 @@ export default function IPCPredictorPage() {
                                             </div>
 
                                             {/* Reasoning */}
-                                            <p className="mt-4 text-gray-700 bg-white/50 rounded-lg p-3">
+                                            <p className="mt-4 text-[#2a3b4e]/80 bg-[#f7f3f1]/50 rounded-lg p-3">
                                                 {prediction.reasoning}
                                             </p>
 
                                             {/* Legal Info */}
                                             <div className="mt-4 grid grid-cols-2 md:grid-cols-4 gap-3">
                                                 <div className="flex items-center gap-2 text-sm">
-                                                    <Clock className="w-4 h-4 text-gray-400" />
-                                                    <span className="text-gray-600 truncate">
+                                                    <Clock className="w-4 h-4 text-[#2a3b4e]/40" />
+                                                    <span className="text-[#2a3b4e]/70 truncate">
                                                         {prediction.section.punishment || 'N/A'}
                                                     </span>
                                                 </div>
                                                 <div className="flex items-center gap-2 text-sm">
-                                                    <Shield className={`w-4 h-4 ${prediction.section.cognizable ? 'text-red-500' : 'text-green-500'}`} />
-                                                    <span className="text-gray-600">
+                                                    <Shield className={`w-4 h-4 ${prediction.section.cognizable ? 'text-red-500' : 'text-green-600'}`} />
+                                                    <span className="text-[#2a3b4e]/70">
                                                         {prediction.section.cognizable ? 'Cognizable' : 'Non-Cognizable'}
                                                     </span>
                                                 </div>
                                                 <div className="flex items-center gap-2 text-sm">
-                                                    <Building2 className={`w-4 h-4 ${prediction.section.bailable ? 'text-green-500' : 'text-red-500'}`} />
-                                                    <span className="text-gray-600">
+                                                    <Building2 className={`w-4 h-4 ${prediction.section.bailable ? 'text-green-600' : 'text-red-500'}`} />
+                                                    <span className="text-[#2a3b4e]/70">
                                                         {prediction.section.bailable ? 'Bailable' : 'Non-Bailable'}
                                                     </span>
                                                 </div>
-                                                <button className="flex items-center gap-1 text-sm text-blue-600 hover:text-blue-700">
+                                                <button className="flex items-center gap-1 text-sm text-[#2a3b4e] font-medium hover:underline">
                                                     View Details
                                                     <ChevronRight className="w-4 h-4" />
                                                 </button>
@@ -247,12 +247,12 @@ export default function IPCPredictorPage() {
                                     ))}
                                 </div>
                             ) : (
-                                <div className="text-center py-12 bg-white rounded-xl border border-gray-200">
-                                    <FileText className="w-12 h-12 text-gray-300 mx-auto mb-4" />
-                                    <h3 className="text-lg font-medium text-gray-900 mb-2">
+                                <div className="text-center py-12 bg-white rounded-xl border border-[#2a3b4e]/10">
+                                    <FileText className="w-12 h-12 text-[#2a3b4e]/30 mx-auto mb-4" />
+                                    <h3 className="text-lg font-medium text-[#2a3b4e] mb-2">
                                         No Matching Sections Found
                                     </h3>
-                                    <p className="text-gray-500">
+                                    <p className="text-[#2a3b4e]/60">
                                         Try providing more details about the incident.
                                     </p>
                                 </div>

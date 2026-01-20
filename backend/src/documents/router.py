@@ -15,6 +15,7 @@ from src.documents.schemas import (
     DocumentListResponse,
     DocumentResponse,
     DocumentStatusResponse,
+    DocumentChunkListResponse,
 )
 from src.rag.service import process_document_for_rag
 
@@ -107,6 +108,29 @@ async def get_document_status(
         db=db,
         document_id=document_id,
         user_id=current_user["id"],
+    )
+
+
+@router.get(
+    "/{document_id}/chunks",
+    response_model=DocumentChunkListResponse,
+    summary="Get document chunks",
+    description="Get the processed text chunks for a document.",
+)
+async def get_document_chunks(
+    document_id: UUID,
+    skip: int = 0,
+    limit: int = 100,
+    db: AsyncSession = Depends(get_db),
+    current_user: dict = Depends(get_current_user),
+):
+    """Get chunks for a specific document."""
+    return await service.get_document_chunks(
+        db=db,
+        document_id=document_id,
+        user_id=current_user["id"],
+        skip=skip,
+        limit=limit,
     )
 
 

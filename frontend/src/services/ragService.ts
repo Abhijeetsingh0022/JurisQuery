@@ -3,7 +3,7 @@
  */
 
 import { api } from './api/client';
-import type { Document, DocumentListResponse, DocumentStatusResponse } from '@/types/documents.types';
+import type { Document, DocumentListResponse, DocumentStatusResponse, DocumentChunkListResponse } from '@/types/documents.types';
 import type {
     QueryResponse,
     ChatSession,
@@ -38,6 +38,14 @@ export async function getDocumentStatus(documentId: string): Promise<DocumentSta
 
 export async function deleteDocument(documentId: string): Promise<void> {
     return api.delete(`/api/documents/${documentId}`);
+}
+
+export async function getDocumentChunks(
+    documentId: string,
+    skip = 0,
+    limit = 100
+): Promise<DocumentChunkListResponse> {
+    return api.get<DocumentChunkListResponse>(`/api/documents/${documentId}/chunks?skip=${skip}&limit=${limit}`);
 }
 
 // ============ RAG Query ============
@@ -109,6 +117,7 @@ const ragService = {
     getDocument,
     getDocumentStatus,
     deleteDocument,
+    getDocumentChunks,
     // RAG
     queryDocument,
     // Chat
