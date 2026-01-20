@@ -81,7 +81,7 @@ export default function DocumentsPage() {
     const documents = data?.documents || [];
 
     const filteredDocs = documents?.filter((doc: any) =>
-        doc.filename.toLowerCase().includes(searchQuery.toLowerCase())
+        doc.original_filename.toLowerCase().includes(searchQuery.toLowerCase())
     ) || [];
 
     const formatFileSize = (bytes: number) => {
@@ -178,10 +178,10 @@ export default function DocumentsPage() {
                                     <tr key={doc.id} className="hover:bg-[#f7f3f1]/30 transition-colors group">
                                         <td className="px-6 py-4">
                                             <div className="flex items-center">
-                                                <div className="h-10 w-10 rounded-lg bg-[#2a3b4e]/5 flex items-center justify-center text-[#2a3b4e] mr-3">
-                                                    <FileText className="h-5 w-5" />
+                                                <div className="h-11 w-11 rounded-xl bg-[#F5F5F5] flex items-center justify-center text-[#2a3b4e] mr-4 shrink-0">
+                                                    <FileText className="h-5 w-5 stroke-[1.5]" />
                                                 </div>
-                                                <span className="font-medium text-[#2a3b4e]">{doc.filename}</span>
+                                                <span className="font-semibold text-[#2a3b4e] text-[15px]">{doc.original_filename}</span>
                                             </div>
                                         </td>
                                         <td className="px-6 py-4">
@@ -247,7 +247,7 @@ export default function DocumentsPage() {
                                 </div>
                                 <h3 className="text-lg font-bold text-[#2a3b4e] mb-2">Delete Document?</h3>
                                 <p className="text-[#2a3b4e]/70 mb-6">
-                                    Are you sure you want to delete <span className="font-semibold">{deleteDoc.filename}</span>? This action cannot be undone.
+                                    Are you sure you want to delete <span className="font-semibold">{deleteDoc.original_filename}</span>? This action cannot be undone.
                                 </p>
                                 <div className="flex items-center space-x-3 justify-center">
                                     <button
@@ -323,8 +323,8 @@ function DocumentDetailsModal({ document, isOpen, onClose }: { document: any, is
                                         key={item.id}
                                         onClick={() => setActiveTab(item.id)}
                                         className={`w-full flex items-center space-x-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 ${isActive
-                                                ? 'bg-white text-[#2a3b4e] shadow-sm ring-1 ring-black/5'
-                                                : 'text-[#2a3b4e]/60 hover:text-[#2a3b4e] hover:bg-[#2a3b4e]/5'
+                                            ? 'bg-white text-[#2a3b4e] shadow-sm ring-1 ring-black/5'
+                                            : 'text-[#2a3b4e]/60 hover:text-[#2a3b4e] hover:bg-[#2a3b4e]/5'
                                             }`}
                                     >
                                         <Icon className={`h-4 w-4 ${isActive ? 'text-[#2a3b4e]' : 'text-[#2a3b4e]/40'}`} />
@@ -341,7 +341,7 @@ function DocumentDetailsModal({ document, isOpen, onClose }: { document: any, is
                     {/* Header */}
                     <div className="flex items-center justify-between px-8 py-6 border-b border-[#2a3b4e]/5 shrink-0">
                         <div>
-                            <h2 className="text-xl font-bold text-[#2a3b4e] font-serif tracking-tight">{document.filename}</h2>
+                            <h2 className="text-xl font-bold text-[#2a3b4e] font-serif tracking-tight">{document.original_filename}</h2>
                             <p className="text-sm text-[#2a3b4e]/60 font-medium mt-1">
                                 {activeTab === 'overview' ? 'Document Properties & Status' : 'Processed Text Segments'}
                             </p>
@@ -366,8 +366,8 @@ function DocumentDetailsModal({ document, isOpen, onClose }: { document: any, is
                                             <label className="text-xs font-medium text-[#2a3b4e]/50">Status</label>
                                             <div>
                                                 <span className={`inline-flex items-center px-2.5 py-1 rounded-md text-xs font-medium uppercase tracking-wide border ${document.status === "ready"
-                                                        ? "bg-emerald-50 text-emerald-700 border-emerald-200"
-                                                        : "bg-amber-50 text-amber-700 border-amber-200"
+                                                    ? "bg-emerald-50 text-emerald-700 border-emerald-200"
+                                                    : "bg-amber-50 text-amber-700 border-amber-200"
                                                     }`}>
                                                     {document.status}
                                                 </span>
