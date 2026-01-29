@@ -40,6 +40,8 @@ JurisQuery is a next-generation legal tech platform that simplifies complex docu
 | **💬 AI Chat Interface** | ChatGPT-style conversation interface with your documents |
 | **🔍 RAG-Powered Answers** | Retrieval-Augmented Generation ensures factual, document-grounded responses |
 | **📌 Citation Highlights** | Every answer includes clickable citations with page/paragraph references |
+| **⚖️ IPC Section Predictor** | AI-powered prediction of applicable Indian Penal Code sections from crime descriptions |
+| **🧠 BrainLLM Meta-Reasoning** | Query optimization, response verification, and automatic refinement |
 | **🔐 Secure Authentication** | Clerk-powered authentication with JWT backend validation |
 | **📊 Dashboard Analytics** | Track documents, processing status, and usage metrics |
 
@@ -49,6 +51,10 @@ JurisQuery is a next-generation legal tech platform that simplifies complex docu
 - **Premium Design**: Glassmorphism, micro-animations, responsive layouts
 - **Professional SaaS Layout**: Sidebar navigation, top header, card-based UI
 - **Dark/Light Mode Ready**: Color palette supports theming
+
+### System Use Cases
+
+![JurisQuery System Use Cases](assets/jurisquery_use_case_diagram.png)
 
 ---
 
@@ -126,7 +132,7 @@ JurisQuery is a next-generation legal tech platform that simplifies complex docu
 │                            DATA LAYER                                        │
 │  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐     │
 │  │   Neon       │  │   Qdrant     │  │  Cloudinary  │  │   Gemini     │     │
-│  │ PostgreSQL   │  │   Cloud      │  │   Storage    │  │  2.5 Flash   │     │
+│  │ PostgreSQL   │  │   Cloud      │  │   Storage    │  │  2.0 Flash   │     │
 │  └──────────────┘  └──────────────┘  └──────────────┘  └──────────────┘     │
 └─────────────────────────────────────────────────────────────────────────────┘
 ```
@@ -147,8 +153,9 @@ JurisQuery is a next-generation legal tech platform that simplifies complex docu
 | **Migrations** | Alembic | Schema version control |
 | **Vector DB** | Qdrant Cloud | Similarity search |
 | **File Storage** | Cloudinary | Document hosting |
-| **LLM** | Gemini 2.5 Flash | Text generation |
+| **LLM** | Gemini 2.0 Flash | Text generation (with key rotation) |
 | **Embeddings** | text-embedding-004 | 768-dim vectors |
+| **Fallback LLM** | Groq LLaMA 3.3 | Backup inference |
 
 ### Frontend Technologies
 
@@ -221,9 +228,10 @@ backend/
 ├── src/
 │   ├── auth/          # JWT validation, Clerk integration
 │   ├── documents/     # Upload, list, status endpoints
-│   ├── rag/           # Embeddings, vectorstore, prompts
+│   ├── rag/           # Embeddings, vectorstore, hybrid search
 │   ├── chat/          # Session & message management
-│   ├── llm/           # Gemini LLM integration
+│   ├── ipc/           # IPC Section Prediction feature
+│   ├── llm/           # Gemini, Groq, BrainLLM
 │   ├── storage/       # Cloudinary file storage
 │   └── main.py        # FastAPI application
 ├── alembic/           # Database migrations
@@ -357,7 +365,7 @@ JurisQuery uses **Retrieval-Augmented Generation (RAG)** to provide accurate, ci
 │                                                                    │             │
 │                                                                    ▼             │
 │  ┌─────────────┐   ┌─────────────────────────────────────────────────────────┐  │
-│  │   Answer    │◀──│                  Gemini 2.5 Flash                        │  │
+│  │   Answer    │◀──│                  Gemini 2.0 Flash                        │  │
 │  │ + Citations │   │   "Based on the document, termination requires..."      │  │
 │  └─────────────┘   └─────────────────────────────────────────────────────────┘  │
 └─────────────────────────────────────────────────────────────────────────────────┘
@@ -385,7 +393,9 @@ JurisQuery uses **Retrieval-Augmented Generation (RAG)** to provide accurate, ci
 | 3 | Cosine similarity search | Qdrant Cloud |
 | 4 | Top-5 relevant chunks retrieved | Vector Store |
 | 5 | Context built with source labels | RAG Service |
-| 6 | Answer generated with citations | Gemini 2.5 Flash |
+| 6 | BrainLLM optimizes query (rewriting, entities) | Brain LLM |
+| 7 | Answer generated with citations | Gemini 2.0 Flash |
+| 8 | Response verified for grounding | Brain LLM |
 
 ### Key Components
 
@@ -393,7 +403,8 @@ JurisQuery uses **Retrieval-Augmented Generation (RAG)** to provide accurate, ci
 |-----------|------|-------------|
 | **Embeddings** | `embeddings.py` | Gemini text-embedding-004, 768 dimensions |
 | **Vector Store** | `vectorstore.py` | Qdrant client with upsert, search, delete |
-| **LLM** | `gemini.py` | Gemini 2.5 Flash with retry logic, streaming |
+| **LLM** | `gemini.py` | Gemini 2.0 Flash with API key rotation |
+| **Brain LLM** | `brain.py` | Query analysis, response verification, refinement |
 | **Prompts** | `prompts.py` | Legal domain prompts for RAG, summarization |
 | **Service** | `service.py` | Query pipeline orchestration |
 
@@ -405,6 +416,39 @@ The legal RAG prompt instructs the LLM to:
 3. Always cite sources with [Source X] format
 4. Use professional legal language
 5. Be precise and avoid speculation
+
+### Advanced RAG Features
+
+#### Hybrid Search with RRF Fusion
+
+JurisQuery combines vector and keyword search for optimal retrieval:
+
+| Search Type | Source | Purpose |
+|-------------|--------|---------|
+| **Vector Search** | Qdrant | Semantic similarity matching |
+| **Keyword Search** | PostgreSQL | Exact term matching |
+| **RRF Fusion** | Service | Reciprocal Rank Fusion to merge and re-rank results |
+
+#### Parent-Child Chunking
+
+```
+PARENT (~2000 chars) ─────────────────────────────────────────────────
+    │
+    ├── CHILD (~500 chars) ← Embedded in Qdrant for precise search
+    ├── CHILD (~500 chars) ← Embedded in Qdrant for precise search
+    └── CHILD (~500 chars) ← Embedded in Qdrant for precise search
+```
+
+- **Search on children**: Smaller chunks provide precise similarity matching
+- **Return parents**: Larger context chunks provide richer LLM context
+
+#### BrainLLM Meta-Reasoning
+
+| Function | Purpose |
+|----------|---------|
+| `analyze_query()` | Query type detection, entity extraction, query rewriting |
+| `verify_response()` | Check if response is grounded in citations |
+| `refine_response()` | Fix ungrounded claims when confidence is low |
 
 ### Configuration Parameters
 
@@ -464,6 +508,14 @@ pending → uploading → processing → vectorizing → ready
 | Method | Endpoint | Description |
 |--------|----------|-------------|
 | `POST` | `/api/rag/query` | Query document with RAG |
+
+### IPC API
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| `POST` | `/api/v1/ipc/predict` | Predict IPC sections from crime description |
+| `GET` | `/api/v1/ipc/sections` | List all IPC sections (paginated) |
+| `GET` | `/api/v1/ipc/sections/{num}` | Get specific IPC section details |
 
 ### Chat API
 

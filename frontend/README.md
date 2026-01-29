@@ -1,36 +1,125 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# JurisQuery Frontend
 
-## Getting Started
+> Next.js 16 Frontend for Legal Document Analysis with AI
 
-First, run the development server:
+## 🚀 Quick Start
+
+### Prerequisites
+
+- Node.js 20+
+- npm or yarn
+
+### Setup
 
 ```bash
+# Install dependencies
+npm install
+
+# Copy environment variables
+cp .env.local.example .env.local
+# Edit .env.local with your Clerk keys
+
+# Start development server
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000) to view the app.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## 📁 Project Structure
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```
+frontend/src/
+├── app/                    # Next.js App Router
+│   ├── (dashboard)/        # Protected dashboard routes
+│   │   ├── dashboard/      # Main dashboard
+│   │   ├── documents/      # Document management
+│   │   ├── ipc-predictor/  # IPC Section Predictor
+│   │   ├── history/        # Chat history
+│   │   └── settings/       # User settings
+│   ├── (public)/           # Landing pages
+│   ├── sign-in/            # Clerk sign-in
+│   └── sign-up/            # Clerk sign-up
+├── components/
+│   ├── layout/             # Sidebar, Header
+│   ├── dashboard/          # Dashboard components
+│   ├── home/               # Landing page sections
+│   └── providers/          # React Query provider
+├── features/
+│   ├── documents/          # Document upload, cards
+│   ├── chat/               # Chat interface
+│   └── ipc/                # IPC predictor components
+├── services/
+│   ├── api/client.ts       # Centralized fetch wrapper
+│   └── ragService.ts       # API methods for documents, chat, RAG
+└── types/                  # TypeScript interfaces
+```
 
-## Learn More
+## 🎨 Key Features
 
-To learn more about Next.js, take a look at the following resources:
+| Feature | Description |
+|---------|-------------|
+| **Dashboard** | Document list, stats, quick upload |
+| **Document Viewer** | PDF/DOCX display with chat |
+| **IPC Predictor** | Crime description → IPC sections |
+| **Chat History** | All conversations with documents |
+| **Clerk Auth** | Sign-in, sign-up, protected routes |
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## 🛠️ Technology Stack
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+| Technology | Purpose |
+|------------|---------|
+| **Next.js 16** | App Router, server components |
+| **TypeScript 5** | Type safety |
+| **TailwindCSS 4** | Styling |
+| **Clerk** | Authentication |
+| **Framer Motion** | Animations |
+| **Lucide React** | Icons |
+| **React Query** | Server state management |
 
-## Deploy on Vercel
+## 📡 API Integration
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+All API calls go through `services/ragService.ts`:
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+```typescript
+// Documents
+uploadDocument(file, onProgress)
+getDocuments(skip, limit)
+deleteDocument(documentId)
+
+// Chat
+createChatSession(documentId)
+sendMessage(sessionId, content)
+getChatSessions()
+
+// RAG
+queryDocument(documentId, query, topK)
+```
+
+## 🎯 Design System
+
+- **Color Palette**: Deep Navy (#2a3b4e), Soft Cream (#f7f3f1)
+- **Typography**: Outfit (sans), Playfair Display (serif)
+- **Animations**: Framer Motion micro-interactions
+- **Components**: Cards, modals, sidebars
+
+## 🔧 Development
+
+```bash
+# Development server
+npm run dev
+
+# Type checking
+npm run lint
+
+# Production build
+npm run build
+npm start
+```
+
+## 🔑 Environment Variables
+
+```env
+NEXT_PUBLIC_API_URL=http://localhost:8000
+NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=pk_...
+CLERK_SECRET_KEY=sk_...
+```
