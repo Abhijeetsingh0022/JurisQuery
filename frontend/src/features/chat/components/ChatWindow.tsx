@@ -251,7 +251,7 @@ export default function ChatWindow({ documentId, onCitationClick }: ChatWindowPr
     return (
         <div className="flex flex-col h-full bg-[#f7f3f1]">
             {/* Header with History & New Chat */}
-            <div className="flex items-center justify-between px-6 py-3 border-b border-gray-200/50 bg-white/50 backdrop-blur-sm">
+            <div className="relative z-50 flex items-center justify-between px-6 py-3 border-b border-gray-200/50 bg-white/50 backdrop-blur-sm">
                 {/* History Dropdown */}
                 <div className="relative" ref={dropdownRef}>
                     <button
