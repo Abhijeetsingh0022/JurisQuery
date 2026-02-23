@@ -157,7 +157,8 @@ async def send_message(
     if session.user_id != user_id:
         raise ForbiddenError()
 
-    # Format history
+    # Format history and check if this is the first message
+    is_first_message = len(session.messages) == 0
     history = [
         {"role": m.role, "content": m.content} 
         for m in session.messages
@@ -191,6 +192,17 @@ async def send_message(
         citations=[c.model_dump(mode="json") for c in response.citations],
     )
     db.add(assistant_message)
+    
+    # Update session title if this was the first message
+    if is_first_message:
+        try:
+            from app.llm.brain import BrainLLM
+            brain = BrainLLM()
+            new_title = await brain.generate_chat_title(content)
+            session.title = new_title
+            # The session is already in the db session, modifications will be flushed
+        except Exception as e:
+            pass  # Non-blocking if title generation fails
     
     await db.flush()
     await db.refresh(assistant_message)

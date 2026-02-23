@@ -105,8 +105,11 @@ async def load_ipc_dataset(
     
     with open(csv_file, "r", encoding="utf-8") as f:
         reader = csv.DictReader(f)
+        # Convert reader to list in a thread to avoid blocking the event loop on I/O
+        import asyncio
+        rows = await asyncio.to_thread(list, reader)
         
-        for row in reader:
+        for row in rows:
             url = row.get("URL", "")
             section_num = extract_section_number(url)
             
@@ -248,18 +251,19 @@ async def predict_ipc_sections(
     
     error_message = None
     try:
-        response = await llm.generate(prompt, temperature=0.2, max_tokens=1024)
+        response = await llm.generate(prompt, temperature=0.2, max_tokens=8192)
         
         # Robust JSON extraction
-        match = re.search(r"\[.*\]", response, re.DOTALL)
+        match = re.search(r"\[\s*\{.*?\}\s*\]", response, re.DOTALL | re.IGNORECASE)
         if match:
             clean_response = match.group(0)
             predictions_data = json.loads(clean_response)
         else:
             clean_response = response.strip()
             if clean_response.startswith("```"):
-                clean_response = re.sub(r"```(?:json)?\n?", "", clean_response)
-                clean_response = clean_response.rstrip("`").strip()
+                clean_response = re.sub(r"^```(?:json)?\n?", "", clean_response)
+                clean_response = re.sub(r"\n?```$", "", clean_response)
+                clean_response = clean_response.strip()
             predictions_data = json.loads(clean_response)
             
     except (json.JSONDecodeError, Exception) as e:
@@ -295,18 +299,23 @@ async def predict_ipc_sections(
     
     # 5. Save prediction if user_id is provided
     if user_id and predicted_sections:
-        # Convert Pydantic objects to dicts for JSON storage
-        stored_predictions = [
-            pred.model_dump(mode="json") for pred in predicted_sections
-        ]
-        
-        prediction = IPCPrediction(
-            user_id=user_id,
-            description=request.description,
-            predicted_sections=stored_predictions,
-        )
-        db.add(prediction)
-        await db.commit()
+        try:
+            # Convert Pydantic objects to dicts for JSON storage
+            stored_predictions = [
+                pred.model_dump(mode="json") for pred in predicted_sections
+            ]
+            
+            prediction = IPCPrediction(
+                user_id=user_id,
+                description=request.description,
+                predicted_sections=stored_predictions,
+            )
+            db.add(prediction)
+            await db.commit()
+        except Exception as e:
+            logger.error(f"Failed to save prediction history for user {user_id}: {e}")
+            await db.rollback()
+            # Do not throw exception back to user; prediction successfully generated
     
     processing_time = (time.time() - start_time) * 1000
     

@@ -75,6 +75,20 @@ Be strict but fair. Legal responses should cite specific provisions, not make ge
 Respond with ONLY valid JSON, no markdown:"""
 
 
+CHAT_TITLE_PROMPT = """Generate a short, descriptive title (3 to 6 words) for a legal chat conversation that begins with the following message. 
+
+IMPORTANT RULES:
+1. Do NOT use random acronyms or single words.
+2. The title must reflect the actual topic or intent of the user's query.
+3. Capitalize it like a standard title (e.g., "Finding Indemnification Clauses").
+4. Do NOT use quotes around the title.
+
+USER MESSAGE: {message}
+
+TITLE:"""
+
+
+
 class BrainLLM:
     """
     Brain LLM for meta-reasoning tasks.
@@ -302,3 +316,27 @@ Write the improved response directly (no preamble):"""
         except Exception as e:
             logger.warning(f"Response refinement failed, using original: {e}")
             return original_response
+
+    async def generate_chat_title(self, first_message: str) -> str:
+        """
+        Generate a short title based on the first user message.
+        
+        Args:
+            first_message: The initial message from the user
+            
+        Returns:
+            str: Generated short title
+        """
+        prompt = CHAT_TITLE_PROMPT.format(message=first_message)
+        try:
+            response = await self.llm.generate(
+                prompt=prompt,
+                temperature=0.3,
+                max_tokens=20,
+            )
+            # Clean up the output by removing common markdown formatting or quotes
+            clean_title = response.strip(' "\'\n*')
+            return clean_title if clean_title else "New Conversation"
+        except Exception as e:
+            logger.warning(f"Failed to generate chat title: {e}")
+            return "New Conversation"
