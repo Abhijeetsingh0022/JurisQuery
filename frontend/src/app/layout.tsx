@@ -26,7 +26,13 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <ClerkProvider>
+    <ClerkProvider
+      appearance={{
+        elements: {
+          footerPagesLink: "hidden",
+        },
+      }}
+    >
       <html lang="en">
         <body
           className={cn(

@@ -34,7 +34,7 @@
 
 5. **Start the development server**
    ```bash
-   uv run uvicorn src.main:app --reload
+   uv run uvicorn app.main:app --reload
    ```
 
 6. **Access the API**
@@ -46,7 +46,7 @@
 
 ```
 backend/
-├── src/
+├── app/
 │   ├── auth/           # JWT validation, Clerk integration
 │   ├── documents/      # Upload, CRUD, status tracking
 │   ├── rag/            # RAG pipeline (hybrid search, embeddings)
@@ -100,8 +100,8 @@ uv run pytest
 
 ### Linting & Formatting
 ```bash
-uv run ruff check --fix src
-uv run ruff format src
+uv run ruff check --fix app
+uv run ruff format app
 ```
 
 ### Creating Migrations

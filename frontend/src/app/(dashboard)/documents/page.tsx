@@ -18,6 +18,7 @@ import Link from "next/link";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useApi } from "@/hooks/use-api";
 import { toast } from "sonner";
+import type { Document } from "@/types/documents.types";
 
 export default function DocumentsPage() {
     const { fetcher } = useApi();
@@ -26,8 +27,8 @@ export default function DocumentsPage() {
     const fileInputRef = useRef<HTMLInputElement>(null);
 
     // Action States
-    const [viewDoc, setViewDoc] = useState<any>(null);
-    const [deleteDoc, setDeleteDoc] = useState<any>(null);
+    const [viewDoc, setViewDoc] = useState<Document | null>(null);
+    const [deleteDoc, setDeleteDoc] = useState<Document | null>(null);
 
     const { data, isLoading } = useQuery({
         queryKey: ["documents"],
@@ -187,7 +188,9 @@ export default function DocumentsPage() {
                                         <td className="px-6 py-4">
                                             <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium capitalize ${doc.status === "ready"
                                                 ? "bg-green-100 text-green-800"
-                                                : "bg-yellow-100 text-yellow-800"
+                                                : doc.status === "failed"
+                                                    ? "bg-red-100 text-red-800"
+                                                    : "bg-yellow-100 text-yellow-800"
                                                 }`}>
                                                 {doc.status || "Unknown"}
                                             </span>
@@ -237,47 +240,116 @@ export default function DocumentsPage() {
             )}
 
             {/* Delete Confirmation Modal */}
-            {
-                deleteDoc && (
-                    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
-                        <div className="bg-white rounded-xl shadow-lg w-full max-w-md overflow-hidden animate-in fade-in zoom-in-95 duration-200">
-                            <div className="p-6 text-center">
-                                <div className="h-12 w-12 rounded-full bg-red-100 flex items-center justify-center text-red-600 mx-auto mb-4">
-                                    <AlertTriangle className="h-6 w-6" />
+            {deleteDoc && (
+                <DeleteModal
+                    document={deleteDoc}
+                    isOpen={!!deleteDoc}
+                    onClose={() => setDeleteDoc(null)}
+                    onConfirm={(id) => deleteMutation.mutate(id)}
+                    isDeleting={deleteMutation.isPending}
+                />
+            )}
+        </div>
+    );
+}
+
+function DeleteModal({ document, isOpen, onClose, onConfirm, isDeleting }: { document: any, isOpen: boolean, onClose: () => void, onConfirm: (id: string) => void, isDeleting: boolean }) {
+    const { fetcher } = useApi();
+
+    const { data: chunksData, isLoading: isLoadingChunks } = useQuery({
+        queryKey: ['documentChunks', document.id],
+        queryFn: async () => fetcher(`/api/documents/${document.id}/chunks?limit=100`),
+        enabled: isOpen,
+    });
+
+    if (!isOpen) return null;
+
+    return (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-in fade-in duration-200">
+            <div className="bg-white rounded-xl shadow-2xl w-full max-w-lg overflow-hidden animate-in zoom-in-95 duration-200 flex flex-col max-h-[85vh]">
+                <div className="p-6 text-center shrink-0">
+                    <div className={`h-12 w-12 rounded-full flex items-center justify-center mx-auto mb-4 transition-all duration-500 ${isDeleting ? 'bg-red-500 scale-110' : 'bg-red-100'}`}>
+                        <AlertTriangle className={`h-6 w-6 transition-colors duration-300 ${isDeleting ? 'text-white' : 'text-red-600'}`} />
+                    </div>
+                    <h3 className="text-lg font-bold text-[#2a3b4e] mb-2">
+                        {isDeleting ? 'Deleting...' : 'Delete Document?'}
+                    </h3>
+                    <p className="text-[#2a3b4e]/70">
+                        {isDeleting ? (
+                            <span className="text-red-500 font-medium">Removing chunks and vectors...</span>
+                        ) : (
+                            <>Are you sure you want to delete <span className="font-semibold text-[#2a3b4e]">{document.original_filename}</span>?</>
+                        )}
+                    </p>
+                </div>
+
+                <div className="px-6 pb-2 flex-1 overflow-hidden flex flex-col min-h-0">
+                    <div className="bg-gray-50 rounded-lg border border-gray-100 flex-1 overflow-hidden flex flex-col">
+                        <div className="px-4 py-3 border-b border-gray-100 flex justify-between items-center bg-gray-50 shrink-0">
+                            <span className="text-xs font-semibold text-[#2a3b4e]/60 uppercase tracking-wider">
+                                Linked Chunks ({isLoadingChunks ? '...' : chunksData?.chunks?.length || 0})
+                            </span>
+                        </div>
+                        <div className="overflow-y-auto p-2 space-y-2">
+                            {isLoadingChunks ? (
+                                <div className="flex justify-center py-8">
+                                    <Loader2 className="h-5 w-5 animate-spin text-[#2a3b4e]/40" />
                                 </div>
-                                <h3 className="text-lg font-bold text-[#2a3b4e] mb-2">Delete Document?</h3>
-                                <p className="text-[#2a3b4e]/70 mb-6">
-                                    Are you sure you want to delete <span className="font-semibold">{deleteDoc.original_filename}</span>? This action cannot be undone.
-                                </p>
-                                <div className="flex items-center space-x-3 justify-center">
-                                    <button
-                                        onClick={() => setDeleteDoc(null)}
-                                        disabled={deleteMutation.isPending}
-                                        className="px-4 py-2 rounded-lg border border-[#2a3b4e]/10 text-[#2a3b4e] font-medium hover:bg-[#f7f3f1] transition-colors"
-                                    >
-                                        Cancel
-                                    </button>
-                                    <button
-                                        onClick={() => deleteMutation.mutate(deleteDoc.id)}
-                                        disabled={deleteMutation.isPending}
-                                        className="px-4 py-2 rounded-lg bg-red-600 text-white font-medium hover:bg-red-700 transition-colors flex items-center"
-                                    >
-                                        {deleteMutation.isPending ? (
-                                            <>
-                                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                                                Deleting...
-                                            </>
-                                        ) : (
-                                            "Delete"
-                                        )}
-                                    </button>
-                                </div>
-                            </div>
+                            ) : chunksData?.chunks?.length > 0 ? (
+                                <ul className="space-y-2">
+                                    {chunksData.chunks.map((chunk: any, index: number) => (
+                                        <li
+                                            key={chunk.id}
+                                            className="text-left bg-white p-3 rounded border border-gray-100 shadow-sm text-xs text-[#2a3b4e]/80 transition-all duration-500 ease-out"
+                                            style={{
+                                                opacity: isDeleting ? 0 : 1,
+                                                transform: isDeleting ? 'scale(0.8) translateX(-20px)' : 'scale(1) translateX(0)',
+                                                transitionDelay: isDeleting ? `${index * 30}ms` : '0ms',
+                                            }}
+                                        >
+                                            <div className="flex items-center gap-2 mb-1">
+                                                <span className="font-mono font-bold text-[#2a3b4e]/40">#{chunk.chunk_index}</span>
+                                                <span className="bg-gray-100 px-1.5 py-0.5 rounded text-[10px] text-[#2a3b4e]/60 font-medium uppercase">{chunk.chunk_type}</span>
+                                            </div>
+                                            <p className="line-clamp-2">{chunk.content}</p>
+                                        </li>
+                                    ))}
+                                </ul>
+                            ) : (
+                                <p className="text-center py-8 text-xs text-[#2a3b4e]/40 italic">No chunks found.</p>
+                            )}
                         </div>
                     </div>
-                )
-            }
-        </div >
+                    <p className={`text-xs mt-3 font-medium text-center shrink-0 transition-colors duration-300 ${isDeleting ? 'text-red-600' : 'text-red-500'}`}>
+                        {isDeleting ? 'Data is being permanently removed...' : 'This action is permanent and cannot be undone.'}
+                    </p>
+                </div>
+
+                <div className="p-6 flex items-center space-x-3 justify-center shrink-0 border-t border-gray-50">
+                    <button
+                        onClick={onClose}
+                        disabled={isDeleting}
+                        className="px-4 py-2 rounded-lg border border-[#2a3b4e]/10 text-[#2a3b4e] font-medium hover:bg-[#f7f3f1] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                        Cancel
+                    </button>
+                    <button
+                        onClick={() => onConfirm(document.id)}
+                        disabled={isDeleting}
+                        className="px-4 py-2 rounded-lg bg-red-600 text-white font-medium hover:bg-red-700 transition-all flex items-center shadow-sm shadow-red-200 disabled:opacity-80"
+                    >
+                        {isDeleting ? (
+                            <>
+                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                Deleting...
+                            </>
+                        ) : (
+                            "Delete Document"
+                        )}
+                    </button>
+                </div>
+            </div>
+        </div>
     );
 }
 
@@ -339,16 +411,18 @@ function DocumentDetailsModal({ document, isOpen, onClose }: { document: any, is
                 {/* Main Content */}
                 <div className="flex-1 flex flex-col min-w-0 bg-white">
                     {/* Header */}
-                    <div className="flex items-center justify-between px-8 py-6 border-b border-[#2a3b4e]/5 shrink-0">
-                        <div>
-                            <h2 className="text-xl font-bold text-[#2a3b4e] font-serif tracking-tight">{document.original_filename}</h2>
+                    <div className="flex items-start justify-between px-8 py-6 border-b border-[#2a3b4e]/5 shrink-0 bg-gray-50/30 backdrop-blur-sm">
+                        <div className="flex-1 min-w-0 mr-4">
+                            <h2 className="text-xl font-bold text-[#2a3b4e] font-serif tracking-tight truncate" title={document.original_filename}>
+                                {document.original_filename}
+                            </h2>
                             <p className="text-sm text-[#2a3b4e]/60 font-medium mt-1">
                                 {activeTab === 'overview' ? 'Document Properties & Status' : 'Processed Text Segments'}
                             </p>
                         </div>
                         <button
                             onClick={onClose}
-                            className="h-9 w-9 rounded-lg hover:bg-[#f7f3f1] flex items-center justify-center text-[#2a3b4e]/60 hover:text-[#2a3b4e] transition-colors"
+                            className="h-9 w-9 rounded-lg hover:bg-gray-100 flex items-center justify-center text-[#2a3b4e]/60 hover:text-[#2a3b4e] transition-colors shrink-0 ring-1 ring-transparent hover:ring-black/5"
                         >
                             <X className="h-5 w-5" />
                         </button>

@@ -50,6 +50,30 @@
   --surface: var(--pure-white);
 }
 
+/* Hide Clerk branding footer & dev mode badge, keep Sign up/Sign in link */
+.cl-footerPages,
+.cl-footerPagesLink,
+div.cl-internal-1dauvpw,
+div.cl-internal-17z2kmo {
+  display: none !important;
+}
+
+/* Hide any Clerk "Secured by" and "Development mode" branding */
+a[href*="clerk.com"],
+a[href*="clerk.dev"] {
+  display: none !important;
+}
+
+/* Target the Clerk footer section that contains branding (not the action links) */
+.cl-card > div:last-child > div:last-child:not(:has(.cl-footerAction__signIn)):not(:has(.cl-footerAction__signUp)) {
+  display: none !important;
+}
+
+/* Fallback: hide by striped background pattern (dev mode indicator) */
+div[style*="repeating-linear-gradient"] {
+  display: none !important;
+}
+
 /* Dark mode support - currently unused but prepared
 @media (prefers-color-scheme: dark) {
   :root {

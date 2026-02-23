@@ -1,20 +1,25 @@
 "use client";
 
+import { useRef } from "react";
 import { useUser } from "@clerk/nextjs";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useApi } from "@/hooks/use-api";
+import { toast } from "sonner";
 import {
     FileText,
     Search,
     Clock,
     ArrowRight,
-    Plus
+    Plus,
+    Loader2
 } from "lucide-react";
 import Link from "next/link";
 
 export default function DashboardClient() {
     const { user } = useUser();
     const { fetcher } = useApi();
+    const queryClient = useQueryClient();
+    const fileInputRef = useRef<HTMLInputElement>(null);
 
     // Fetch Recent Documents
     const { data: documents, isLoading: isLoadingDocs } = useQuery({
@@ -22,15 +27,52 @@ export default function DashboardClient() {
         queryFn: async () => fetcher("/api/documents?limit=3"),
     });
 
-    // Fetch Recent Chat Sessions (serving as Saved Queries & History)
+    // Upload Mutation
+    const uploadMutation = useMutation({
+        mutationFn: async (file: File) => {
+            const formData = new FormData();
+            formData.append("file", file);
+            return fetcher("/api/documents/upload", {
+                method: "POST",
+                body: formData,
+            });
+        },
+        onSuccess: () => {
+            toast.success("Document uploaded successfully");
+            queryClient.invalidateQueries({ queryKey: ["documents", "recent"] });
+            // Also invalidate the main documents list in case the user navigates there
+            queryClient.invalidateQueries({ queryKey: ["documents"] });
+        },
+        onError: (error: any) => {
+            toast.error(`Upload failed: ${error.message}`);
+        }
+    });
+
+    const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+
+        // Reset input
+        e.target.value = "";
+
+        uploadMutation.mutate(file);
+    };
+
+    // Fetch Recent Chat Sessions (Analysis History)
     const { data: sessions, isLoading: isLoadingSessions } = useQuery({
         queryKey: ["chat", "sessions", "recent"],
         queryFn: async () => fetcher("/api/chat/sessions?limit=5"),
     });
 
+    // Fetch Recent IPC Predictions (Saved Queries)
+    const { data: ipcHistory, isLoading: isLoadingIPC } = useQuery({
+        queryKey: ["ipc", "history", "recent"],
+        queryFn: async () => fetcher("/api/v1/ipc/history?limit=3"),
+    });
+
     const recentDocuments = documents?.documents || [];
-    // Using chat sessions titles as "Saved Queries" for now
-    const savedQueries = sessions?.sessions?.slice(0, 3) || [];
+    // Using IPC history as Saved Queries
+    const savedQueries = ipcHistory?.predictions || [];
     // Using recent sessions as Analysis History
     const analysisHistory = sessions?.sessions || [];
 
@@ -44,9 +86,31 @@ export default function DashboardClient() {
                     </h1>
                     <p className="text-[#2a3b4e]/70 mt-1">Here's what's happened since your last visit.</p>
                 </div>
-                <button className="bg-[#2a3b4e] text-white px-4 py-2 rounded-lg text-sm font-medium flex items-center hover:bg-[#2a3b4e]/90 transition-colors shadow-sm">
-                    <Plus className="mr-2 h-4 w-4" />
-                    New Upload
+
+                <input
+                    type="file"
+                    ref={fileInputRef}
+                    onChange={handleFileSelect}
+                    className="hidden"
+                    accept=".pdf,.docx,.txt"
+                />
+
+                <button
+                    onClick={() => fileInputRef.current?.click()}
+                    disabled={uploadMutation.isPending}
+                    className="bg-[#2a3b4e] text-white px-4 py-2 rounded-lg text-sm font-medium flex items-center hover:bg-[#2a3b4e]/90 transition-colors shadow-sm disabled:opacity-70 disabled:cursor-not-allowed"
+                >
+                    {uploadMutation.isPending ? (
+                        <>
+                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                            Uploading...
+                        </>
+                    ) : (
+                        <>
+                            <Plus className="mr-2 h-4 w-4" />
+                            New Upload
+                        </>
+                    )}
                 </button>
             </div>
 
@@ -92,31 +156,43 @@ export default function DashboardClient() {
             </section>
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                {/* Saved Queries (Chat Sessions) */}
+                {/* Saved Queries (IPC Predictions) */}
                 <section>
                     <div className="flex justify-between items-center mb-4">
                         <h2 className="text-xl font-bold text-[#2a3b4e] flex items-center">
                             <Search className="mr-2 h-5 w-5 opacity-70" />
-                            Saved Queries
+                            Recent IPC Predictions
                         </h2>
+                        <Link href="/ipc-predictor" className="text-sm text-[#2a3b4e] font-medium hover:underline flex items-center">
+                            New Prediction <ArrowRight className="ml-1 h-3 w-4" />
+                        </Link>
                     </div>
 
-                    {isLoadingSessions ? (
+                    {isLoadingIPC ? (
                         <div className="h-48 bg-[#2a3b4e]/5 rounded-xl animate-pulse" />
                     ) : savedQueries.length > 0 ? (
                         <div className="bg-white rounded-xl shadow-sm border border-[#2a3b4e]/10 overflow-hidden">
                             <ul className="divide-y divide-[#2a3b4e]/5">
                                 {savedQueries.map((q: any) => (
-                                    <li key={q.id} className="p-4 hover:bg-[#f7f3f1]/50 transition-colors cursor-pointer flex items-center group">
-                                        <Search className="h-4 w-4 text-[#2a3b4e]/40 mr-3 group-hover:text-[#2a3b4e]" />
-                                        <span className="text-sm text-[#2a3b4e] font-medium">{q.title || "Untitled Query"}</span>
-                                    </li>
+                                    <Link href="/ipc-predictor" key={q.id}>
+                                        <li className="p-4 hover:bg-[#f7f3f1]/50 transition-colors cursor-pointer flex items-center group">
+                                            <Search className="h-4 w-4 text-[#2a3b4e]/40 mr-3 group-hover:text-[#2a3b4e]" />
+                                            <div className="overflow-hidden">
+                                                <p className="text-sm text-[#2a3b4e] font-medium truncate">
+                                                    {q.description}
+                                                </p>
+                                                <p className="text-xs text-[#2a3b4e]/60 mt-0.5">
+                                                    {new Date(q.created_at).toLocaleDateString()} • {q.predicted_sections.length} sections found
+                                                </p>
+                                            </div>
+                                        </li>
+                                    </Link>
                                 ))}
                             </ul>
                         </div>
                     ) : (
                         <div className="bg-white rounded-xl shadow-sm border border-[#2a3b4e]/10 p-6 text-center text-[#2a3b4e]/60 italic">
-                            No saved queries yet.
+                            No recent predictions.
                         </div>
                     )}
                 </section>
