@@ -1,6 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
+import Link from "next/link";
 import { Button } from "@/components/common/Button";
 import { Check } from "lucide-react";
 
@@ -94,14 +95,16 @@ export default function PricingPage() {
                                 {plan.period && <span className={`text-sm ${plan.popular ? "text-primary-foreground/70" : "text-foreground/60"}`}>{plan.period}</span>}
                             </div>
 
-                            <Button
-                                className={`w-full mb-8 rounded-xl font-semibold h-12 ${plan.popular
-                                        ? "bg-white text-primary hover:bg-gray-100"
-                                        : "bg-primary text-primary-foreground hover:bg-primary/90"
-                                    }`}
-                            >
-                                {plan.cta}
-                            </Button>
+                            <Link href={plan.name === "Enterprise" ? "/contact" : "/sign-up"} className="w-full">
+                                <Button
+                                    className={`w-full mb-8 rounded-xl font-semibold h-12 ${plan.popular
+                                            ? "bg-white text-primary hover:bg-gray-100"
+                                            : "bg-primary text-primary-foreground hover:bg-primary/90"
+                                        }`}
+                                >
+                                    {plan.cta}
+                                </Button>
+                            </Link>
 
                             <div className="space-y-4">
                                 {plan.features.map((feature, i) => (

@@ -22,7 +22,10 @@ import {
     BarChart3,
     BookOpen,
     Zap,
-    ExternalLink
+    ExternalLink,
+    Trash2,
+    Download,
+    X
 } from 'lucide-react';
 import { useApi } from '@/hooks/use-api';
 
@@ -76,6 +79,8 @@ export default function IPCPredictorPage() {
     const [historyEntries, setHistoryEntries] = useState<HistoryEntry[]>([]);
     const [activeHistoryId, setActiveHistoryId] = useState<string | null>(null);
     const [sidebarTab, setSidebarTab] = useState<'history' | 'prompts'>('history');
+    const [historySearch, setHistorySearch] = useState('');
+    const [deletingId, setDeletingId] = useState<string | null>(null);
 
     const router = useRouter();
 
@@ -179,6 +184,54 @@ export default function IPCPredictorPage() {
         const key = `${messageId}-${sectionNumber}`;
         setExpandedSections(prev => ({ ...prev, [key]: !prev[key] }));
     };
+
+    const handleDeleteHistory = async (e: React.MouseEvent, id: string) => {
+        e.stopPropagation();
+        setDeletingId(id);
+        try {
+            await fetcher(`/api/v1/ipc/history/${id}`, { method: 'DELETE' });
+            setHistoryEntries((prev) => prev.filter((h) => h.id !== id));
+            if (activeHistoryId === id) {
+                setActiveHistoryId(null);
+                setMessages([]);
+            }
+        } catch (err) {
+            console.error('Failed to delete history entry', err);
+        } finally {
+            setDeletingId(null);
+        }
+    };
+
+    const handleExport = () => {
+        const data = historyEntries.map((entry) => ({
+            id: entry.id,
+            description: entry.description,
+            date: entry.created_at,
+            sections_found: entry.sections_count,
+            predicted_sections: entry.predicted_sections.map((p) => ({
+                section_number: p.section.section_number,
+                offense: p.section.offense,
+                punishment: p.section.punishment,
+                cognizable: p.section.cognizable,
+                bailable: p.section.bailable,
+                confidence: `${(p.confidence * 100).toFixed(0)}%`,
+                reasoning: p.reasoning,
+            })),
+        }));
+        const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `ipc-prediction-history-${new Date().toISOString().split('T')[0]}.json`;
+        a.click();
+        URL.revokeObjectURL(url);
+    };
+
+    const filteredHistory = historySearch.trim()
+        ? historyEntries.filter((e) =>
+              e.description.toLowerCase().includes(historySearch.toLowerCase())
+          )
+        : historyEntries;
 
     const handleNewChat = () => {
         setMessages([]);
@@ -340,7 +393,7 @@ export default function IPCPredictorPage() {
                         </div>
 
                         {/* Tab Content */}
-                        <div className="flex-1 overflow-y-auto">
+                        <div className="flex-1 overflow-y-auto flex flex-col min-h-0">
                             {sidebarTab === 'history' ? (
                                 historyEntries.length === 0 ? (
                                     <div className="flex flex-col items-center justify-center h-full text-center px-6 py-12">
@@ -351,43 +404,102 @@ export default function IPCPredictorPage() {
                                         <p className="text-[11px] text-[#2a3b4e]/25 mt-1 leading-relaxed">Your past analyses<br />will appear here</p>
                                     </div>
                                 ) : (
-                                    <div className="p-2 space-y-0.5">
-                                        {activeHistoryId && (
+                                    <>
+                                        {/* Search + Export toolbar */}
+                                        <div className="px-2 pt-2 pb-1 flex items-center gap-1.5 border-b border-[#e8e2de]/60">
+                                            <div className="flex-1 relative">
+                                                <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3 w-3 text-[#2a3b4e]/25 pointer-events-none" />
+                                                <input
+                                                    type="text"
+                                                    value={historySearch}
+                                                    onChange={(e) => setHistorySearch(e.target.value)}
+                                                    placeholder="Search history…"
+                                                    className="w-full bg-[#f7f3f1] border border-transparent focus:border-[#2a3b4e]/15 focus:bg-white rounded-lg pl-7 pr-6 py-1.5 text-[11px] text-[#1a2332] placeholder:text-[#2a3b4e]/25 outline-none transition-all"
+                                                />
+                                                {historySearch && (
+                                                    <button
+                                                        onClick={() => setHistorySearch('')}
+                                                        className="absolute right-2 top-1/2 -translate-y-1/2 text-[#2a3b4e]/30 hover:text-[#2a3b4e]"
+                                                    >
+                                                        <X className="h-3 w-3" />
+                                                    </button>
+                                                )}
+                                            </div>
                                             <button
-                                                onClick={() => { setActiveHistoryId(null); setMessages([]); }}
-                                                className="w-full px-3 py-2 text-[11px] text-left font-semibold text-[#2a3b4e]/40 hover:text-[#2a3b4e] hover:bg-[#f7f3f1] rounded-lg transition-colors flex items-center gap-1.5 mb-1"
+                                                onClick={handleExport}
+                                                title="Export history as JSON"
+                                                className="p-1.5 rounded-lg text-[#2a3b4e]/30 hover:text-[#2a3b4e] hover:bg-[#f7f3f1] transition-colors shrink-0"
                                             >
-                                                <ArrowLeft className="h-3 w-3" />
-                                                Show all
+                                                <Download className="h-3.5 w-3.5" />
                                             </button>
-                                        )}
-                                        {historyEntries.map((entry) => (
-                                            <button
-                                                key={entry.id}
-                                                onClick={() => handleHistoryClick(entry)}
-                                                className={`w-full text-left rounded-lg transition-all group p-3 ${activeHistoryId === entry.id
-                                                    ? 'bg-[#2a3b4e] text-white shadow-md shadow-[#2a3b4e]/15'
-                                                    : 'hover:bg-[#f7f3f1]'
-                                                    }`}
-                                            >
-                                                <p className={`text-[12px] font-medium leading-snug line-clamp-2 ${activeHistoryId === entry.id ? 'text-white' : 'text-[#1a2332] group-hover:text-[#1a2332]'
-                                                    }`}>
-                                                    {entry.description}
-                                                </p>
-                                                <div className="flex items-center gap-2 mt-2">
-                                                    <span className={`text-[10px] font-medium ${activeHistoryId === entry.id ? 'text-white/60' : 'text-[#2a3b4e]/30'}`}>
-                                                        {formatTime(entry.created_at)}
-                                                    </span>
-                                                    <span className={`text-[10px] ${activeHistoryId === entry.id ? 'text-white/30' : 'text-[#2a3b4e]/15'}`}>•</span>
-                                                    <span className={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-semibold ${activeHistoryId === entry.id ? 'bg-white/20 text-white/80' : 'bg-[#2a3b4e]/5 text-[#2a3b4e]/40'
-                                                        }`}>
-                                                        <BookOpen className="h-2.5 w-2.5" />
-                                                        {entry.sections_count}
-                                                    </span>
+                                        </div>
+
+                                        <div className="p-2 space-y-0.5 overflow-y-auto flex-1">
+                                            {activeHistoryId && !historySearch && (
+                                                <button
+                                                    onClick={() => { setActiveHistoryId(null); setMessages([]); }}
+                                                    className="w-full px-3 py-2 text-[11px] text-left font-semibold text-[#2a3b4e]/40 hover:text-[#2a3b4e] hover:bg-[#f7f3f1] rounded-lg transition-colors flex items-center gap-1.5 mb-1"
+                                                >
+                                                    <ArrowLeft className="h-3 w-3" />
+                                                    Show all
+                                                </button>
+                                            )}
+                                            {filteredHistory.length === 0 && historySearch ? (
+                                                <div className="text-center py-8">
+                                                    <p className="text-[12px] text-[#2a3b4e]/30">No results for &ldquo;{historySearch}&rdquo;</p>
                                                 </div>
-                                            </button>
-                                        ))}
-                                    </div>
+                                            ) : (
+                                                filteredHistory.map((entry) => (
+                                                    <div
+                                                        key={entry.id}
+                                                        onClick={() => handleHistoryClick(entry)}
+                                                        className={`w-full text-left rounded-lg transition-all group p-3 cursor-pointer relative ${
+                                                            activeHistoryId === entry.id
+                                                                ? 'bg-[#2a3b4e] text-white shadow-md shadow-[#2a3b4e]/15'
+                                                                : 'hover:bg-[#f7f3f1]'
+                                                        }`}
+                                                    >
+                                                        <p className={`text-[12px] font-medium leading-snug line-clamp-2 pr-6 ${
+                                                            activeHistoryId === entry.id ? 'text-white' : 'text-[#1a2332] group-hover:text-[#1a2332]'
+                                                        }`}>
+                                                            {entry.description}
+                                                        </p>
+                                                        <div className="flex items-center gap-2 mt-2">
+                                                            <span className={`text-[10px] font-medium ${
+                                                                activeHistoryId === entry.id ? 'text-white/60' : 'text-[#2a3b4e]/30'
+                                                            }`}>
+                                                                {formatTime(entry.created_at)}
+                                                            </span>
+                                                            <span className={`text-[10px] ${
+                                                                activeHistoryId === entry.id ? 'text-white/30' : 'text-[#2a3b4e]/15'
+                                                            }`}>•</span>
+                                                            <span className={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-semibold ${
+                                                                activeHistoryId === entry.id ? 'bg-white/20 text-white/80' : 'bg-[#2a3b4e]/5 text-[#2a3b4e]/40'
+                                                            }`}>
+                                                                <BookOpen className="h-2.5 w-2.5" />
+                                                                {entry.sections_count}
+                                                            </span>
+                                                        </div>
+                                                        {/* Delete button */}
+                                                        <button
+                                                            onClick={(e) => handleDeleteHistory(e, entry.id)}
+                                                            disabled={deletingId === entry.id}
+                                                            className={`absolute top-2.5 right-2.5 p-1 rounded-md opacity-0 group-hover:opacity-100 transition-all ${
+                                                                activeHistoryId === entry.id
+                                                                    ? 'text-white/50 hover:text-white hover:bg-white/15'
+                                                                    : 'text-[#2a3b4e]/25 hover:text-red-500 hover:bg-red-50'
+                                                            } ${deletingId === entry.id ? 'opacity-100' : ''}`}
+                                                            title="Delete entry"
+                                                        >
+                                                            {deletingId === entry.id
+                                                                ? <Loader2 className="h-3 w-3 animate-spin" />
+                                                                : <Trash2 className="h-3 w-3" />}
+                                                        </button>
+                                                    </div>
+                                                ))
+                                            )}
+                                        </div>
+                                    </>
                                 )
                             ) : (
                                 <div className="p-2 space-y-0.5">
