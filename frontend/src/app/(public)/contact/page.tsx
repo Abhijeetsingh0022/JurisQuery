@@ -3,8 +3,15 @@
 import { motion } from "framer-motion";
 import { Button } from "@/components/common/Button";
 import { Mail, MapPin, Phone } from "lucide-react";
+import { FormEvent } from "react";
 
 export default function ContactPage() {
+    const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
+        e.preventDefault();
+        // TODO: Implement form submission logic (email service integration)
+        alert("Thank you for your message! We'll get back to you soon.");
+    };
+
     return (
         <div className="bg-background min-h-screen pt-32 pb-20">
             <div className="container mx-auto px-4 max-w-6xl">
@@ -62,26 +69,26 @@ export default function ContactPage() {
                         transition={{ delay: 0.2 }}
                         className="bg-white p-8 rounded-2xl shadow-lg border border-gray-100"
                     >
-                        <form className="space-y-6">
+                        <form className="space-y-6" onSubmit={handleSubmit}>
                             <div className="grid grid-cols-2 gap-4">
                                 <div className="space-y-2">
                                     <label className="text-sm font-medium text-foreground/80">First Name</label>
-                                    <input type="text" className="w-full px-4 py-3 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all" placeholder="Jane" />
+                                    <input type="text" required className="w-full px-4 py-3 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all" placeholder="Jane" />
                                 </div>
                                 <div className="space-y-2">
                                     <label className="text-sm font-medium text-foreground/80">Last Name</label>
-                                    <input type="text" className="w-full px-4 py-3 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all" placeholder="Doe" />
+                                    <input type="text" required className="w-full px-4 py-3 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all" placeholder="Doe" />
                                 </div>
                             </div>
                             <div className="space-y-2">
                                 <label className="text-sm font-medium text-foreground/80">Work Email</label>
-                                <input type="email" className="w-full px-4 py-3 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all" placeholder="jane@lawfirm.com" />
+                                <input type="email" required className="w-full px-4 py-3 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all" placeholder="jane@lawfirm.com" />
                             </div>
                             <div className="space-y-2">
                                 <label className="text-sm font-medium text-foreground/80">Message</label>
-                                <textarea className="w-full px-4 py-3 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all min-h-[150px]" placeholder="Tell us about your firm's needs..." />
+                                <textarea required className="w-full px-4 py-3 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all min-h-[150px]" placeholder="Tell us about your firm's needs..." />
                             </div>
-                            <Button className="w-full h-12 text-lg font-semibold shadow-lg">
+                            <Button type="submit" className="w-full h-12 text-lg font-semibold shadow-lg">
                                 Send Message
                             </Button>
                         </form>

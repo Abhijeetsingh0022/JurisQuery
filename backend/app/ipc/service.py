@@ -29,6 +29,31 @@ from app.llm.gemini import GeminiLLM
 logger = logging.getLogger(__name__)
 
 
+# Crime keyword synonyms for better matching
+CRIME_SYNONYMS = {
+    "stole": ["theft", "steal", "stealing", "stolen"],
+    "steal": ["theft", "stole", "stealing", "stolen"],
+    "stealing": ["theft", "steal", "stole", "stolen"],
+    "stolen": ["theft", "steal", "stole", "stealing"],
+    "killed": ["murder", "homicide", "killed", "killing"],
+    "killing": ["murder", "homicide", "killed", "killing"],
+    "murder": ["killed", "killing", "homicide"],
+    "attacked": ["assault", "attacked", "attacking", "attack"],
+    "attack": ["assault", "attacked", "attacking", "attack"],
+    "assault": ["attack", "attacked", "attacking"],
+    "raped": ["rape", "sexual assault", "raped"],
+    "rape": ["raped", "sexual assault"],
+    "kidnapped": ["kidnapping", "abduction", "kidnapped"],
+    "kidnapping": ["kidnapped", "abduction"],
+    "abduction": ["kidnapping", "kidnapped"],
+    "cheated": ["cheating", "fraud", "cheated"],
+    "cheating": ["cheated", "fraud"],
+    "fraud": ["cheating", "cheated"],
+    "bribe": ["bribery", "corruption", "bribe"],
+    "bribery": ["bribe", "corruption"],
+}
+
+
 # IPC Prediction prompt
 IPC_PREDICTION_PROMPT = """You are an expert in Indian criminal law. Given a crime/incident description, identify the most applicable IPC (Indian Penal Code) sections.
 
@@ -155,23 +180,30 @@ async def search_relevant_sections(
     limit: int = 20,
 ) -> list[IPCSection]:
     """
-    Search for relevant IPC sections using keyword matching.
-    TODO: Add vector search when embeddings are populated.
+    Search for relevant IPC sections using keyword matching with synonyms.
     """
-    # Simple keyword-based search
-    keywords = [w.lower() for w in query.split() if len(w) > 3]
+    # Extract keywords and expand with synonyms
+    raw_keywords = [w.lower() for w in query.split() if len(w) > 3]
     
-    if not keywords:
+    if not raw_keywords:
         # Return some common sections if no keywords
         stmt = select(IPCSection).limit(limit)
         result = await db.execute(stmt)
         return list(result.scalars().all())
     
+    # Expand keywords with synonyms
+    expanded_keywords = set()
+    for kw in raw_keywords:
+        expanded_keywords.add(kw)
+        if kw in CRIME_SYNONYMS:
+            expanded_keywords.update(CRIME_SYNONYMS[kw])
+    
     # Search in description and offense
     from sqlalchemy import or_
     
     conditions = []
-    for kw in keywords[:5]:  # Limit keywords to avoid huge queries
+    # Limit to avoid massive queries
+    for kw in list(expanded_keywords)[:15]:
         pattern = f"%{kw}%"
         conditions.append(IPCSection.description.ilike(pattern))
         conditions.append(IPCSection.offense.ilike(pattern))
@@ -180,14 +212,22 @@ async def search_relevant_sections(
     result = await db.execute(stmt)
     sections = list(result.scalars().all())
     
-    # Score by keyword matches
+    # Score by keyword matches (prioritize original keywords)
     scored = []
     for section in sections:
         score = 0
         text = f"{section.description} {section.offense or ''}".lower()
-        for kw in keywords:
+        
+        # Higher score for original keywords
+        for kw in raw_keywords:
+            if kw in text:
+                score += 3
+        
+        # Lower score for synonym matches
+        for kw in expanded_keywords:
             if kw in text:
                 score += 1
+        
         scored.append((section, score))
     
     # Sort by score descending
@@ -398,3 +438,22 @@ async def get_user_predictions(
     return IPCPredictionListResponse(
         predictions=[IPCPredictionSchema.model_validate(p) for p in predictions]
     )
+
+
+async def delete_user_prediction(
+    db: AsyncSession,
+    prediction_id: str,
+    user_id: str,
+) -> bool:
+    """Delete a specific prediction from user's history."""
+    stmt = select(IPCPrediction).where(
+        IPCPrediction.id == prediction_id,
+        IPCPrediction.user_id == user_id,
+    )
+    result = await db.execute(stmt)
+    prediction = result.scalar_one_or_none()
+    if not prediction:
+        return False
+    await db.delete(prediction)
+    await db.commit()
+    return True

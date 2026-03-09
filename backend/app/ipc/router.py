@@ -17,6 +17,7 @@ from app.ipc.schemas import (
     IPCPredictionListResponse,
 )
 from app.ipc.service import (
+    delete_user_prediction,
     get_all_sections,
     get_section_by_number,
     get_user_predictions,
@@ -47,7 +48,7 @@ async def predict_sections(
 
 @router.get("/history", response_model=IPCPredictionListResponse)
 async def get_prediction_history(
-    limit: int = 10,
+    limit: int = Query(50, ge=1, le=200),
     db: AsyncSession = Depends(get_db),
     current_user: dict = Depends(get_current_user),
 ):
@@ -55,6 +56,20 @@ async def get_prediction_history(
     Get user's IPC section prediction history.
     """
     return await get_user_predictions(db, user_id=current_user["id"], limit=limit)
+
+
+@router.delete("/history/{prediction_id}", status_code=204)
+async def delete_prediction(
+    prediction_id: str,
+    db: AsyncSession = Depends(get_db),
+    current_user: dict = Depends(get_current_user),
+):
+    """
+    Delete a specific prediction from the user's history.
+    """
+    deleted = await delete_user_prediction(db, prediction_id, user_id=current_user["id"])
+    if not deleted:
+        raise NotFoundError(f"Prediction {prediction_id}")
 
 
 @router.get("/sections", response_model=IPCSectionListResponse)

@@ -1,6 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
+import Link from "next/link";
 import { Button } from "@/components/common/Button";
 import { ArrowRight, Brain, FileSearch, Scale, ShieldCheck, Zap } from "lucide-react";
 
@@ -81,9 +82,11 @@ export default function FeaturesPage() {
                                     {feature.description}
                                 </p>
                                 <div className="pt-4">
-                                    <Button variant="outline" className="gap-2 group">
-                                        Learn more <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-                                    </Button>
+                                    <Link href="/contact">
+                                        <Button variant="outline" className="gap-2 group">
+                                            Learn more <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                                        </Button>
+                                    </Link>
                                 </div>
                             </div>
                         </motion.div>
@@ -99,9 +102,11 @@ export default function FeaturesPage() {
                     <p className="text-xl text-primary-foreground/80 mb-10 max-w-2xl mx-auto">
                         Join thousands of legal professionals who trust JurisQuery for their document analysis.
                     </p>
-                    <Button size="lg" className="bg-white text-primary hover:bg-gray-100 shadow-xl text-lg h-14 px-10 rounded-full">
-                        Get Started Now
-                    </Button>
+                    <Link href="/sign-up">
+                        <Button size="lg" className="bg-white text-primary hover:bg-gray-100 shadow-xl text-lg h-14 px-10 rounded-full">
+                            Get Started Now
+                        </Button>
+                    </Link>
                 </div>
             </section>
         </div>

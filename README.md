@@ -17,6 +17,7 @@ JurisQuery is a next-generation legal tech platform that simplifies complex docu
 
 - [Features](#-features)
 - [API Keys Required](#-api-keys-required)
+- [Cloud Services Setup](#-cloud-services-setup)
 - [Architecture](#-architecture)
 - [Technology Stack](#-technology-stack)
 - [Getting Started](#-getting-started)
@@ -72,6 +73,8 @@ JurisQuery is a next-generation legal tech platform that simplifies complex docu
 
 **Total for Development: 5 API Keys (all free tier)**
 
+> 📘 **Complete Free Tier Setup Guide**: See [CLOUD_SERVICES_FREE_TIER_PLAN.md](CLOUD_SERVICES_FREE_TIER_PLAN.md) for a comprehensive guide on setting up all services with 100% free tiers, including deployment instructions, capacity planning, and cost optimization strategies.
+
 ### Production (Paid Tier Recommendations)
 
 | Service | Recommended Plan | Estimated Cost | Notes |
@@ -89,6 +92,71 @@ JurisQuery is a next-generation legal tech platform that simplifies complex docu
 | Service | Keys Needed | Free Tier | Use Case |
 |---------|-------------|-----------|----------|
 | **Groq** | 1 (optional) | 14,400 req/day | Faster inference (Llama 3.3 70B) |
+
+---
+
+## ☁️ Cloud Services Setup
+
+JurisQuery can run **100% FREE** using generous free tiers from cloud providers. Perfect for development, MVP testing, and early production.
+
+### Quick Setup Summary
+
+```bash
+# 1. Database (Neon PostgreSQL)
+Sign up: https://neon.tech
+└─ Free Tier: 0.5 GB storage, 10 GB/month bandwidth
+
+# 2. Vector Database (Qdrant Cloud)
+Sign up: https://qdrant.io/cloud
+└─ Free Tier: 1 GB cluster, 1M vectors (~10,000 documents)
+
+# 3. File Storage (Cloudinary)
+Sign up: https://cloudinary.com
+└─ Free Tier: 25 GB storage, 25 GB/month bandwidth
+
+# 4. AI Services (Google Gemini)
+Get API Key: https://aistudio.google.com/apikey
+└─ Free Tier: 1,500 requests/day
+
+# 5. Authentication (Clerk)
+Sign up: https://clerk.com
+└─ Free Tier: 10,000 monthly active users
+
+# 6. Frontend Hosting (Vercel)
+Deploy: https://vercel.com
+└─ Free Tier: 100 GB bandwidth, unlimited deployments
+
+# 7. Backend Hosting (Render or Railway)
+Sign up: https://render.com or https://railway.app
+└─ Free Tier: 750 hours/month (24/7 operation)
+```
+
+### Free Tier Capacity
+
+| Resource | Free Limit | Estimated Capacity | Good For |
+|----------|------------|-------------------|----------|
+| **Documents** | 1M vectors | ~10,000 documents | Small law firm |
+| **Storage** | 25 GB | ~50,000 PDFs | Medium archive |
+| **Queries** | 1,500/day | ~45,000/month | 500 active users |
+| **Users** | 10K MAU | 10,000 users | Early startup |
+
+**Total Cost: $0/month** within free tiers
+
+### Detailed Setup Guide
+
+**Choose your deployment strategy:**
+
+**⭐ [AWS_RDS_QUICK_SETUP.md](AWS_RDS_QUICK_SETUP.md)** - **RECOMMENDED**: Use only AWS RDS for 40x more database storage (30 min setup, free 12 months)
+
+**📘 [CLOUD_SERVICES_FREE_TIER_PLAN.md](CLOUD_SERVICES_FREE_TIER_PLAN.md)** - Multi-cloud setup (Neon, Cloudinary, Render, Vercel) - Free forever, smaller storage
+
+**☁️ [AWS_FREE_TIER_PLAN.md](AWS_FREE_TIER_PLAN.md)** - Full AWS guide (RDS, S3, Lambda, Cognito) - For AWS-specific needs
+
+**📊 [CLOUD_COMPARISON.md](CLOUD_COMPARISON.md)** - Compare all options side-by-side
+
+**✅ [DEPLOYMENT_CHECKLIST.md](DEPLOYMENT_CHECKLIST.md)** - Step-by-step multi-cloud deployment checklist
+
+**🔧 [backend/.env.example.production](backend/.env.example.production)** - Production environment template
 
 ---
 
