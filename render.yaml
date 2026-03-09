@@ -1,0 +1,102 @@
+# render.yaml — Render Blueprint for JurisQuery
+# Docs: https://render.com/docs/blueprint-spec
+#
+# FIRST-TIME SETUP CHECKLIST
+# ──────────────────────────
+# 1. Connect this repo to Render and create a new Blueprint.
+# 2. Set all env vars marked "sync: false" in the Render dashboard
+#    (or via the Render CLI) before triggering deploys.
+# 3. Render auto-resolves `fromService` vars (NEXT_PUBLIC_API_HOST)
+#    from the backend service — no manual action needed.
+# 4. After both services are live, set CORS_ORIGINS on the backend
+#    to the frontend URL (e.g. https://jurisquery-frontend.onrender.com).
+# 5. Redeploy the backend after updating CORS_ORIGINS.
+
+services:
+
+  # ────────────────────────────────────────────────────────────────
+  # FastAPI Backend
+  # ────────────────────────────────────────────────────────────────
+  - type: web
+    name: jurisquery-backend
+    runtime: docker
+    dockerfilePath: ./backend/Dockerfile
+    dockerContext: ./backend
+    plan: free                    # upgrade to starter/standard for production
+    healthCheckPath: /health
+    envVars:
+      - key: ENVIRONMENT
+        value: production
+      - key: DEBUG
+        value: "false"
+
+      # ── Database ───────────────────────────────────────────────
+      # Neon / Supabase / Render Postgres connection string
+      # Format: postgresql+asyncpg://user:pass@host/dbname?sslmode=require
+      - key: DATABASE_URL
+        sync: false
+
+      # ── AI Services ────────────────────────────────────────────
+      - key: GEMINI_API_KEY
+        sync: false
+      - key: GEMINI_API_KEY_2
+        sync: false               # optional second key for rotation
+      - key: GROQ_API_KEY
+        sync: false
+
+      # ── Vector Database (Qdrant Cloud) ─────────────────────────
+      - key: QDRANT_URL
+        sync: false
+      - key: QDRANT_API_KEY
+        sync: false
+      - key: QDRANT_COLLECTION_NAME
+        value: jurisquery_documents
+
+      # ── File Storage (Cloudinary) ──────────────────────────────
+      - key: CLOUDINARY_CLOUD_NAME
+        sync: false
+      - key: CLOUDINARY_API_KEY
+        sync: false
+      - key: CLOUDINARY_API_SECRET
+        sync: false
+
+      # ── Auth ───────────────────────────────────────────────────
+      - key: JWT_SECRET
+        generateValue: true       # Render generates a secure random value
+      - key: JWT_ALGORITHM
+        value: HS256
+      - key: CLERK_SECRET_KEY
+        sync: false
+
+      # ── CORS ───────────────────────────────────────────────────
+      # Set this AFTER the frontend is deployed.
+      # Value: https://jurisquery-frontend.onrender.com
+      # (or your custom domain if configured)
+      - key: CORS_ORIGINS
+        sync: false
+
+  # ────────────────────────────────────────────────────────────────
+  # Next.js Frontend
+  # ────────────────────────────────────────────────────────────────
+  - type: web
+    name: jurisquery-frontend
+    runtime: docker
+    dockerfilePath: ./frontend/Dockerfile
+    dockerContext: ./frontend
+    plan: free
+    envVars:
+      # Render resolves the backend's hostname automatically and passes it
+      # as a Docker build arg. The Dockerfile prepends "https://" to form
+      # NEXT_PUBLIC_API_URL (e.g. https://jurisquery-backend.onrender.com).
+      - key: NEXT_PUBLIC_API_HOST
+        fromService:
+          type: web
+          name: jurisquery-backend
+          property: host
+
+      # ── Clerk Authentication ───────────────────────────────────
+      # Get keys from https://dashboard.clerk.com → your app → API keys
+      - key: NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY
+        sync: false
+      - key: CLERK_SECRET_KEY
+        sync: false
