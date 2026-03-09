@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef } from "react";
+import { useRef, useState, useEffect } from "react";
 import { useUser } from "@clerk/nextjs";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useApi } from "@/hooks/use-api";
@@ -92,12 +92,13 @@ export default function DashboardClient() {
         return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i];
     };
 
-    const greeting = () => {
+    const [greeting, setGreeting] = useState('Welcome');
+    useEffect(() => {
         const h = new Date().getHours();
-        if (h < 12) return 'Good morning';
-        if (h < 17) return 'Good afternoon';
-        return 'Good evening';
-    };
+        if (h < 12) setGreeting('Good morning');
+        else if (h < 17) setGreeting('Good afternoon');
+        else setGreeting('Good evening');
+    }, []);
 
     return (
         <div className="space-y-6">
@@ -109,7 +110,7 @@ export default function DashboardClient() {
                     </div>
                     <div>
                         <h1 className="text-2xl font-bold font-serif text-[#1a2332] tracking-tight">
-                            {greeting()}, {user?.firstName || "Counsel"}
+                            {greeting}, {user?.firstName || "Counsel"}
                         </h1>
                         <p className="text-xs text-[#2a3b4e]/35">Here&apos;s your legal workspace overview</p>
                     </div>

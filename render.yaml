@@ -85,10 +85,9 @@ services:
     dockerContext: ./frontend
     plan: free
     envVars:
-      # BACKEND_URL is used by Next.js rewrites at runtime to proxy /api/* to the backend.
-      # Uses Render private networking (same region, no SSL overhead).
+      # BACKEND_URL is baked into Next.js rewrites at build time to proxy /api/* to the backend.
       - key: BACKEND_URL
-        value: http://jurisquery-backend:8000
+        value: https://jurisquery-backend.onrender.com
 
       # ── Clerk Authentication ───────────────────────────────────
       # Get keys from https://dashboard.clerk.com → your app → API keys
