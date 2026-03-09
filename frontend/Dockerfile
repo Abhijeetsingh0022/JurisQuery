@@ -12,12 +12,6 @@ WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 
-# Render passes these as Docker build args (declared in render.yaml envVars).
-# NEXT_PUBLIC_API_HOST comes from fromService and is the backend hostname only,
-# so we prepend the scheme here to form the full URL.
-ARG NEXT_PUBLIC_API_HOST
-ENV NEXT_PUBLIC_API_URL=https://${NEXT_PUBLIC_API_HOST}
-
 ARG NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY
 ENV NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=${NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY}
 

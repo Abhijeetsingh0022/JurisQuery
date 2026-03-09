@@ -85,14 +85,10 @@ services:
     dockerContext: ./frontend
     plan: free
     envVars:
-      # Render resolves the backend's hostname automatically and passes it
-      # as a Docker build arg. The Dockerfile prepends "https://" to form
-      # NEXT_PUBLIC_API_URL (e.g. https://jurisquery-backend.onrender.com).
-      - key: NEXT_PUBLIC_API_HOST
-        fromService:
-          type: web
-          name: jurisquery-backend
-          property: host
+      # BACKEND_URL is used by Next.js rewrites at runtime to proxy /api/* to the backend.
+      # Uses Render private networking (same region, no SSL overhead).
+      - key: BACKEND_URL
+        value: http://jurisquery-backend:8000
 
       # ── Clerk Authentication ───────────────────────────────────
       # Get keys from https://dashboard.clerk.com → your app → API keys

@@ -1,7 +1,9 @@
 import { useAuth } from "@clerk/nextjs";
 import { useCallback } from "react";
 
-const BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+// Use relative URLs so requests go through Next.js rewrites → backend proxy.
+// This works on both localhost (/api/* → 127.0.0.1:8000) and production.
+const BASE_URL = '';
 
 export function useApi() {
     const { getToken } = useAuth();
