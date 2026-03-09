@@ -1,10 +1,13 @@
 """
 Authentication dependencies for JurisQuery.
 JWT validation and user extraction from Clerk tokens.
+Clerk tokens are RS256-signed — verified via Clerk's JWKS endpoint.
 """
 
-from fastapi import Depends, Header
+import httpx
+from fastapi import Header
 from jose import JWTError, jwt
+from jose.backends import RSAKey
 
 from app.config import settings
 from app.exceptions import UnauthorizedError
@@ -17,52 +20,70 @@ DEV_USER = {
     "clerk_id": "dev_clerk_123",
 }
 
+# Cached JWKS keys (fetched once per process)
+_jwks_cache: dict | None = None
+
+
+async def _get_jwks() -> dict:
+    global _jwks_cache
+    if _jwks_cache is not None:
+        return _jwks_cache
+    # Derive JWKS URL from Clerk issuer domain
+    # e.g. https://grown-hyena-6.clerk.accounts.dev → /.well-known/jwks.json
+    clerk_domain = settings.clerk_frontend_api or "https://clerk.accounts.dev"
+    jwks_url = f"{clerk_domain.rstrip('/')}/.well-known/jwks.json"
+    async with httpx.AsyncClient() as client:
+        resp = await client.get(jwks_url, timeout=10)
+        resp.raise_for_status()
+        _jwks_cache = resp.json()
+    return _jwks_cache
+
 
 async def get_current_user(authorization: str | None = Header(None)) -> dict:
     """
-    Extract and validate user from JWT token.
+    Extract and validate user from Clerk JWT token.
     In development mode, returns a dev user if no token provided.
-    
-    Args:
-        authorization: Bearer token from Authorization header
-        
-    Returns:
-        dict: User information from token or dev user
-        
-    Raises:
-        UnauthorizedError: If token is invalid (in production)
     """
     # In development, allow requests without auth
     if not authorization:
         if settings.environment == "development":
             return DEV_USER
         raise UnauthorizedError("Authorization header required")
-    
+
     if not authorization.startswith("Bearer "):
         raise UnauthorizedError("Invalid authorization header format")
-    
+
     token = authorization.replace("Bearer ", "")
-    
+
     try:
-        # Decode JWT token
-        payload = jwt.decode(
-            token,
-            settings.jwt_secret,
-            algorithms=[settings.jwt_algorithm],
-        )
-        
+        # First try Clerk RS256 verification via JWKS
+        if settings.clerk_frontend_api:
+            jwks = await _get_jwks()
+            payload = jwt.decode(
+                token,
+                jwks,
+                algorithms=["RS256"],
+                options={"verify_aud": False},
+            )
+        else:
+            # Fallback: local HS256 secret (dev/legacy)
+            payload = jwt.decode(
+                token,
+                settings.jwt_secret,
+                algorithms=[settings.jwt_algorithm],
+            )
+
         user_id = payload.get("sub")
         if not user_id:
             raise UnauthorizedError("Invalid token payload")
-            
+
         return {
             "id": user_id,
             "email": payload.get("email"),
-            "clerk_id": payload.get("clerk_id", user_id),
+            "clerk_id": user_id,
         }
-        
+
     except JWTError as e:
-        # In development, fall back to dev user on token errors
         if settings.environment == "development":
             return DEV_USER
         raise UnauthorizedError(f"Token validation failed: {str(e)}")

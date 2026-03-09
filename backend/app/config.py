@@ -54,6 +54,8 @@ class Settings(BaseSettings):
     jwt_algorithm: str = "HS256"
     jwt_expiry_minutes: int = 60
     clerk_secret_key: str | None = None
+    # Clerk JWKS endpoint base, e.g. https://grown-hyena-6.clerk.accounts.dev
+    clerk_frontend_api: str | None = None
 
     # CORS
     cors_origins: str = "http://localhost:3000"
