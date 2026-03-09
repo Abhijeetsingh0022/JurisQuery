@@ -3,7 +3,8 @@
  * Centralized fetch wrapper with auth and error handling
  */
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+// Use relative URLs so requests go through Next.js rewrites → backend proxy.
+const API_BASE_URL = '';
 
 export interface ApiError {
     message: string;
@@ -24,9 +25,15 @@ export class ApiClientError extends Error {
 }
 
 async function getAuthToken(): Promise<string | null> {
-    // In a production setup, this would get the token from Clerk
-    // For now, we'll rely on Clerk's built-in fetch handling
-    // or the user can manually add auth headers from the client components
+    try {
+        // Clerk exposes getToken on the global window object in the browser
+        const clerk = (window as any).Clerk;
+        if (clerk?.session) {
+            return await clerk.session.getToken();
+        }
+    } catch {
+        // ignore — unauthenticated context
+    }
     return null;
 }
 
@@ -104,6 +111,7 @@ export const api = {
         const url = `${API_BASE_URL}${endpoint}`;
         const formData = new FormData();
         formData.append('file', file);
+        const token = await getAuthToken();
 
         return new Promise((resolve, reject) => {
             const xhr = new XMLHttpRequest();
@@ -128,6 +136,7 @@ export const api = {
             });
 
             xhr.open('POST', url);
+            if (token) xhr.setRequestHeader('Authorization', `Bearer ${token}`);
             xhr.send(formData);
         });
     },
