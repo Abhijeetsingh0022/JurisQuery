@@ -62,7 +62,7 @@ services:
 
       # ── Auth ───────────────────────────────────────────────────
       - key: JWT_SECRET
-        generateValue: true       # Render generates a secure random value
+        sync: false               # set once in Dashboard, never rotate unless sessions must be invalidated
       - key: JWT_ALGORITHM
         value: HS256
       - key: CLERK_SECRET_KEY
@@ -71,11 +71,8 @@ services:
         value: https://grown-hyena-6.clerk.accounts.dev
 
       # ── CORS ───────────────────────────────────────────────────
-      # Set this AFTER the frontend is deployed.
-      # Value: https://jurisquery-frontend.onrender.com
-      # (or your custom domain if configured)
       - key: CORS_ORIGINS
-        sync: false
+        value: https://jurisquery-frontend.onrender.com
 
   # ────────────────────────────────────────────────────────────────
   # Next.js Frontend
