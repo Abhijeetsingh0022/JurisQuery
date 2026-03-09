@@ -11,13 +11,15 @@ from sqlalchemy.orm import DeclarativeBase
 from app.config import settings
 
 
-# Create async engine for Neon PostgreSQL
+# Create async engine for PostgreSQL
+# ssl=True required for AWS RDS; harmless for Neon/Supabase (they also require SSL)
 engine = create_async_engine(
     settings.database_url,
     echo=settings.debug,
     pool_pre_ping=True,
-    pool_size=5,
-    max_overflow=10,
+    pool_size=2,
+    max_overflow=3,
+    connect_args={"ssl": True},
 )
 
 # Session factory
