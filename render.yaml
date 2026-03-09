@@ -67,6 +67,8 @@ services:
         value: HS256
       - key: CLERK_SECRET_KEY
         sync: false
+      - key: CLERK_FRONTEND_API
+        sync: false               # e.g. https://grown-hyena-6.clerk.accounts.dev
 
       # ── CORS ───────────────────────────────────────────────────
       # Set this AFTER the frontend is deployed.

@@ -25,7 +25,9 @@ export function useApi() {
 
         if (!res.ok) {
             const errorData = await res.json().catch(() => ({}));
-            throw new Error(errorData.detail || `API Error: ${res.statusText}`);
+            const error = new Error(errorData.detail || `API Error: ${res.statusText}`) as Error & { status: number };
+            error.status = res.status;
+            throw error;
         }
 
         // Some endpoints returning 204 No Content might not have JSON
