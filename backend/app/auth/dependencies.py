@@ -59,12 +59,27 @@ async def get_current_user(authorization: str | None = Header(None)) -> dict:
         # First try Clerk RS256 verification via JWKS
         if settings.clerk_frontend_api:
             jwks = await _get_jwks()
-            payload = jwt.decode(
-                token,
-                jwks,
-                algorithms=["RS256"],
-                options={"verify_aud": False},
-            )
+            try:
+                unverified_header = jwt.get_unverified_header(token)
+                kid = unverified_header.get("kid")
+                if not kid:
+                    raise UnauthorizedError("Token missing 'kid' header")
+                
+                # Find the key that matches the kid
+                key_data = next((k for k in jwks["keys"] if k["kid"] == kid), None)
+                if not key_data:
+                    raise UnauthorizedError("No matching key found in JWKS")
+                
+                payload = jwt.decode(
+                    token,
+                    key_data,
+                    algorithms=["RS256"],
+                    options={"verify_aud": False},
+                )
+            except Exception as e:
+                if settings.environment == "development":
+                    return DEV_USER
+                raise UnauthorizedError(f"JWKS validation failed: {str(e)}")
         else:
             # Fallback: local HS256 secret (dev/legacy)
             payload = jwt.decode(
