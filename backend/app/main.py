@@ -60,7 +60,7 @@ app.include_router(chat_router, prefix="/api/chat", tags=["Chat"])
 app.include_router(ipc_router, prefix="/api/v1/ipc", tags=["IPC Sections"])
 
 
-@app.get("/", tags=["Health"])
+@app.api_route("/", methods=["GET", "HEAD"], tags=["Health"])
 async def root():
     """Health check endpoint."""
     return {
@@ -70,7 +70,7 @@ async def root():
     }
 
 
-@app.get("/health", tags=["Health"])
+@app.api_route("/health", methods=["GET", "HEAD"], tags=["Health"])
 async def health_check():
     """Detailed health check endpoint."""
     return {
