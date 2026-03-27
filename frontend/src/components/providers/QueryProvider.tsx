@@ -11,7 +11,8 @@ export default function QueryProvider({ children }: { children: React.ReactNode 
                 refetchOnWindowFocus: false,
                 retry: (failureCount, error) => {
                     const status = (error as any)?.status;
-                    if (status === 401 || status === 403) return false;
+                    // Never retry auth errors or server/gateway errors
+                    if (status >= 400) return false;
                     return failureCount < 1;
                 },
                 retryDelay: 3000,

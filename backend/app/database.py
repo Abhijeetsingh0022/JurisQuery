@@ -3,7 +3,6 @@ Database configuration for Neon PostgreSQL.
 Uses SQLAlchemy async with asyncpg driver.
 """
 
-import ssl
 from collections.abc import AsyncGenerator
 
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
@@ -13,18 +12,13 @@ from app.config import settings
 
 
 # Create async engine for PostgreSQL
-# AWS RDS uses SSL with its own CA — require SSL but skip cert chain verification
-_ssl_ctx = ssl.create_default_context()
-_ssl_ctx.check_hostname = False
-_ssl_ctx.verify_mode = ssl.CERT_NONE
-
 engine = create_async_engine(
     settings.database_url,
     echo=settings.debug,
     pool_pre_ping=True,
     pool_size=2,
     max_overflow=3,
-    connect_args={"ssl": _ssl_ctx},
+    connect_args={"ssl": True},
 )
 
 # Session factory

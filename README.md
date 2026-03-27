@@ -146,13 +146,7 @@ Sign up: https://render.com or https://railway.app
 
 **Choose your deployment strategy:**
 
-**⭐ [AWS_RDS_QUICK_SETUP.md](AWS_RDS_QUICK_SETUP.md)** - **RECOMMENDED**: Use only AWS RDS for 40x more database storage (30 min setup, free 12 months)
-
-**📘 [CLOUD_SERVICES_FREE_TIER_PLAN.md](CLOUD_SERVICES_FREE_TIER_PLAN.md)** - Multi-cloud setup (Neon, Cloudinary, Render, Vercel) - Free forever, smaller storage
-
-**☁️ [AWS_FREE_TIER_PLAN.md](AWS_FREE_TIER_PLAN.md)** - Full AWS guide (RDS, S3, Lambda, Cognito) - For AWS-specific needs
-
-**📊 [CLOUD_COMPARISON.md](CLOUD_COMPARISON.md)** - Compare all options side-by-side
+**⭐ [CLOUD_SERVICES_FREE_TIER_PLAN.md](CLOUD_SERVICES_FREE_TIER_PLAN.md)** - **RECOMMENDED**: Multi-cloud setup (Neon, Cloudinary, Render, Vercel) - Free forever, perfect for dev & MVP testing.
 
 **✅ [DEPLOYMENT_CHECKLIST.md](DEPLOYMENT_CHECKLIST.md)** - Step-by-step multi-cloud deployment checklist
 
