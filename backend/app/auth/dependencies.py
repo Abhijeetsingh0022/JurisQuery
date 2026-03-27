@@ -77,6 +77,8 @@ async def get_current_user(authorization: str | None = Header(None)) -> dict:
                     options={"verify_aud": False},
                 )
             except Exception as e:
+                # Log the specific error for debugging
+                print(f"Auth Error: {str(e)}") 
                 if settings.environment == "development":
                     return DEV_USER
                 raise UnauthorizedError(f"JWKS validation failed: {str(e)}")
