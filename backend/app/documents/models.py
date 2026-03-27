@@ -67,6 +67,7 @@ class Document(BaseModel):
     chat_sessions: Mapped[list["ChatSession"]] = relationship(
         "ChatSession",
         back_populates="document",
+        cascade="all, delete-orphan",
     )
 
 
