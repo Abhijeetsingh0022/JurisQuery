@@ -860,7 +860,7 @@ export default function IPCPredictorPage() {
                                 leaveFrom="opacity-100 scale-100"
                                 leaveTo="opacity-0 scale-95"
                             >
-                                <Dialog.Panel className="w-full max-w-2xl transform overflow-hidden rounded-2xl bg-white text-left align-middle shadow-2xl transition-all border border-[#e8e2de]">
+                                <Dialog.Panel className="w-full max-w-4xl transform overflow-hidden rounded-2xl bg-white text-left align-middle shadow-2xl transition-all border border-[#e8e2de]">
                                     {bridgeSection && (
                                         <div className="max-h-[85vh] overflow-y-auto">
                                             <StatuteBridgePanel
