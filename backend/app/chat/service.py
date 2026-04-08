@@ -359,39 +359,33 @@ async def stream_message(
 
         if search_mode == "web":
             from app.research.agent import AgenticResearchPipeline
+            from app.rag.schemas import Citation
             agent = AgenticResearchPipeline()
             try:
                 history_str = rag_service._format_chat_history(history)
                 async for step in agent.execute_research(content, history_str):
                     if step.get("done", False):
-                        ans = step.get("response", "")
-                        for w in ans.split(" "):
-                            tok = w + " "
-                            full_answer_parts.append(tok)
-                            safe_tok = tok.replace("\n", "\\n")
-                            yield f"data: {safe_tok}\n\n"
-                        # Create pseudo-citations for the UI
-                        citations_obj = []
-                        from app.rag.schemas import Citation
-                        for s in step.get("sources", []):
-                            citations_obj.append(Citation(
+                        # The answer was already streamed token-by-token via `delta`.
+                        # Here we only need to capture the final citations.
+                        citations = [
+                            Citation(
                                 chunk_id="web",
                                 content=f"URL: {s['url']}\nTitle: {s['title']}",
                                 relevance_score=1.0,
-                                source_id=s['id'],
+                                source_id=str(s.get('id', '')),
                                 page_number=None,
-                            ))
-                        citations = citations_obj
+                            )
+                            for s in step.get("sources", [])
+                        ]
+                    elif "delta" in step:
+                        # Token-level stream from the synthesis LLM
+                        tok = step["delta"]
+                        full_answer_parts.append(tok)
+                        safe_token = tok.replace("\n", "\\n")
+                        yield f"data: {safe_token}\n\n"
                     else:
-                        # stream progress or delta
-                        if "delta" in step:
-                            tok = step["delta"]
-                            full_answer_parts.append(tok)
-                            safe_token = tok.replace("\n", "\\n")
-                            yield f"data: {safe_token}\n\n"
-                        else:
-                            # Send status update mapped to some special tag
-                            yield f"data: [STATUS] {step['status']}\n\n"
+                        # Agentic status update (e.g. "Searching web...")
+                        yield f"data: [STATUS] {step.get('status', '')}\n\n"
             except Exception as e:
                 logger.error("Web research stream failed: %s", e)
                 err_msg = "Sorry, I encountered an error during web research."

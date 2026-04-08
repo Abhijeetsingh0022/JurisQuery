@@ -117,10 +117,11 @@ class AgenticResearchPipeline:
             }
             
         except Exception as e:
-            logger.error(f"Synthesis failed: {e}")
+            logger.error("Synthesis failed: %s", e)
             yield {
                 "status": "Error during synthesis.",
                 "step": "error",
                 "done": True,
                 "response": "An error occurred while synthesizing the final response from the web search.",
+                "sources": [],  # required: prevents KeyError in chat service consumer
             }

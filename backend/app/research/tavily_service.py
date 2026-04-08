@@ -36,7 +36,7 @@ class TavilyResearchService:
         if not self.client:
             return []
 
-        logger.info(f"Executing Tavily search for: {query}")
+        logger.info("Executing Tavily search for: %s", query)
         try:
             response = await self.client.search(
                 query=query,
@@ -57,5 +57,5 @@ class TavilyResearchService:
                     })
             return results
         except Exception as e:
-            logger.error(f"Tavily search failed: {e}")
+            logger.error("Tavily search failed: %s", e)
             return []
