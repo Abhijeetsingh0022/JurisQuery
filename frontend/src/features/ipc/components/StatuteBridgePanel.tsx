@@ -99,54 +99,56 @@ function SectionCard({
   badgeText: string;
 }) {
   const [expanded, setExpanded] = useState(false);
-  const isLong = description.length > 200;
+  const isLong = description.length > 150;
 
   return (
-    <div className="bg-white rounded-xl border border-[#e8e2de] overflow-hidden flex-1 flex flex-col">
-      <div className="px-5 py-4 flex-1 flex flex-col">
+    <div className="bg-white rounded-xl border border-[#e8e2de] overflow-hidden flex-1 flex flex-col shadow-sm">
+      <div className="px-5 py-5 flex-1 flex flex-col h-full">
         {/* Header with section number box */}
-        <div className="flex items-start justify-between mb-3">
+        <div className="flex items-start justify-between mb-4">
             <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#2a3b4e] to-[#3d5a80] flex items-center justify-center shrink-0 shadow-sm relative">
-                    <span className="text-white font-bold text-[11px]">{sectionNumber}</span>
-                    <div className="absolute -bottom-1 -right-1 bg-white rounded-md text-[8px] font-bold px-1 py-0.5 border border-[#e8e2de] text-[#2a3b4e] shadow-sm uppercase tracking-wider">
+                <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-[#2a3b4e] to-[#3d5a80] flex items-center justify-center shrink-0 shadow-md relative">
+                    <span className="text-white font-bold text-[13px]">{sectionNumber}</span>
+                    <div className="absolute -bottom-1.5 -right-1.5 bg-white rounded-md text-[8px] font-bold px-1.5 py-0.5 border border-[#e8e2de] text-[#2a3b4e] shadow-sm uppercase tracking-wider z-10">
                       {badgeText}
                     </div>
                 </div>
                 <div>
-                    <h3 className="font-bold text-[#1a2332] text-[14px]">
+                    <h3 className="font-bold text-[#1a2332] text-[15px] tracking-tight">
                         Section {sectionNumber}
                     </h3>
-                    <p className="text-[11px] text-[#2a3b4e]/45 mt-0.5 line-clamp-1">
+                    <p className="text-[12px] text-[#2a3b4e]/60 mt-0.5 line-clamp-2 md:line-clamp-1 max-w-[180px]" title={sectionName || 'Unspecified Offense'}>
                         {sectionName || 'Unspecified Offense'}
                     </p>
                 </div>
             </div>
             {/* Tag (IPC/BNS 2023) */}
-            <span className="text-[10px] font-bold text-[#1a2332]/50 uppercase tracking-wider">
+            <span className="text-[10px] font-bold text-[#1a2332]/40 uppercase tracking-widest hidden md:block">
                {label}
             </span>
         </div>
 
         {/* Text Area */}
-        <div className="bg-[#faf8f6] rounded-lg px-4 py-3 border border-[#e8e2de]/50 flex-1 relative">
-            <p className={`text-[12px] text-[#1a2332]/60 leading-relaxed italic transition-all duration-300 ${!expanded && isLong ? 'line-clamp-4' : ''}`}>
-                &ldquo;{description}&rdquo;
-            </p>
+        <div className="flex-1 flex flex-col relative mt-2">
+            <div className={`bg-[#fdfcfb] rounded-xl px-4 py-4 border border-[#e8e2de]/60 flex-1 relative transition-all duration-300 ${expanded ? 'max-h-[350px] overflow-y-auto custom-scrollbar' : 'max-h-[140px] overflow-hidden'}`}>
+                <div className="text-[13px] text-[#1a2332]/80 leading-relaxed font-sans whitespace-pre-wrap">
+                    {description}
+                </div>
+            </div>
             {!expanded && isLong && (
-                <div className="absolute bottom-0 left-0 right-0 h-12 bg-gradient-to-t from-[#faf8f6] to-transparent pointer-events-none rounded-b-lg" />
+                <div className="absolute bottom-0 left-0 right-0 h-16 bg-gradient-to-t from-[#fdfcfb] via-[#fdfcfb]/80 to-transparent pointer-events-none rounded-b-xl border-x border-[#e8e2de]/60" />
             )}
         </div>
 
         {/* Expand button */}
         {isLong && (
-            <div className="flex items-center justify-between mt-3">
+            <div className="flex items-center justify-between mt-3 pt-2 border-t border-[#e8e2de]/30">
                 <button 
                   onClick={() => setExpanded(!expanded)}
-                  className="flex items-center gap-1.5 text-[11px] font-semibold text-[#2a3b4e]/30 hover:text-[#2a3b4e]/60 transition-colors"
+                  className="flex items-center gap-1 text-[12px] font-semibold text-[#2a3b4e]/50 hover:text-[#2a3b4e]/80 transition-colors py-1 px-2 -ml-2 rounded-md hover:bg-[#faf8f6]"
                 >
-                    {expanded ? 'Hide details' : 'View details'}
-                    <ChevronRight className={`h-3 w-3 transition-transform duration-200 ${expanded ? 'rotate-90' : ''}`} />
+                    {expanded ? 'Collapse Text' : 'Read Full Statute'}
+                    <ChevronDown className={`h-3.5 w-3.5 transition-transform duration-200 ${expanded ? 'rotate-180' : ''}`} />
                 </button>
             </div>
         )}
@@ -241,12 +243,12 @@ export function StatuteBridgePanel({
             </div>
 
             {/* AI Summary Callout using standard reasoning styling */}
-            <div className="bg-[#faf8f6] rounded-lg px-4 py-3 border border-[#e8e2de]/50 relative">
-                <div className="text-[11px] font-bold text-[#1a2332]/50 uppercase tracking-wider mb-2 flex items-center gap-1.5">
-                    <AlertCircle className="h-3 w-3 text-[#2a3b4e]/50" /> Translation Summary
+            <div className="bg-[#f0f4f8] rounded-xl px-5 py-4 border border-[#e1e9f0] shadow-sm relative mt-2">
+                <div className="text-[11px] font-bold text-[#1a2332]/60 uppercase tracking-widest mb-2 flex items-center gap-1.5">
+                    <AlertCircle className="h-3.5 w-3.5 text-[#4a6b8e]" /> Translation Summary
                 </div>
-                <p className="text-[12px] text-[#1a2332]/60 leading-relaxed italic">
-                    &ldquo;{result.change_summary}&rdquo;
+                <p className="text-[13px] text-[#1a2332]/85 leading-relaxed font-medium">
+                    {result.change_summary}
                 </p>
             </div>
 
