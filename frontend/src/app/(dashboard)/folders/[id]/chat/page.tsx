@@ -122,6 +122,7 @@ export default function FolderChatPage() {
         abortRef.current = streamMessage(
             sessionId,
             userContent,
+            undefined, // searchMode
             (token) => setStreamingContent((prev) => (prev ?? '') + token),
             () => {
                 setStreamingContent((prev) => {
