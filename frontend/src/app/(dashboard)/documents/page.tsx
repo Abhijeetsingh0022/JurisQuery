@@ -13,6 +13,7 @@ import {
     MessageSquare,
     Upload,
     FolderOpen,
+    FolderPlus,
     Clock,
     HardDrive,
     ChevronDown,
@@ -30,19 +31,29 @@ import { useApi } from "@/hooks/use-api";
 import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
 import type { Document } from "@/types/documents.types";
+import CaseFoldersTab, { AddToFolderModal } from "@/features/folders/components/CaseFoldersTab";
 
 export default function DocumentsPage() {
     const { fetcher } = useApi();
     const queryClient = useQueryClient();
+    const [activeTab, setActiveTab] = useState<'documents' | 'folders'>('documents');
     const [searchQuery, setSearchQuery] = useState("");
     const fileInputRef = useRef<HTMLInputElement>(null);
     const [viewDoc, setViewDoc] = useState<Document | null>(null);
     const [deleteDoc, setDeleteDoc] = useState<Document | null>(null);
+    const [addToFolderDoc, setAddToFolderDoc] = useState<Document | null>(null);
     const [dragActive, setDragActive] = useState(false);
 
     const { data, isLoading } = useQuery({
         queryKey: ["documents"],
         queryFn: async () => fetcher("/api/documents?limit=100"),
+        refetchInterval: (query) => {
+            const docs = query.state.data?.documents || [];
+            const isProcessing = docs.some((doc: any) => 
+                !['ready', 'failed'].includes(doc.status)
+            );
+            return isProcessing ? 3000 : false;
+        }
     });
 
     const uploadMutation = useMutation({
@@ -207,6 +218,31 @@ export default function DocumentsPage() {
                 </div>
             </div>
 
+            {/* Tab Switcher */}
+            <div className="flex items-center gap-1 p-1 bg-[#faf8f6] rounded-xl border border-[#e8e2de] w-fit">
+                {([
+                    { id: 'documents', label: 'All Documents', icon: FileText },
+                    { id: 'folders', label: 'Case Folders', icon: FolderPlus },
+                ] as const).map(({ id, label, icon: Icon }) => (
+                    <button
+                        key={id}
+                        onClick={() => setActiveTab(id)}
+                        className={`flex items-center gap-2 px-4 py-2 rounded-lg text-[13px] font-semibold transition-all ${
+                            activeTab === id
+                                ? 'bg-white text-[#1a2332] shadow-sm ring-1 ring-[#e8e2de]'
+                                : 'text-[#2a3b4e]/40 hover:text-[#2a3b4e]'
+                        }`}
+                    >
+                        <Icon className="h-3.5 w-3.5" />
+                        {label}
+                    </button>
+                ))}
+            </div>
+
+            {activeTab === 'folders' ? (
+                <CaseFoldersTab />
+            ) : (<>
+
             {/* Search Bar */}
             <div className="flex items-center gap-3">
                 <div className="relative flex-1">
@@ -360,6 +396,13 @@ export default function DocumentsPage() {
                                             <MessageSquare className="h-3.5 w-3.5" />
                                         </Link>
                                         <button
+                                            onClick={() => setAddToFolderDoc(doc)}
+                                            className="p-2 text-[#2a3b4e]/40 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-all ring-1 ring-transparent hover:ring-blue-100"
+                                            title="Add to Case Folder"
+                                        >
+                                            <FolderPlus className="h-3.5 w-3.5" />
+                                        </button>
+                                        <button
                                             onClick={() => setViewDoc(doc)}
                                             className="p-2 text-[#2a3b4e]/40 hover:text-[#2a3b4e] hover:bg-white rounded-lg transition-all ring-1 ring-transparent hover:ring-[#e8e2de] hover:shadow-sm"
                                             title="View Details"
@@ -397,7 +440,8 @@ export default function DocumentsPage() {
             <AnimatePresence>
                 {viewDoc && (
                     <DocumentDetailsModal
-                        document={viewDoc}
+                        documentId={viewDoc.id}
+                        initialData={viewDoc}
                         isOpen={!!viewDoc}
                         onClose={() => setViewDoc(null)}
                     />
@@ -416,6 +460,17 @@ export default function DocumentsPage() {
                     />
                 )}
             </AnimatePresence>
+
+            {/* Add to Folder Modal */}
+            {addToFolderDoc && (
+                <AddToFolderModal
+                    isOpen={!!addToFolderDoc}
+                    onClose={() => setAddToFolderDoc(null)}
+                    documentId={addToFolderDoc.id}
+                    documentName={addToFolderDoc.original_filename}
+                />
+            )}
+            </>)}
         </div>
     );
 }
@@ -532,14 +587,28 @@ function DeleteModal({ document, isOpen, onClose, onConfirm, isDeleting }: { doc
     );
 }
 
-function DocumentDetailsModal({ document, isOpen, onClose }: { document: any, isOpen: boolean, onClose: () => void }) {
+function DocumentDetailsModal({ documentId, initialData, isOpen, onClose }: { documentId: string, initialData?: any, isOpen: boolean, onClose: () => void }) {
     const [activeTab, setActiveTab] = useState<'overview' | 'chunks'>('overview');
     const { fetcher } = useApi();
 
+    const { data: document, isLoading: isLoadingDoc } = useQuery({
+        queryKey: ['document', documentId],
+        queryFn: async () => fetcher(`/api/documents/${documentId}`),
+        initialData: initialData,
+        enabled: isOpen && !!documentId,
+        refetchInterval: (query) => {
+            const doc = query.state.data;
+            return (doc && !['ready', 'failed'].includes(doc.status)) ? 3000 : false;
+        }
+    });
+
     const { data: chunksData, isLoading: isLoadingChunks } = useQuery({
-        queryKey: ['documentChunks', document.id],
-        queryFn: async () => fetcher(`/api/documents/${document.id}/chunks?limit=100`),
-        enabled: activeTab === 'chunks' && isOpen,
+        queryKey: ['documentChunks', documentId],
+        queryFn: async () => fetcher(`/api/documents/${documentId}/chunks?limit=100`),
+        enabled: isOpen && !!documentId && (activeTab === 'chunks' || (document && !['ready', 'failed'].includes(document.status))),
+        refetchInterval: (query) => {
+            return (document && !['ready', 'failed'].includes(document.status)) ? 3000 : false;
+        }
     });
 
     const formatFileSize = (bytes: number) => {

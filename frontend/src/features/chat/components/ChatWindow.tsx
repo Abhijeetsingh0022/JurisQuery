@@ -15,14 +15,15 @@ import {
     Sparkles,
     BookOpen,
     Scale,
-    Plus
+    Plus,
+    Globe
 } from 'lucide-react';
 import {
     getChatSessions,
     getChatSession,
     createChatSession,
     deleteChatSession,
-    sendMessage as sendChatMessage
+    streamMessage,
 } from '@/services/ragService';
 import type { Citation, ChatSession } from '@/types/api.types';
 
@@ -43,6 +44,7 @@ export default function ChatWindow({ documentId, onCitationClick }: ChatWindowPr
     const [messages, setMessages] = useState<Message[]>([]);
     const [input, setInput] = useState('');
     const [isLoading, setIsLoading] = useState(false);
+    const [streamingContent, setStreamingContent] = useState<string | null>(null);
     const [isInitializing, setIsInitializing] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [sessionId, setSessionId] = useState<string | null>(null);
@@ -51,6 +53,10 @@ export default function ChatWindow({ documentId, onCitationClick }: ChatWindowPr
     const messagesEndRef = useRef<HTMLDivElement>(null);
     const inputRef = useRef<HTMLTextAreaElement>(null);
     const dropdownRef = useRef<HTMLDivElement>(null);
+    const abortControllerRef = useRef<AbortController | null>(null);
+
+    const [searchMode, setSearchMode] = useState<'document' | 'web' | 'auto'>('document');
+    const [agentStatus, setAgentStatus] = useState<string | null>(null);
 
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
@@ -147,32 +153,50 @@ export default function ChatWindow({ documentId, onCitationClick }: ChatWindowPr
         };
 
         setMessages((prev) => [...prev, userMessage]);
+        const userContent = input.trim();
         setInput('');
         setIsLoading(true);
+        setStreamingContent('');
+        setAgentStatus('Thinking...');
         setError(null);
 
-        try {
-            const response = await sendChatMessage(sessionId, userMessage.content);
-
-            const assistantMessage: Message = {
-                id: response.id || `assistant-${Date.now()}`,
-                role: 'assistant',
-                content: response.content,
-                citations: response.citations ?? undefined,
-                timestamp: new Date(response.created_at || Date.now()),
-            };
-
-            setMessages((prev) => [...prev, assistantMessage]);
-
-            if (isFirstMessage) {
-                await fetchSessions();
+        abortControllerRef.current = streamMessage(
+            sessionId,
+            userContent,
+            searchMode,
+            // onToken — append each chunk to streamingContent
+            (token) => {
+                setStreamingContent((prev) => (prev ?? '') + token);
+                messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+            },
+            // onDone — move streamingContent into messages list
+            () => {
+                setStreamingContent((prev) => {
+                    if (prev !== null && prev !== '') {
+                        const assistantMessage: Message = {
+                            id: `assistant-${Date.now()}`,
+                            role: 'assistant',
+                            content: prev,
+                            timestamp: new Date(),
+                        };
+                        setMessages((msgs) => [...msgs, assistantMessage]);
+                    }
+                    return null;
+                });
+                setIsLoading(false);
+                setAgentStatus(null);
+                if (isFirstMessage) fetchSessions();
+            },
+            // onError
+            (errMsg) => {
+                setError(errMsg);
+                setAgentStatus(null);
+            },
+            // onStatus
+            (statusMsg) => {
+                setAgentStatus(statusMsg);
             }
-        } catch (err) {
-            const errorMsg = err instanceof Error ? err.message : 'Failed to get response';
-            setError(errorMsg);
-        } finally {
-            setIsLoading(false);
-        }
+        );
     };
 
     const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -235,6 +259,87 @@ export default function ChatWindow({ documentId, onCitationClick }: ChatWindowPr
         if (diffHours < 24) return `${diffHours}h ago`;
         if (diffDays < 7) return `${diffDays}d ago`;
         return date.toLocaleDateString();
+    };
+
+    // ── BNS Callout renderer ────────────────────────────────────────────────
+    const renderBnsCallout = (block: string, key: number) => {
+        // Parse: "⚖️ **BNS 2023 Update** — Section X IPC → Section Y BNS\n🟢 **Label** | summary"
+        const lines = block.split('\n').filter(Boolean);
+        const header = lines[0] ?? '';
+        const body = lines.slice(1).join(' ');
+
+        const emojiMatch = body.match(/^([🟢🟡🔴🔵🆕⚪]+)\s*\*\*([^*]+)\*\*\s*\|\s*(.+)/);
+        const emoji   = emojiMatch?.[1] ?? '⚖️';
+        const tag     = emojiMatch?.[2] ?? 'BNS 2023';
+        const summary = emojiMatch?.[3] ?? body;
+
+        return (
+            <div
+                key={key}
+                className="mt-3 rounded-lg border border-amber-200 bg-amber-50 px-3.5 py-3 text-[12px]"
+            >
+                <p className="font-semibold text-amber-800 mb-1">{header}</p>
+                <p className="text-amber-700 leading-relaxed">
+                    <span className="mr-1">{emoji}</span>
+                    <span className="font-semibold mr-1">{tag}</span>
+                    {summary}
+                </p>
+            </div>
+        );
+    };
+
+    const renderMessageContent = (content: string, citations?: Citation[]) => {
+        // Split on BNS callout blocks first (separator is ---\n\n)
+        const BNS_MARKER = '⚖️ **BNS 2023 Update**';
+        const segments = content.split(/\n\n---\n\n/);
+
+        return (
+            <>
+                {segments.map((segment, segIdx) => {
+                    if (segment.startsWith(BNS_MARKER)) {
+                        return renderBnsCallout(segment, segIdx);
+                    }
+                    // Render as normal cited content
+                    if (!citations || citations.length === 0) {
+                        return <span key={segIdx}>{segment}</span>;
+                    }
+                    const parts = segment.split(/(\[(?:Web )?Source \d+[^\]]*\])/g);
+                    return (
+                        <span key={segIdx}>
+                            {parts.map((part, i) => {
+                                const match = part.match(/\[(?:Web )?Source (\d+)/);
+                                if (match) {
+                                    const sourceId = parseInt(match[1]);
+                                    const targetCitation = citations.find(c => c.source_id === sourceId);
+                                    if (targetCitation) {
+                                        const isWeb = targetCitation.chunk_id === 'web';
+                                        const tooltip = isWeb 
+                                            ? targetCitation.content.replace('\n', ' - ') 
+                                            : `Page ${targetCitation.page_number || '?'}, Para ${targetCitation.paragraph_number || '?'}`;
+
+                                        return (
+                                            <button
+                                                key={i}
+                                                onClick={() => onCitationClick?.(targetCitation)}
+                                                className={`inline-flex items-center justify-center px-1.5 mx-0.5 text-[11px] font-bold ring-1 rounded cursor-pointer transition-all translateY-[-1px] ${
+                                                    isWeb 
+                                                    ? 'text-indigo-600 bg-indigo-50 hover:bg-indigo-100 ring-indigo-200/50 hover:ring-indigo-300' 
+                                                    : 'text-amber-600 bg-amber-50 hover:bg-amber-100 ring-amber-200/50 hover:ring-amber-300'
+                                                }`}
+                                                title={tooltip}
+                                            >
+                                                {part}
+                                            </button>
+                                        );
+                                    }
+                                }
+                                return <span key={i}>{part}</span>;
+                            })}
+                        </span>
+                    );
+                })}
+            </>
+        );
     };
 
     if (isInitializing) {
@@ -434,7 +539,7 @@ export default function ChatWindow({ documentId, onCitationClick }: ChatWindowPr
                                         <div className="min-w-0">
                                             <div className="bg-white border border-[#e8e2de] rounded-2xl rounded-bl-md px-4 py-3.5 shadow-sm">
                                                 <p className="text-[13px] leading-relaxed text-[#1a2332]/80 whitespace-pre-wrap">
-                                                    {message.content}
+                                                    {renderMessageContent(message.content, message.citations)}
                                                 </p>
 
                                                 {/* Citations */}
@@ -445,14 +550,14 @@ export default function ChatWindow({ documentId, onCitationClick }: ChatWindowPr
                                                             Sources
                                                         </p>
                                                         <div className="flex flex-wrap gap-1.5">
-                                                            {message.citations.map((citation) => (
+                                                            {message.citations.map((citation, idx) => (
                                                                 <button
-                                                                    key={citation.chunk_id}
+                                                                    key={citation.chunk_id || idx}
                                                                     onClick={() => onCitationClick?.(citation)}
                                                                     className="group inline-flex items-center gap-1.5 px-2.5 py-1 text-[10px] font-semibold rounded-md bg-[#f7f3f1] hover:bg-amber-50 text-[#2a3b4e]/50 hover:text-amber-700 ring-1 ring-[#e8e2de] hover:ring-amber-200 transition-all"
                                                                 >
                                                                     <span className="w-1.5 h-1.5 rounded-full bg-amber-400 group-hover:scale-110 transition-transform" />
-                                                                    Page {citation.page_number || '?'}, Para {citation.paragraph_number || '?'}
+                                                                    {citation.source_id ? `Source ${citation.source_id}: ` : ''}Page {citation.page_number || '?'}, Para {citation.paragraph_number || '?'}
                                                                 </button>
                                                             ))}
                                                         </div>
@@ -468,7 +573,7 @@ export default function ChatWindow({ documentId, onCitationClick }: ChatWindowPr
                 )}
 
                 {/* Loading indicator */}
-                {isLoading && (
+                {isLoading && !streamingContent && (
                     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex justify-start">
                         <div className="flex gap-3">
                             <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-[#2a3b4e] to-[#4a6b8e] flex items-center justify-center shrink-0 shadow-sm">
@@ -477,8 +582,9 @@ export default function ChatWindow({ documentId, onCitationClick }: ChatWindowPr
                             <div className="bg-white border border-[#e8e2de] rounded-xl px-4 py-3 flex items-center gap-2.5 shadow-sm">
                                 <Loader2 className="h-3.5 w-3.5 animate-spin text-[#2a3b4e]/30" />
                                 <div>
-                                    <span className="text-[11px] font-medium text-[#1a2332]/40 block">Analyzing document…</span>
-                                    <span className="text-[9px] text-[#2a3b4e]/20">Searching citations</span>
+                                    <span className="text-[11px] font-medium text-[#1a2332]/80 block">
+                                        {agentStatus || 'Analyzing document…'}
+                                    </span>
                                 </div>
                             </div>
                         </div>
@@ -497,6 +603,25 @@ export default function ChatWindow({ documentId, onCitationClick }: ChatWindowPr
                     </motion.div>
                 )}
 
+                {/* Streaming bubble — shown while response is arriving */}
+                {streamingContent !== null && streamingContent !== '' && (
+                    <motion.div
+                        initial={{ opacity: 0, y: 6 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        className="flex gap-3"
+                    >
+                        <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-[#2a3b4e] to-[#4a6b8e] flex items-center justify-center shrink-0 shadow-sm mt-0.5">
+                            <Sparkles className="h-3.5 w-3.5 text-white" />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                            <div className="inline-block bg-white border border-[#e8e2de] rounded-xl rounded-tl-sm px-4 py-3 shadow-sm text-[13px] text-[#1a2332] leading-relaxed whitespace-pre-wrap">
+                                {streamingContent}
+                                <span className="inline-block w-[2px] h-[1em] bg-[#2a3b4e]/60 ml-0.5 align-middle animate-pulse" />
+                            </div>
+                        </div>
+                    </motion.div>
+                )}
+
                 <div ref={messagesEndRef} />
             </div>
 
@@ -504,20 +629,28 @@ export default function ChatWindow({ documentId, onCitationClick }: ChatWindowPr
             <div className="flex-none p-4 border-t border-[#e8e2de] bg-white">
                 <form onSubmit={handleSubmit}>
                     <div className="flex items-center gap-3 bg-[#faf8f6] border border-[#e8e2de] rounded-xl px-4 py-2 focus-within:bg-white focus-within:border-[#2a3b4e]/20 focus-within:ring-2 focus-within:ring-[#2a3b4e]/5 focus-within:shadow-sm transition-all duration-200">
+                        <button
+                            type="button"
+                            onClick={() => setSearchMode(searchMode === 'web' ? 'document' : 'web')}
+                            className={`p-1.5 shrink-0 rounded-md transition-all ${searchMode === 'web' ? 'bg-indigo-50 text-indigo-600 ring-1 ring-indigo-200' : 'text-[#2a3b4e]/40 hover:bg-[#e8e2de] hover:text-[#2a3b4e]'}`}
+                            title={searchMode === 'web' ? 'Web Research Enabled' : 'Document Only Mode'}
+                        >
+                            <Globe className="h-4 w-4" />
+                        </button>
                         <textarea
                             ref={inputRef}
                             value={input}
                             onChange={(e) => setInput(e.target.value)}
                             onKeyDown={handleKeyDown}
-                            placeholder="Ask a question about your document…"
+                            placeholder={searchMode === 'web' ? 'Ask a web research question...' : 'Ask a question about your document…'}
                             rows={1}
-                            className="flex-1 bg-transparent text-[13px] focus:outline-none text-[#1a2332] placeholder:text-[#2a3b4e]/20 resize-none h-8 pt-1.5"
+                            className="flex-1 bg-transparent text-[13px] focus:outline-none text-[#1a2332] placeholder:text-[#2a3b4e]/30 resize-none h-8 pt-1.5"
                             disabled={isLoading || !sessionId}
                         />
                         <button
                             type="submit"
                             disabled={!input.trim() || isLoading || !sessionId}
-                            className="p-2 rounded-lg bg-gradient-to-r from-[#2a3b4e] to-[#3d5a80] text-white disabled:opacity-20 disabled:cursor-not-allowed hover:shadow-md hover:shadow-[#2a3b4e]/15 transition-all shrink-0 active:scale-95"
+                            className={`p-2 rounded-lg text-white disabled:opacity-20 disabled:cursor-not-allowed hover:shadow-md transition-all shrink-0 active:scale-95 ${searchMode === 'web' ? 'bg-gradient-to-r from-indigo-500 to-indigo-600 shadow-indigo-500/20' : 'bg-gradient-to-r from-[#2a3b4e] to-[#3d5a80] shadow-[#2a3b4e]/15'}`}
                         >
                             <Send className="h-3.5 w-3.5" />
                         </button>

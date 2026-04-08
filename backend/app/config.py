@@ -30,6 +30,10 @@ class Settings(BaseSettings):
     gemini_api_key: str
     gemini_api_key_2: str | None = None
     groq_api_key: str | None = None
+    tavily_api_key: str | None = None
+
+    # Feature Flags
+    enable_agentic_research: bool = True
 
     @property
     def gemini_api_keys(self) -> list[str]:

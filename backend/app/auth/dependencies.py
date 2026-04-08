@@ -5,12 +5,15 @@ Clerk tokens are RS256-signed — verified via Clerk's JWKS endpoint.
 """
 
 import httpx
+import logging
 from fastapi import Header
 from jose import JWTError, jwt
-from jose.backends import RSAKey
 
 from app.config import settings
 from app.exceptions import UnauthorizedError
+
+
+logger = logging.getLogger(__name__)
 
 
 # Development mode user for testing
@@ -50,10 +53,13 @@ async def get_current_user(authorization: str | None = Header(None)) -> dict:
             return DEV_USER
         raise UnauthorizedError("Authorization header required")
 
-    if not authorization.startswith("Bearer "):
+    if not authorization.lower().startswith("bearer "):
         raise UnauthorizedError("Invalid authorization header format")
 
-    token = authorization.replace("Bearer ", "")
+    try:
+        token = authorization.split(" ", 1)[1]
+    except IndexError:
+        raise UnauthorizedError("Token missing in authorization header")
 
     try:
         # First try Clerk RS256 verification via JWKS
@@ -78,7 +84,7 @@ async def get_current_user(authorization: str | None = Header(None)) -> dict:
                 )
             except Exception as e:
                 # Log the specific error for debugging
-                print(f"Auth Error: {str(e)}") 
+                logger.error("Auth Error: %s", e) 
                 if settings.environment == "development":
                     return DEV_USER
                 raise UnauthorizedError(f"JWKS validation failed: {str(e)}")

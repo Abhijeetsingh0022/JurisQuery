@@ -3,6 +3,8 @@
 import { useState, useRef, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
+import { Dialog, Transition } from '@headlessui/react';
+import React from 'react';
 import {
     Scale,
     Send,
@@ -28,6 +30,7 @@ import {
     X
 } from 'lucide-react';
 import { useApi } from '@/hooks/use-api';
+import { StatuteBridgePanel } from '@/features/ipc/components/StatuteBridgePanel';
 
 interface PredictedSection {
     section: {
@@ -81,6 +84,8 @@ export default function IPCPredictorPage() {
     const [sidebarTab, setSidebarTab] = useState<'history' | 'prompts'>('history');
     const [historySearch, setHistorySearch] = useState('');
     const [deletingId, setDeletingId] = useState<string | null>(null);
+    // BNS Bridge drawer state
+    const [bridgeSection, setBridgeSection] = useState<string | null>(null);
 
     const router = useRouter();
 
@@ -648,14 +653,14 @@ export default function IPCPredictorPage() {
                                                             return (
                                                                 <div
                                                                     key={pred.section.section_number}
-                                                                    className={`bg-white rounded-xl border overflow-hidden transition-all duration-200 ${isExpanded ? 'border-[#2a3b4e]/15 shadow-md' : 'border-[#e8e2de] hover:border-[#2a3b4e]/12 hover:shadow-sm'
-                                                                        }`}
+                                                                    className={`bg-white rounded-xl border overflow-hidden transition-all duration-200 ${isExpanded ? 'border-[#2a3b4e]/15 shadow-md' : 'border-[#e8e2de] hover:border-[#2a3b4e]/12 hover:shadow-sm'}`}
                                                                 >
+                                                                    {/* Clickable header area */}
                                                                     <div
                                                                         className="px-5 py-4 cursor-pointer"
                                                                         onClick={() => toggleSection(msg.id, pred.section.section_number)}
                                                                     >
-                                                                        {/* Section header */}
+                                                                        {/* Section number + offense + confidence */}
                                                                         <div className="flex items-start justify-between mb-3">
                                                                             <div className="flex items-center gap-3">
                                                                                 <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#2a3b4e] to-[#3d5a80] flex items-center justify-center shrink-0 shadow-sm">
@@ -681,13 +686,11 @@ export default function IPCPredictorPage() {
 
                                                                         {/* Status tags */}
                                                                         <div className="flex flex-wrap items-center gap-2 mb-3">
-                                                                            <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[11px] font-semibold ${pred.section.cognizable ? 'bg-red-50 text-red-600 ring-1 ring-red-100' : 'bg-emerald-50 text-emerald-600 ring-1 ring-emerald-100'
-                                                                                }`}>
+                                                                            <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[11px] font-semibold ${pred.section.cognizable ? 'bg-red-50 text-red-600 ring-1 ring-red-100' : 'bg-emerald-50 text-emerald-600 ring-1 ring-emerald-100'}`}>
                                                                                 <Shield className="h-3 w-3" />
                                                                                 {pred.section.cognizable ? 'Cognizable' : 'Non-Cognizable'}
                                                                             </span>
-                                                                            <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[11px] font-semibold ${pred.section.bailable ? 'bg-emerald-50 text-emerald-600 ring-1 ring-emerald-100' : 'bg-red-50 text-red-600 ring-1 ring-red-100'
-                                                                                }`}>
+                                                                            <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[11px] font-semibold ${pred.section.bailable ? 'bg-emerald-50 text-emerald-600 ring-1 ring-emerald-100' : 'bg-red-50 text-red-600 ring-1 ring-red-100'}`}>
                                                                                 <Building2 className="h-3 w-3" />
                                                                                 {pred.section.bailable ? 'Bailable' : 'Non-Bailable'}
                                                                             </span>
@@ -706,14 +709,26 @@ export default function IPCPredictorPage() {
                                                                             </p>
                                                                         </div>
 
-                                                                        {/* Expand toggle */}
-                                                                        <button className="flex items-center gap-1.5 text-[11px] font-semibold text-[#2a3b4e]/30 hover:text-[#2a3b4e]/60 transition-colors mt-3">
-                                                                            {isExpanded ? 'Hide details' : 'View details'}
-                                                                            <ChevronRight className={`h-3 w-3 transition-transform duration-200 ${isExpanded ? 'rotate-90' : ''}`} />
-                                                                        </button>
+                                                                        {/* Footer: expand toggle + BNS bridge button */}
+                                                                        <div className="flex items-center justify-between mt-3">
+                                                                            <button className="flex items-center gap-1.5 text-[11px] font-semibold text-[#2a3b4e]/30 hover:text-[#2a3b4e]/60 transition-colors">
+                                                                                {isExpanded ? 'Hide details' : 'View details'}
+                                                                                <ChevronRight className={`h-3 w-3 transition-transform duration-200 ${isExpanded ? 'rotate-90' : ''}`} />
+                                                                            </button>
+                                                                            <button
+                                                                                onClick={(e) => {
+                                                                                    e.stopPropagation();
+                                                                                    setBridgeSection(pred.section.section_number);
+                                                                                }}
+                                                                                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[11px] font-semibold bg-amber-50 text-amber-700 ring-1 ring-amber-200 hover:bg-amber-100 hover:ring-amber-300 transition-all"
+                                                                            >
+                                                                                ⚖️ View BNS 2023
+                                                                                <ChevronRight className="h-3 w-3" />
+                                                                            </button>
+                                                                        </div>
                                                                     </div>
 
-                                                                    {/* Expanded panel */}
+                                                                    {/* Expanded detail panel */}
                                                                     <AnimatePresence>
                                                                         {isExpanded && (
                                                                             <motion.div
@@ -818,6 +833,48 @@ export default function IPCPredictorPage() {
                     </div>
                 </div>
             </div>
+
+            {/* BNS Bridge Centered Modal */}
+            <Transition appear show={!!bridgeSection} as={React.Fragment}>
+                <Dialog as="div" className="relative z-50" onClose={() => setBridgeSection(null)}>
+                    <Transition.Child
+                        as={React.Fragment}
+                        enter="ease-out duration-300"
+                        enterFrom="opacity-0"
+                        enterTo="opacity-100"
+                        leave="ease-in duration-200"
+                        leaveFrom="opacity-100"
+                        leaveTo="opacity-0"
+                    >
+                        <div className="fixed inset-0 bg-black/40 backdrop-blur-sm" />
+                    </Transition.Child>
+
+                    <div className="fixed inset-0 overflow-y-auto">
+                        <div className="flex min-h-full items-center justify-center p-4 text-center">
+                            <Transition.Child
+                                as={React.Fragment}
+                                enter="ease-out duration-300"
+                                enterFrom="opacity-0 scale-95"
+                                enterTo="opacity-100 scale-100"
+                                leave="ease-in duration-200"
+                                leaveFrom="opacity-100 scale-100"
+                                leaveTo="opacity-0 scale-95"
+                            >
+                                <Dialog.Panel className="w-full max-w-2xl transform overflow-hidden rounded-2xl bg-white text-left align-middle shadow-2xl transition-all border border-[#e8e2de]">
+                                    {bridgeSection && (
+                                        <div className="max-h-[85vh] overflow-y-auto">
+                                            <StatuteBridgePanel
+                                                ipcSectionNumber={bridgeSection}
+                                                onClose={() => setBridgeSection(null)}
+                                            />
+                                        </div>
+                                    )}
+                                </Dialog.Panel>
+                            </Transition.Child>
+                        </div>
+                    </div>
+                </Dialog>
+            </Transition>
         </div>
     );
 }

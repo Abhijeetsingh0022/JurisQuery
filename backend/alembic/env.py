@@ -17,6 +17,7 @@ from app.database import Base
 from app.documents.models import Document, DocumentChunk  # noqa: F401
 from app.chat.models import ChatSession, Message  # noqa: F401
 from app.ipc.models import IPCSection, IPCPrediction  # noqa: F401
+from app.folders.models import CaseFolder, CaseFolderDocument  # noqa: F401
 
 # this is the Alembic Config object
 config = context.config
