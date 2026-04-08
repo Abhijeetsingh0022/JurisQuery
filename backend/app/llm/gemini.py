@@ -114,18 +114,36 @@ class GeminiLLM:
             Non-empty text chunks as they arrive
         """
         client = self._next_client()
-        stream = await asyncio.to_thread(
-            client.models.generate_content_stream,
-            model=self.model_name,
-            contents=prompt,
-            config=types.GenerateContentConfig(
-                temperature=temperature,
-                max_output_tokens=max_tokens,
-            ),
-        )
-        for chunk in stream:
-            if chunk.text:
-                yield chunk.text
+        try:
+            stream = await client.aio.models.generate_content_stream(
+                model=self.model_name,
+                contents=prompt,
+                config=types.GenerateContentConfig(
+                    temperature=temperature,
+                    max_output_tokens=max_tokens,
+                ),
+            )
+            async for chunk in stream:
+                if chunk.text:
+                    yield chunk.text
+        except AttributeError:
+            # Fallback to threading if older SDK without .aio
+            stream = await asyncio.to_thread(
+                client.models.generate_content_stream,
+                model=self.model_name,
+                contents=prompt,
+                config=types.GenerateContentConfig(
+                    temperature=temperature,
+                    max_output_tokens=max_tokens,
+                ),
+            )
+            while True:
+                try:
+                    chunk = await asyncio.to_thread(next, stream)
+                    if chunk.text:
+                        yield chunk.text
+                except StopIteration:
+                    break
 
     # ------------------------------------------------------------------
     # Private helpers

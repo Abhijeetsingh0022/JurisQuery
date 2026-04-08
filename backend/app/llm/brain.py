@@ -176,20 +176,15 @@ class BrainLLM:
         )
 
         try:
-            response = await self.llm.agenerate(
+            raw = await self.llm.generate(
                 prompt=prompt,
-                response_format={"type": "json_object"},
+                json_mode=True,
                 temperature=0.0
             )
 
             # Some models return JSON nested under a root key if json_object type is requested, 
             # or return raw JSON array. Let's parse robustly.
-            content = response.content.strip()
-            # Clean possible markdown ticks
-            if content.startswith("```json"):
-                content = content[7:-3].strip()
-            elif content.startswith("```"):
-                content = content[3:-3].strip()
+            content = self._extract_json(raw).strip()
 
             parsed = json.loads(content)
             

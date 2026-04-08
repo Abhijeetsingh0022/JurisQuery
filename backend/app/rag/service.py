@@ -285,6 +285,99 @@ async def query_document(
     )
 
 
+async def query_document_stream(
+    db: AsyncSession,
+    document_id: UUID,
+    query: str,
+    user_id: str,
+    top_k: int = 15,
+):
+    """
+    Query a document and stream the response token-by-token.
+    """
+    result = await db.execute(
+        select(Document).where(
+            Document.id == document_id,
+            Document.user_id == user_id,
+        )
+    )
+    document = result.scalar_one_or_none()
+    if not document:
+        yield "data: [ERROR] Document not found\n\n"
+        return
+
+    embeddings = GeminiEmbeddings()
+    vectorstore = QdrantVectorStore()
+    brain = BrainLLM()
+
+    query_analysis = await brain.analyze_query(query, "")
+    query_embedding = await embeddings.embed_query(query_analysis.rewritten_query)
+
+    vector_results = await vectorstore.search(
+        query_vector=query_embedding,
+        document_id=str(document_id),
+        top_k=top_k,
+    )
+
+    enhanced_query = f"{query} {' '.join(query_analysis.search_keywords)}"
+    keyword_results = await _keyword_search(
+        db=db,
+        document_id=document_id,
+        query=enhanced_query,
+        limit=top_k,
+    )
+
+    retrieved_chunks = (
+        _rrf_fusion(vector_results, keyword_results)[:top_k]
+        if keyword_results
+        else vector_results
+    )
+
+    child_ids = [c["chunk_id"] for c in retrieved_chunks]
+    if not child_ids:
+        yield "data: I couldn't find any relevant information to answer your question.\n\n"
+        return
+
+    child_result = await db.execute(
+        select(DocumentChunk).where(DocumentChunk.id.in_(child_ids))
+    )
+    db_children = {str(c.id): c for c in child_result.scalars().all()}
+
+    parent_ids = {
+        child.parent_chunk_id
+        for child in db_children.values()
+        if child.parent_chunk_id
+    }
+
+    if parent_ids:
+        parent_result = await db.execute(
+            select(DocumentChunk).where(DocumentChunk.id.in_(parent_ids))
+        )
+        db_parents = {str(c.id): c for c in parent_result.scalars().all()}
+    else:
+        db_parents = db_children
+
+    context, _citations = _build_context_and_citations(
+        document=document,
+        retrieved_chunks=retrieved_chunks,
+        db_children=db_children,
+        db_parents=db_parents,
+    )
+
+    prompt = LEGAL_RAG_PROMPT.format(
+        context=context,
+        question=query,
+        chat_history="",
+    )
+
+    gemini_llm = GeminiLLM()
+    async for token in gemini_llm.generate_stream(prompt):
+        safe_token = token.replace("\n", "\\n")
+        yield f"data: {safe_token}\n\n"
+    
+    yield "data: [DONE]\n\n"
+
+
 # ---------------------------------------------------------------------------
 # Document Processing Pipeline
 # ---------------------------------------------------------------------------
@@ -838,8 +931,21 @@ async def prepare_branched_rag_context(
             return sq.document_id, []
         try:
             q_emb = await embeddings.embed_query(sq.query)
-            res = await vectorstore.search(q_emb, document_id=sq.document_id, top_k=top_k_per_doc)
-            return sq.document_id, res
+            vec_res = await vectorstore.search(q_emb, document_id=sq.document_id, top_k=top_k_per_doc)
+            
+            kw_res = await _keyword_search(
+                db=db,
+                document_id=UUID(str(sq.document_id)),
+                query=sq.query,
+                limit=top_k_per_doc,
+            )
+            
+            fused_res = (
+                _rrf_fusion(vec_res, kw_res)[:top_k_per_doc]
+                if kw_res
+                else vec_res
+            )
+            return sq.document_id, fused_res
         except Exception as e:
             logger.error("Branched retrieve failed for doc %s: %s", sq.document_id, e)
             return sq.document_id, []

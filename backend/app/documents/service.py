@@ -89,10 +89,11 @@ async def upload_document(
         folder="documents",
     )
 
+    original_name = (file.filename or "unknown")[:255]
     document = Document(
         user_id=user_id,
         filename=unique_filename,
-        original_filename=file.filename or "unknown",
+        original_filename=original_name,
         file_url=file_url,
         file_type=extension,
         file_size=file_size,
@@ -193,7 +194,7 @@ async def delete_document(
     except Exception as e:
         logger.warning("Failed to delete Qdrant vectors for document %s: %s", document_id, e)
 
-    await CloudinaryStorage().delete(document.filename)
+    await CloudinaryStorage().delete(document.filename, folder="documents")
 
     await db.delete(document)
     await db.commit()

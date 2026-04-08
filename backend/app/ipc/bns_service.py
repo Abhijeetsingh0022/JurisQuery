@@ -364,18 +364,17 @@ async def detect_and_embed_bns_updates(answer: str, db: AsyncSession) -> str:
     if not detected_sections:
         return answer
 
-    # Generate bridges in parallel (max 3 to not spike latency)
-    bridge_tasks = [
-        get_or_create_bridge(db, num)
-        for num in detected_sections[:3]
-    ]
-    results = await asyncio.gather(*bridge_tasks, return_exceptions=True)
+    # Generate bridges sequentially to avoid crossing SQLAlchemy AsyncSession execution limits
+    results = []
+    for num in detected_sections[:3]:
+        try:
+            bridge = await get_or_create_bridge(db, num)
+            results.append(bridge)
+        except Exception as e:
+            logger.warning("BNS bridge fetch failed for %s: %s", num, e)
 
     callouts: list[str] = []
     for bridge in results:
-        if isinstance(bridge, Exception):
-            logger.warning("BNS bridge fetch failed: %s", bridge)
-            continue
         callouts.append(_format_callout(bridge))
 
     if not callouts:

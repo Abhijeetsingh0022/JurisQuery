@@ -5,7 +5,7 @@ Uses Groq's fast inference for LLaMA models as a fallback.
 import asyncio
 import logging
 
-from groq import Groq
+from groq import AsyncGroq
 from tenacity import retry, stop_after_attempt, wait_exponential
 
 from app.config import settings
@@ -26,8 +26,8 @@ class GroqLLM:
             model_name: Groq model identifier to use for generation
         """
         self.model_name = model_name
-        self.client: Groq | None = (
-            Groq(api_key=settings.groq_api_key) if settings.groq_api_key else None
+        self.client: AsyncGroq | None = (
+            AsyncGroq(api_key=settings.groq_api_key) if settings.groq_api_key else None
         )
 
     # ------------------------------------------------------------------
@@ -76,10 +76,7 @@ class GroqLLM:
         if json_mode:
             kwargs["response_format"] = {"type": "json_object"}
 
-        response = await asyncio.to_thread(
-            self.client.chat.completions.create,
-            **kwargs
-        )
+        response = await self.client.chat.completions.create(**kwargs)
         text = response.choices[0].message.content
         logger.debug("Groq generation complete: %d chars", len(text or ""))
         return text

@@ -168,33 +168,56 @@ async def load_ipc_dataset(
 
 async def search_relevant_sections(
     db: AsyncSession,
-    query: str,
+    keywords: list[str],
     limit: int = 20,
 ) -> list[IPCSection]:
     """
-    Search for relevant IPC sections using keyword matching with synonym expansion.
+    Search for relevant IPC sections using provided keywords with synonym expansion.
 
     Args:
         db: Database session
-        query: Crime or incident description
+        keywords: Curated list of legal keywords
         limit: Maximum number of sections to return
 
     Returns:
         Sections scored and sorted by keyword match frequency
     """
-    raw_keywords = [w.lower() for w in query.split() if len(w) > 3]
-
-    if not raw_keywords:
+    if not keywords:
         result = await db.execute(select(IPCSection).limit(limit))
         return list(result.scalars().all())
 
-    expanded: set[str] = set(raw_keywords)
-    for kw in raw_keywords:
+    # Flatten keywords to ensure phrases like "culpable homicide" become ["culpable", "homicide"]
+    # Because ILIKE is strict and fails if spacing differs slightly in the DB.
+    flattened_keywords = []
+    for kw in keywords:
+        flattened_keywords.extend(str(kw).split())
+
+    # Filter out common stop words
+    stop_words = {
+        "the", "and", "for", "that", "this", "with", "from", "your", "are", 
+        "was", "will", "has", "had", "his", "her", "him", "she"
+    }
+    raw_keywords = [
+        w.lower() for w in flattened_keywords 
+        if len(w) >= 3 and w.lower() not in stop_words
+    ]
+    
+    # Remove duplicates but preserve some deterministic order (unlike set)
+    unique_keywords = list(dict.fromkeys(raw_keywords))
+
+    if not unique_keywords:
+        result = await db.execute(select(IPCSection).limit(limit))
+        return list(result.scalars().all())
+
+    expanded: set[str] = set(unique_keywords)
+    for kw in unique_keywords:
         expanded.update(_CRIME_SYNONYMS.get(kw, []))
 
+    # Support all keywords without arbitrarily cutting off at 25, which 
+    # previously randomized and dropped crucial terms like "murder" if the list grew.
     conditions = [
         clause
-        for kw in list(expanded)[:15]
+        for kw in expanded
         for clause in (
             IPCSection.description.ilike(f"%{kw}%"),
             IPCSection.offense.ilike(f"%{kw}%"),
@@ -202,13 +225,13 @@ async def search_relevant_sections(
     ]
 
     result = await db.execute(
-        select(IPCSection).where(or_(*conditions)).limit(limit)
+        select(IPCSection).where(or_(*conditions))
     )
     sections = result.scalars().all()
 
     def _score(section: IPCSection) -> int:
         text = f"{section.description} {section.offense or ''}".lower()
-        return sum(3 for kw in raw_keywords if kw in text) + \
+        return sum(3 for kw in unique_keywords if kw in text) + \
                sum(1 for kw in expanded if kw in text)
 
     return sorted(sections, key=_score, reverse=True)[:limit]
@@ -236,7 +259,21 @@ async def predict_ipc_sections(
     """
     start = time.monotonic()
 
-    relevant = await search_relevant_sections(db, request.description, limit=20)
+    # Step 1: Intelligent LLM distillation of massive narratives into crisp legal keywords
+    from app.llm.brain import BrainLLM
+    
+    try:
+        brain = BrainLLM()
+        analysis = await brain.analyze_query(request.description)
+        keywords = analysis.search_keywords
+        if not keywords:
+            keywords = request.description.split()
+    except Exception as e:
+        logger.warning("BrainLLM extraction failed, using fallback parsing: %s", e)
+        keywords = request.description.split()
+
+    # Step 2: Query DB safely using distilled keywords
+    relevant = await search_relevant_sections(db, keywords, limit=20)
     if not relevant:
         return IPCPredictionResponse(
             predicted_sections=[],

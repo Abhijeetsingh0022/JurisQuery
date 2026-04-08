@@ -24,7 +24,7 @@ class GeminiEmbeddings:
             model_name: Embedding model to use
         """
         self.model_name = model_name
-        self.dimension = 3072  # gemini-embedding-001 dimension
+        self.dimension = 768  # gemini-embedding-001 dimension
 
     async def embed_query(self, text: str) -> list[float]:
         """

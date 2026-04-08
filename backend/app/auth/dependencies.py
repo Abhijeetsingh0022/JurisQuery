@@ -73,8 +73,16 @@ async def get_current_user(authorization: str | None = Header(None)) -> dict:
                 
                 # Find the key that matches the kid
                 key_data = next((k for k in jwks["keys"] if k["kid"] == kid), None)
+                
                 if not key_data:
-                    raise UnauthorizedError("No matching key found in JWKS")
+                    # Clear cache and retry once in case keys were rotated
+                    global _jwks_cache
+                    _jwks_cache = None
+                    jwks = await _get_jwks()
+                    key_data = next((k for k in jwks["keys"] if k["kid"] == kid), None)
+                    
+                    if not key_data:
+                        raise UnauthorizedError("No matching key found in JWKS (even after rotation fetch)")
                 
                 payload = jwt.decode(
                     token,

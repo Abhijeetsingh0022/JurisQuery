@@ -4,7 +4,7 @@ Handles vector storage and retrieval using Qdrant Cloud.
 """
 import logging
 
-from qdrant_client import QdrantClient
+from qdrant_client import AsyncQdrantClient
 from qdrant_client.models import (
     Distance,
     FieldCondition,
@@ -26,12 +26,12 @@ class QdrantVectorStore:
 
     def __init__(self) -> None:
         """Initialise Qdrant client and collection configuration."""
-        self.client = QdrantClient(
+        self.client = AsyncQdrantClient(
             url=settings.qdrant_url,
             api_key=settings.qdrant_api_key,
         )
         self.collection_name = settings.qdrant_collection_name
-        self.dimension = 3072  # gemini-embedding-001 output dimension
+        self.dimension = 768  # gemini-embedding output dimension
 
     # ------------------------------------------------------------------
     # Collection Management
@@ -43,12 +43,13 @@ class QdrantVectorStore:
         Creates the collection if absent; recreates it on dimension mismatch.
         Idempotently creates a keyword payload index on `document_id`.
         """
+        collections_resp = await self.client.get_collections()
         existing_names = {
-            c.name for c in self.client.get_collections().collections
+            c.name for c in collections_resp.collections
         }
 
         if self.collection_name in existing_names:
-            info = self.client.get_collection(self.collection_name)
+            info = await self.client.get_collection(self.collection_name)
             existing_dim = info.config.params.vectors.size
             if existing_dim != self.dimension:
                 logger.warning(
@@ -57,16 +58,16 @@ class QdrantVectorStore:
                     self.dimension,
                     existing_dim,
                 )
-                self.client.delete_collection(self.collection_name)
-                self._create_collection()
+                await self.client.delete_collection(self.collection_name)
+                await self._create_collection()
         else:
-            self._create_collection()
+            await self._create_collection()
 
-        self._ensure_document_id_index()
+        await self._ensure_document_id_index()
 
-    def _create_collection(self) -> None:
+    async def _create_collection(self) -> None:
         """Create the Qdrant collection with cosine similarity."""
-        self.client.create_collection(
+        await self.client.create_collection(
             collection_name=self.collection_name,
             vectors_config=VectorParams(
                 size=self.dimension,
@@ -74,10 +75,10 @@ class QdrantVectorStore:
             ),
         )
 
-    def _ensure_document_id_index(self) -> None:
+    async def _ensure_document_id_index(self) -> None:
         """Create a keyword payload index on `document_id` (idempotent)."""
         try:
-            self.client.create_payload_index(
+            await self.client.create_payload_index(
                 collection_name=self.collection_name,
                 field_name="document_id",
                 field_schema=PayloadSchemaType.KEYWORD,
@@ -120,7 +121,7 @@ class QdrantVectorStore:
             for i, (vector, chunk_id) in enumerate(zip(vectors, chunk_ids))
         ]
 
-        self.client.upsert(
+        await self.client.upsert(
             collection_name=self.collection_name,
             points=points,
         )
@@ -132,7 +133,7 @@ class QdrantVectorStore:
         Args:
             document_id: Document ID whose vectors should be removed
         """
-        self.client.delete(
+        await self.client.delete(
             collection_name=self.collection_name,
             points_selector=_document_filter(document_id),
         )
@@ -161,7 +162,7 @@ class QdrantVectorStore:
         """
         await self.ensure_collection()
 
-        response = self.client.query_points(
+        response = await self.client.query_points(
             collection_name=self.collection_name,
             query=query_vector,
             query_filter=_document_filter(document_id),

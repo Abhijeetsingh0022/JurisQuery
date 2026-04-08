@@ -63,9 +63,7 @@ async def update_folder(
         folder.description = data.description
         
     await db.commit()
-    await db.refresh(folder)
-    folder.documents = [fd.document for fd in folder.folder_documents]
-    return folder
+    return await get_folder(db, user_id, folder_id)
 
 
 async def delete_folder(db: AsyncSession, user_id: str, folder_id: UUID) -> None:

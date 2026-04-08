@@ -67,8 +67,11 @@ class CloudinaryStorage(BaseStorage):
         extension = filename.rsplit(".", 1)[-1].lower() if "." in filename else ""
         resource_type = "raw"  # Use 'raw' for PDFs and documents
         
+        import asyncio
+        
         # Upload to Cloudinary
-        result = cloudinary.uploader.upload(
+        result = await asyncio.to_thread(
+            cloudinary.uploader.upload,
             content,
             public_id=public_id,
             resource_type=resource_type,
@@ -91,8 +94,10 @@ class CloudinaryStorage(BaseStorage):
         """
         public_id = self._get_public_id(filename, folder)
         
+        import asyncio
         try:
-            result = cloudinary.uploader.destroy(
+            result = await asyncio.to_thread(
+                cloudinary.uploader.destroy,
                 public_id,
                 resource_type="raw",
                 invalidate=True,
