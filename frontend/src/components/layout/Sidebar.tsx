@@ -10,7 +10,8 @@ import {
     History,
     Settings,
     HelpCircle,
-    LogOut
+    LogOut,
+    CreditCard
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -19,6 +20,7 @@ const navigation = [
     { name: "Documents", href: "/documents", icon: FolderOpen },
     { name: "IPC Predictor", href: "/ipc-predictor", icon: Scale },
     { name: "History", href: "/history", icon: History },
+    { name: "Subscription", href: "/subscription", icon: CreditCard },
     { name: "Settings", href: "/settings", icon: Settings },
 ];
 

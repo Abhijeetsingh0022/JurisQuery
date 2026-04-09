@@ -28,7 +28,7 @@ async def create_folder(
     db: AsyncSession = Depends(get_db),
     current_user: dict = Depends(get_current_user),
 ):
-    return await service.create_folder(db, current_user["id"], request)
+    return await service.create_folder(db, current_user["id"], request, plan_tier=current_user.get("plan_tier", "free"))
 
 
 @router.get(

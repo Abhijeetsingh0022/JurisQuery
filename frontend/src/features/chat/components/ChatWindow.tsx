@@ -153,10 +153,11 @@ export default function ChatWindow({ documentId, onCitationClick }: ChatWindowPr
         const isFirstMessage = messages.length === 0;
         const userContent = input.trim();
 
+        const userMsgId = `user-${crypto.randomUUID()}`;
         setMessages((prev) => [
             ...prev,
             {
-                id: `user-${Date.now()}`,
+                id: userMsgId,
                 role: 'user',
                 content: userContent,
                 timestamp: new Date(),
@@ -168,29 +169,29 @@ export default function ChatWindow({ documentId, onCitationClick }: ChatWindowPr
         setAgentStatus('Thinking...');
         setError(null);
 
+        let finalContent = '';
+
         abortControllerRef.current = streamMessage(
             sessionId,
             userContent,
             searchMode,
             (token) => {
-                setStreamingContent((prev) => (prev ?? '') + token);
-                messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+                finalContent += token;
+                setStreamingContent(finalContent);
             },
             () => {
-                setStreamingContent((prev) => {
-                    if (prev) {
-                        setMessages((msgs) => [
-                            ...msgs,
-                            {
-                                id: `assistant-${Date.now()}`,
-                                role: 'assistant',
-                                content: prev,
-                                timestamp: new Date(),
-                            },
-                        ]);
-                    }
-                    return null;
-                });
+                if (finalContent) {
+                    setMessages((msgs) => [
+                        ...msgs,
+                        {
+                            id: `assistant-${crypto.randomUUID()}`,
+                            role: 'assistant',
+                            content: finalContent,
+                            timestamp: new Date(),
+                        },
+                    ]);
+                }
+                setStreamingContent(null);
                 setIsLoading(false);
                 setAgentStatus(null);
                 if (isFirstMessage) fetchSessions();

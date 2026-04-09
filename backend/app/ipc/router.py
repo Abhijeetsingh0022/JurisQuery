@@ -56,7 +56,12 @@ async def predict_sections(
     current_user: dict = Depends(get_current_user),
 ) -> IPCPredictionResponse:
     """Predict applicable IPC sections from a crime/incident description."""
-    return await predict_ipc_sections(db, request, user_id=current_user["id"])
+    return await predict_ipc_sections(
+        db, 
+        request, 
+        user_id=current_user["id"],
+        plan_tier=current_user.get("plan_tier", "free")
+    )
 
 
 @router.get(

@@ -29,9 +29,10 @@ class QdrantVectorStore:
         self.client = AsyncQdrantClient(
             url=settings.qdrant_url,
             api_key=settings.qdrant_api_key,
+            timeout=60.0,
         )
         self.collection_name = settings.qdrant_collection_name
-        self.dimension = 768  # gemini-embedding output dimension
+        self.dimension = 3072  # text-embedding-004 max dimension
 
     # ------------------------------------------------------------------
     # Collection Management

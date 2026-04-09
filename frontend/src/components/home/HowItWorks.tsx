@@ -55,15 +55,27 @@ export function HowItWorks() {
                     </motion.h2>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-4 gap-8 relative">
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-8 relative mt-24">
                     {/* Connecting line for desktop */}
-                    <div className="hidden md:block absolute top-[2.5rem] left-[12%] right-[12%] h-[2px] bg-white/10 z-0">
+                    <div className="hidden md:block absolute top-[2.5rem] left-[12%] right-[12%] h-[2px] bg-white/[0.05] z-0 overflow-hidden">
+                        {/* Static loaded line state */}
                         <motion.div
                             initial={{ width: "0%" }}
                             whileInView={{ width: "100%" }}
                             viewport={{ once: true }}
-                            transition={{ duration: 1.5, ease: "easeInOut", delay: 0.2 }}
-                            className="h-full bg-gradient-to-r from-transparent via-white/50 to-transparent"
+                            transition={{ duration: 1.5, ease: "easeInOut" }}
+                            className="absolute inset-0 bg-white/10"
+                        />
+                        {/* Infinite data flow pulse */}
+                        <motion.div
+                            initial={{ x: "-100%" }}
+                            animate={{ x: "200%" }}
+                            transition={{
+                                duration: 3,
+                                ease: "linear",
+                                repeat: Infinity,
+                            }}
+                            className="absolute inset-y-0 w-1/3 bg-gradient-to-r from-transparent via-white/50 to-transparent"
                         />
                     </div>
 
@@ -74,16 +86,23 @@ export function HowItWorks() {
                             whileInView={{ opacity: 1, y: 0 }}
                             viewport={{ once: true }}
                             transition={{ delay: index * 0.15 }}
-                            className="relative z-10 flex flex-col items-center text-center"
+                            className="relative flex flex-col items-center text-center"
                         >
-                            <div className="w-20 h-20 rounded-full bg-white text-primary flex items-center justify-center mb-6 shadow-lg text-xl font-bold border-4 border-primary/20">
-                                <step.icon size={32} />
+                            {/* Icon & Watermark Container */}
+                            <div className="relative flex items-center justify-center w-full mb-8 pt-0">
+                                {/* Large faint number shifted heavily upwards behind the icon */}
+                                <div className="absolute -top-[7.5rem] md:-top-[9.5rem] left-1/2 -translate-x-1/2 text-[100px] md:text-[130px] font-serif font-bold text-white/[0.08] select-none pointer-events-none z-0 tracking-tighter">
+                                    {step.id}
+                                </div>
+                                
+                                {/* Active Icon Circle */}
+                                <div className="w-20 h-20 rounded-full bg-white text-[#2a3b4e] flex items-center justify-center shadow-2xl ring-[12px] ring-white/5 relative z-10 transition-transform hover:scale-105 duration-300">
+                                    <step.icon size={32} strokeWidth={1.5} />
+                                </div>
                             </div>
-                            <div className="text-5xl font-serif font-bold text-white/10 absolute -top-4 -right-4 select-none">
-                                {step.id}
-                            </div>
-                            <h3 className="text-xl font-bold mb-3">{step.title}</h3>
-                            <p className="text-primary-foreground/70 text-sm leading-relaxed max-w-[200px]">
+                            
+                            <h3 className="text-xl font-bold font-serif mb-3 tracking-wide">{step.title}</h3>
+                            <p className="text-primary-foreground/60 text-[14px] leading-relaxed max-w-[220px]">
                                 {step.description}
                             </p>
                         </motion.div>

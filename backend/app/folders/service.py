@@ -13,7 +13,18 @@ from app.folders.schemas import CaseFolderCreate, CaseFolderUpdate
 logger = logging.getLogger(__name__)
 
 
-async def create_folder(db: AsyncSession, user_id: str, data: CaseFolderCreate) -> CaseFolder:
+async def create_folder(db: AsyncSession, user_id: str, data: CaseFolderCreate, plan_tier: str = "free") -> CaseFolder:
+    if plan_tier == "free":
+        # Check folder count limit
+        stmt = select(CaseFolder).where(CaseFolder.user_id == user_id)
+        result = await db.execute(stmt)
+        folders = result.scalars().all()
+        if len(folders) >= 3:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Free-tier limit reached (3 folders). Upgrade to Pro for unlimited folders."
+            )
+
     folder = CaseFolder(
         user_id=user_id,
         name=data.name,

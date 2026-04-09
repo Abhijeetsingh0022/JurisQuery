@@ -21,12 +21,15 @@ import {
     ArrowUpRight
 } from "lucide-react";
 import Link from "next/link";
+import UpgradeModal from "@/components/shared/UpgradeModal";
 
 export default function DashboardClient() {
     const { user } = useUser();
     const { fetcher } = useApi();
     const queryClient = useQueryClient();
     const fileInputRef = useRef<HTMLInputElement>(null);
+    const [upgradeModalOpen, setUpgradeModalOpen] = useState(false);
+    const [lastError, setLastError] = useState<string | null>(null);
 
     const { data: documents, isLoading: isLoadingDocs } = useQuery({
         queryKey: ["documents", "recent"],
@@ -48,7 +51,12 @@ export default function DashboardClient() {
             queryClient.invalidateQueries({ queryKey: ["documents"] });
         },
         onError: (error: any) => {
-            toast.error(`Upload failed: ${error.message}`);
+            if (error.status === 403) {
+                setLastError(error.message);
+                setUpgradeModalOpen(true);
+            } else {
+                toast.error(`Upload failed: ${error.message}`);
+            }
         }
     });
 
@@ -342,6 +350,12 @@ export default function DashboardClient() {
                         )}
                     </div>
                 </section>
+            <UpgradeModal 
+                isOpen={upgradeModalOpen} 
+                onClose={() => setUpgradeModalOpen(false)} 
+                limitName="Uploads"
+                description={lastError || undefined}
+            />
             </div>
         </div>
     );

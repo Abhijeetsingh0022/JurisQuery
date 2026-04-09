@@ -8,7 +8,7 @@ import { Check } from "lucide-react";
 const plans = [
     {
         name: "Starter",
-        price: "$0",
+        price: "₹0",
         description: "Perfect for individuals trying out AI legal analysis.",
         features: [
             "5 Document uploads per month",
@@ -21,7 +21,7 @@ const plans = [
     },
     {
         name: "Professional",
-        price: "$49",
+        price: "₹2,499",
         period: "/month",
         description: "For solo practitioners and small firms needing power.",
         features: [

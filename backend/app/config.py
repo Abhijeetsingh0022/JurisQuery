@@ -61,6 +61,12 @@ class Settings(BaseSettings):
     # Clerk JWKS endpoint base, e.g. https://grown-hyena-6.clerk.accounts.dev
     clerk_frontend_api: str | None = None
 
+    # Stripe Billing
+    stripe_secret_key: str | None = None
+    stripe_webhook_secret: str | None = None
+    stripe_pro_price_id: str | None = None
+    stripe_dummy_mode: bool = True
+
     # CORS
     cors_origins: str = "http://localhost:3000"
 

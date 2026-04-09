@@ -31,6 +31,7 @@ import {
 } from 'lucide-react';
 import { useApi } from '@/hooks/use-api';
 import { StatuteBridgePanel } from '@/features/ipc/components/StatuteBridgePanel';
+import UpgradeModal from '@/components/shared/UpgradeModal';
 
 interface PredictedSection {
     section: {
@@ -86,6 +87,8 @@ export default function IPCPredictorPage() {
     const [deletingId, setDeletingId] = useState<string | null>(null);
     // BNS Bridge drawer state
     const [bridgeSection, setBridgeSection] = useState<string | null>(null);
+    const [upgradeModalOpen, setUpgradeModalOpen] = useState(false);
+    const [lastError, setLastError] = useState<string | null>(null);
 
     const router = useRouter();
 
@@ -166,13 +169,18 @@ export default function IPCPredictorPage() {
                 }, ...prev]);
             }
         } catch (err) {
-            const errorMessage: Message = {
-                id: `error-${Date.now()}`,
-                role: 'assistant',
-                content: err instanceof Error ? err.message : 'An error occurred while analyzing.',
-                timestamp: new Date(),
-            };
-            setMessages((prev) => [...prev, errorMessage]);
+            if (err instanceof Error && (err as any).status === 403) {
+                setUpgradeModalOpen(true);
+                setLastError(err.message);
+            } else {
+                const errorMessage: Message = {
+                    id: `error-${Date.now()}`,
+                    role: 'assistant',
+                    content: err instanceof Error ? err.message : 'An error occurred while analyzing.',
+                    timestamp: new Date(),
+                };
+                setMessages((prev) => [...prev, errorMessage]);
+            }
         } finally {
             setIsLoading(false);
         }
@@ -875,6 +883,12 @@ export default function IPCPredictorPage() {
                     </div>
                 </Dialog>
             </Transition>
+            <UpgradeModal 
+                isOpen={upgradeModalOpen} 
+                onClose={() => setUpgradeModalOpen(false)} 
+                limitName="AI Predictions"
+                description={lastError || undefined}
+            />
         </div>
     );
 }

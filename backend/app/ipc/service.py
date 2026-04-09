@@ -9,6 +9,7 @@ import logging
 import re
 import time
 from pathlib import Path
+from fastapi import HTTPException
 
 from sqlalchemy import func, or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -245,18 +246,36 @@ async def predict_ipc_sections(
     db: AsyncSession,
     request: IPCPredictionRequest,
     user_id: str | None = None,
+    plan_tier: str = "free",
 ) -> IPCPredictionResponse:
     """
     Predict applicable IPC sections for a crime description using LLM reasoning.
-
-    Args:
-        db: Database session
-        request: Prediction request containing the description and max sections
-        user_id: If provided, the prediction is persisted to history
-
-    Returns:
-        IPCPredictionResponse with matched sections, confidence scores, and metadata
+    Enforces daily query limits for Free-tier users.
     """
+    if user_id and plan_tier == "free":
+        from app.auth.models import User
+        from datetime import datetime, timezone
+
+        # Fetch and update usage
+        result = await db.execute(select(User).where(User.clerk_id == user_id))
+        user = result.scalar_one_or_none()
+        
+        if user:
+            now = datetime.now(timezone.utc)
+            # Reset counter if it's a new day (UTC)
+            if user.last_query_reset.date() < now.date():
+                user.daily_query_count = 0
+                user.last_query_reset = now
+            
+            if user.daily_query_count >= 5:
+                raise HTTPException(
+                    status_code=403,
+                    detail="Daily prediction limit reached (5/5). Upgrade to Pro for unlimited AI analysis."
+                )
+            
+            user.daily_query_count += 1
+            # We don't commit yet; it will commit at the end of the prediction process or session
+
     start = time.monotonic()
 
     # Step 1: Intelligent LLM distillation of massive narratives into crisp legal keywords

@@ -10,9 +10,10 @@ import { useApi } from '@/hooks/use-api';
 import { toast } from 'sonner';
 import { motion, AnimatePresence } from 'framer-motion';
 import Link from 'next/link';
+import UpgradeModal from '@/components/shared/UpgradeModal';
 
 // --- Create Folder Modal ---
-function CreateFolderModal({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) {
+function CreateFolderModal({ isOpen, onClose, onLimitReached }: { isOpen: boolean; onClose: () => void; onLimitReached: (msg: string) => void }) {
     const [name, setName] = useState('');
     const [description, setDescription] = useState('');
     const { mutate: createFolder, isPending } = useCreateFolder();
@@ -28,7 +29,14 @@ function CreateFolderModal({ isOpen, onClose }: { isOpen: boolean; onClose: () =
                     setName(''); setDescription('');
                     onClose();
                 },
-                onError: () => toast.error('Failed to create folder'),
+                onError: (error: any) => {
+                    if (error.status === 403) {
+                        onClose();
+                        onLimitReached(error.message);
+                    } else {
+                        toast.error('Failed to create folder');
+                    }
+                },
             }
         );
     };
@@ -226,6 +234,8 @@ function FolderCard({ folder, onDelete }: { folder: any; onDelete: (id: string) 
 // --- Main export ---
 export default function CaseFoldersTab() {
     const [createOpen, setCreateOpen] = useState(false);
+    const [upgradeModalOpen, setUpgradeModalOpen] = useState(false);
+    const [lastError, setLastError] = useState<string | null>(null);
     const { data: folders = [], isLoading } = useFolders();
     const { mutate: deleteFolder } = useDeleteFolder();
 
@@ -288,7 +298,21 @@ export default function CaseFoldersTab() {
                 </div>
             )}
 
-            <CreateFolderModal isOpen={createOpen} onClose={() => setCreateOpen(false)} />
+            <CreateFolderModal 
+                isOpen={createOpen} 
+                onClose={() => setCreateOpen(false)} 
+                onLimitReached={(msg) => {
+                    setLastError(msg);
+                    setUpgradeModalOpen(true);
+                }}
+            />
+
+            <UpgradeModal 
+                isOpen={upgradeModalOpen} 
+                onClose={() => setUpgradeModalOpen(false)} 
+                limitName="Case Folders"
+                description={lastError || undefined}
+            />
         </div>
     );
 }

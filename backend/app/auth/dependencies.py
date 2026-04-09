@@ -6,7 +6,7 @@ Clerk tokens are RS256-signed — verified via Clerk's JWKS endpoint.
 
 import httpx
 import logging
-from fastapi import Header
+from fastapi import Header, Depends
 from jose import JWTError, jwt
 
 from app.config import settings
@@ -42,10 +42,18 @@ async def _get_jwks() -> dict:
     return _jwks_cache
 
 
-async def get_current_user(authorization: str | None = Header(None)) -> dict:
+from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
+from app.database import get_db
+from app.auth.models import User
+
+async def get_current_user(
+    authorization: str | None = Header(None),
+    db: AsyncSession = Depends(get_db)
+) -> dict:
     """
     Extract and validate user from Clerk JWT token.
-    In development mode, returns a dev user if no token provided.
+    Fetches real-time SaaS entitlements from local PostgreSQL mapping.
     """
     # In development, allow requests without auth
     if not authorization:
@@ -108,10 +116,22 @@ async def get_current_user(authorization: str | None = Header(None)) -> dict:
         if not user_id:
             raise UnauthorizedError("Invalid token payload")
 
+        # Guarantee Real-time SaaS Entitlement Synced State
+        result = await db.execute(select(User).where(User.clerk_id == user_id))
+        db_user = result.scalar_one_or_none()
+        
+        plan_tier = "free"
+        stripe_customer_id = None
+        if db_user:
+            plan_tier = db_user.plan_tier
+            stripe_customer_id = db_user.stripe_customer_id
+
         return {
             "id": user_id,
             "email": payload.get("email"),
             "clerk_id": user_id,
+            "plan_tier": plan_tier,
+            "stripe_customer_id": stripe_customer_id
         }
 
     except JWTError as e:

@@ -6,7 +6,7 @@ import logging
 import uuid
 from uuid import UUID
 
-from fastapi import UploadFile
+from fastapi import UploadFile, HTTPException, status
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -52,6 +52,7 @@ async def upload_document(
     db: AsyncSession,
     file: UploadFile,
     user_id: str,
+    plan_tier: str = "free",
 ) -> Document:
     """
     Validate, upload, and register a new document.
@@ -66,7 +67,18 @@ async def upload_document(
 
     Raises:
         BadRequestError: If the file type or size is not allowed
+        HTTPException: If Free-tier document limit is reached
     """
+    if plan_tier == "free":
+        # Check document count limit
+        stmt = select(func.count()).select_from(Document).where(Document.user_id == user_id)
+        count = await db.scalar(stmt) or 0
+        if count >= 10:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Free-tier limit reached (10 documents). Upgrade to Pro for unlimited uploads."
+            )
+
     extension = _file_extension(file.filename or "")
     if extension not in _ALLOWED_EXTENSIONS:
         raise BadRequestError(

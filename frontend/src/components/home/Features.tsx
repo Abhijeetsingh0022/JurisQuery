@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { LayoutDashboard, UploadCloud, SplitSquareHorizontal, Quote, Share2 } from "lucide-react";
+import { LayoutDashboard, UploadCloud, SplitSquareHorizontal, Quote, Share2, Scale } from "lucide-react";
 
 const features = [
     {
@@ -28,6 +28,11 @@ const features = [
         title: "Export & Share",
         description: "Generate formatted PDF reports or share chat summaries via email with a single click.",
         icon: Share2,
+    },
+    {
+        title: "BNS Statute Bridge",
+        description: "Instantly cross-reference legacy IPC statutes with newly enforced Bharatiya Nyaya Sanhita (BNS) 2023 provisions.",
+        icon: Scale,
     },
 ];
 

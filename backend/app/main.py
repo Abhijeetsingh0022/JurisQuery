@@ -17,9 +17,11 @@ from app.rag.router import router as rag_router
 from app.chat.router import router as chat_router
 from app.folders.router import router as folders_router
 from app.ipc.router import router as ipc_router
+from app.billing.router import router as billing_router
+from app.webhooks.router import router as webhooks_router
+
 from app.ipc import bns_service
 from app.database import async_session_maker
-
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -68,6 +70,8 @@ app.include_router(rag_router, prefix="/api/rag", tags=["RAG"])
 app.include_router(chat_router, prefix="/api/chat", tags=["Chat"])
 app.include_router(ipc_router, prefix="/api/v1/ipc", tags=["IPC Sections"])
 app.include_router(folders_router, prefix="/api/folders", tags=["Folders"])
+app.include_router(billing_router, prefix="/api/v1/billing", tags=["Billing"])
+app.include_router(webhooks_router, prefix="/api/v1/webhooks", tags=["Webhooks"])
 
 
 @app.api_route("/", methods=["GET", "HEAD"], tags=["Health"])
