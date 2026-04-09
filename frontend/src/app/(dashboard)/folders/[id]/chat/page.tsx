@@ -268,7 +268,7 @@ export default function FolderChatPage() {
         return (
             <div className="h-screen -m-8 bg-[#fdfcfb] flex items-center justify-center">
                 <div className="flex flex-col items-center gap-4">
-                    <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-[#2a3b4e] to-[#4a6b8e] flex items-center justify-center shadow-xl shadow-[#2a3b4e]/20">
+                    <div className="w-14 h-14 rounded-lg bg-gradient-to-br from-[#2a3b4e] to-[#4a6b8e] flex items-center justify-center shadow-xl shadow-[#2a3b4e]/20">
                         <Loader2 className="h-6 w-6 animate-spin text-white" />
                     </div>
                     <p className="text-[14px] font-semibold text-[#1a2332]">Loading folder…</p>
@@ -281,13 +281,13 @@ export default function FolderChatPage() {
         return (
             <div className="h-screen -m-8 bg-[#fdfcfb] flex items-center justify-center">
                 <div className="text-center max-w-sm">
-                    <div className="w-16 h-16 rounded-2xl bg-red-50 flex items-center justify-center mx-auto mb-5">
+                    <div className="w-16 h-16 rounded-lg bg-red-50 flex items-center justify-center mx-auto mb-5">
                         <AlertCircle className="h-7 w-7 text-red-400" />
                     </div>
                     <h1 className="text-lg font-bold text-[#1a2332] mb-2">Folder Not Found</h1>
                     <Link
                         href="/documents"
-                        className="inline-flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-[#2a3b4e] to-[#3d5a80] text-white rounded-xl text-sm font-semibold mt-4"
+                        className="inline-flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-[#2a3b4e] to-[#3d5a80] text-white rounded-lg text-sm font-semibold mt-4"
                     >
                         <ArrowLeft className="h-4 w-4" /> Back to Documents
                     </Link>
@@ -304,7 +304,7 @@ export default function FolderChatPage() {
 
                 {/* Top header */}
                 <div className="px-4 pt-4 pb-2 flex-none">
-                    <div className="bg-white rounded-xl border border-[#e8e2de] flex items-center justify-between px-5 py-3 shadow-sm">
+                    <div className="bg-white rounded-lg border border-[#e8e2de] flex items-center justify-between px-5 py-3 shadow-sm">
                         <div className="flex items-center gap-3.5 min-w-0">
                             <button
                                 onClick={() => router.back()}
@@ -345,14 +345,14 @@ export default function FolderChatPage() {
                 <div className="flex-1 flex overflow-hidden px-4 pb-4 pt-2 gap-3">
 
                     {/* Left: Document sidebar */}
-                    <div className="w-72 shrink-0 bg-white rounded-xl border border-[#e8e2de] shadow-sm overflow-hidden flex flex-col">
+                    <div className="w-72 shrink-0 bg-white rounded-lg border border-[#e8e2de] shadow-sm overflow-hidden flex flex-col">
                         <div className="px-4 py-3 border-b border-[#e8e2de] bg-[#faf8f6]">
                             <h2 className="text-[10px] font-bold text-[#2a3b4e]/30 uppercase tracking-wider">Sources</h2>
                             <p className="text-[11px] text-[#2a3b4e]/25 mt-0.5">Answers synthesized across all</p>
                         </div>
 
                         {/* Branched RAG badge */}
-                        <div className="mx-3 mt-3 p-3 rounded-xl bg-gradient-to-br from-blue-50 to-indigo-50 border border-blue-100">
+                        <div className="mx-3 mt-3 p-3 rounded-lg bg-gradient-to-br from-blue-50 to-indigo-50 border border-blue-100">
                             <div className="flex items-center gap-2 mb-1">
                                 <Sparkles className="h-3 w-3 text-blue-500" />
                                 <span className="text-[10px] font-bold text-blue-700 uppercase tracking-wider">Branched RAG</span>
@@ -376,7 +376,7 @@ export default function FolderChatPage() {
                                     <Link
                                         key={doc.id}
                                         href={`/documents/${doc.id}`}
-                                        className="flex items-center gap-2.5 p-2.5 rounded-xl hover:bg-[#faf8f6] border border-transparent hover:border-[#e8e2de] transition-all group"
+                                        className="flex items-center gap-2.5 p-2.5 rounded-lg hover:bg-[#faf8f6] border border-transparent hover:border-[#e8e2de] transition-all group"
                                     >
                                         <div className="w-8 h-8 rounded-lg bg-[#f7f3f1] flex items-center justify-center shrink-0 group-hover:bg-[#2a3b4e]/5 transition-colors">
                                             <FileText className="h-3.5 w-3.5 text-[#2a3b4e]/40" />
@@ -401,7 +401,7 @@ export default function FolderChatPage() {
                     </div>
 
                     {/* Right: Chat panel */}
-                    <div className="flex-1 bg-white rounded-xl border border-[#e8e2de] shadow-sm overflow-hidden flex flex-col">
+                    <div className="flex-1 bg-white rounded-lg border border-[#e8e2de] shadow-sm overflow-hidden flex flex-col">
                         <div className="flex items-center justify-between px-5 py-3.5 border-b border-[#e8e2de] bg-[#faf8f6]/60 shrink-0">
                             <div className="flex items-center gap-2.5">
                                 <div className="w-6 h-6 rounded-lg bg-gradient-to-br from-[#2a3b4e] to-[#4a6b8e] flex items-center justify-center">
@@ -426,7 +426,7 @@ export default function FolderChatPage() {
                                     animate={{ opacity: 1, y: 0 }}
                                     className="flex flex-col items-center justify-center py-16 text-center"
                                 >
-                                    <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-[#2a3b4e] to-[#4a6b8e] flex items-center justify-center mb-5 shadow-xl shadow-[#2a3b4e]/15">
+                                    <div className="w-16 h-16 rounded-lg bg-gradient-to-br from-[#2a3b4e] to-[#4a6b8e] flex items-center justify-center mb-5 shadow-xl shadow-[#2a3b4e]/15">
                                         <FolderOpen className="h-7 w-7 text-white" />
                                     </div>
                                     <h3 className="text-[15px] font-bold text-[#1a2332] mb-2">Ask across {docCount} documents</h3>
@@ -434,7 +434,7 @@ export default function FolderChatPage() {
                                         JurisQuery will search every document in this folder and synthesize a single, citation-backed answer.
                                     </p>
                                     {docCount === 0 && (
-                                        <div className="flex items-center gap-2 px-4 py-2.5 bg-amber-50 text-amber-700 border border-amber-100 rounded-xl text-[12px] font-medium">
+                                        <div className="flex items-center gap-2 px-4 py-2.5 bg-amber-50 text-amber-700 border border-amber-100 rounded-lg text-[12px] font-medium">
                                             <AlertCircle className="h-3.5 w-3.5" />
                                             Add documents to this folder first
                                         </div>
@@ -455,7 +455,7 @@ export default function FolderChatPage() {
                                                 </div>
                                             )}
                                             <div className={`flex-1 min-w-0 ${msg.role === 'user' ? 'flex justify-end' : ''}`}>
-                                                <div className={`inline-block px-4 py-3 rounded-xl shadow-sm text-[13px] leading-relaxed ${
+                                                <div className={`inline-block px-4 py-3 rounded-lg shadow-sm text-[13px] leading-relaxed ${
                                                     msg.role === 'user'
                                                         ? 'bg-gradient-to-r from-[#2a3b4e] to-[#3d5a80] text-white rounded-tr-sm max-w-[75%]'
                                                         : 'bg-white border border-[#e8e2de] text-[#1a2332] rounded-tl-sm whitespace-pre-wrap'
@@ -479,7 +479,7 @@ export default function FolderChatPage() {
                                         <Sparkles className="h-3.5 w-3.5 text-white" />
                                     </div>
                                     <div className="flex-1 min-w-0">
-                                        <div className="inline-block bg-white border border-[#e8e2de] rounded-xl rounded-tl-sm px-4 py-3 shadow-sm text-[13px] text-[#1a2332] leading-relaxed">
+                                        <div className="inline-block bg-white border border-[#e8e2de] rounded-lg rounded-tl-sm px-4 py-3 shadow-sm text-[13px] text-[#1a2332] leading-relaxed">
                                             {renderMessageContent(streamingContent)}
                                             <span className="inline-block w-[2px] h-[1em] bg-[#2a3b4e]/60 ml-0.5 align-middle animate-pulse" />
                                         </div>
@@ -492,7 +492,7 @@ export default function FolderChatPage() {
                                 <motion.div
                                     initial={{ opacity: 0, y: 6 }}
                                     animate={{ opacity: 1, y: 0 }}
-                                    className="flex items-center gap-2.5 px-4 py-3 rounded-xl bg-red-50 text-red-600 border border-red-100 text-[13px]"
+                                    className="flex items-center gap-2.5 px-4 py-3 rounded-lg bg-red-50 text-red-600 border border-red-100 text-[13px]"
                                 >
                                     <AlertCircle className="h-4 w-4 shrink-0" />
                                     <span className="font-medium">{error}</span>
@@ -505,7 +505,7 @@ export default function FolderChatPage() {
                         {/* Input */}
                         <div className="flex-none p-4 border-t border-[#e8e2de] bg-white">
                             <form onSubmit={handleSubmit}>
-                                <div className="flex items-center gap-3 bg-[#faf8f6] border border-[#e8e2de] rounded-xl px-4 py-2 focus-within:bg-white focus-within:border-[#2a3b4e]/20 focus-within:ring-2 focus-within:ring-[#2a3b4e]/5 focus-within:shadow-sm transition-all duration-200">
+                                <div className="flex items-center gap-3 bg-[#faf8f6] border border-[#e8e2de] rounded-lg px-4 py-2 focus-within:bg-white focus-within:border-[#2a3b4e]/20 focus-within:ring-2 focus-within:ring-[#2a3b4e]/5 focus-within:shadow-sm transition-all duration-200">
                                     <textarea
                                         value={input}
                                         onChange={(e) => setInput(e.target.value)}
@@ -518,7 +518,7 @@ export default function FolderChatPage() {
                                     <button
                                         type="submit"
                                         disabled={!input.trim() || isLoading || isInitializing || docCount === 0}
-                                        className="w-8 h-8 rounded-xl flex items-center justify-center bg-gradient-to-br from-[#2a3b4e] to-[#3d5a80] text-white shadow-sm shadow-[#2a3b4e]/20 hover:shadow-md hover:shadow-[#2a3b4e]/25 transition-all active:scale-95 disabled:opacity-30 disabled:cursor-not-allowed disabled:shadow-none shrink-0"
+                                        className="w-8 h-8 rounded-lg flex items-center justify-center bg-gradient-to-br from-[#2a3b4e] to-[#3d5a80] text-white shadow-sm shadow-[#2a3b4e]/20 hover:shadow-md hover:shadow-[#2a3b4e]/25 transition-all active:scale-95 disabled:opacity-30 disabled:cursor-not-allowed disabled:shadow-none shrink-0"
                                     >
                                         {isLoading
                                             ? <Loader2 className="h-3.5 w-3.5 animate-spin" />

@@ -10,7 +10,7 @@ export default function HelpPage() {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div className="bg-white p-6 rounded-xl shadow-sm border border-[#2a3b4e]/10 hover:shadow-md transition-shadow">
+                <div className="bg-white p-6 rounded-lg shadow-sm border border-[#2a3b4e]/10 hover:shadow-md transition-shadow">
                     <BookOpen className="h-8 w-8 text-[#2a3b4e] mb-4" />
                     <h3 className="text-lg font-bold text-[#2a3b4e] mb-2">Documentation</h3>
                     <p className="text-[#2a3b4e]/70 text-sm mb-4">
@@ -21,7 +21,7 @@ export default function HelpPage() {
                     </Link>
                 </div>
 
-                <div className="bg-white p-6 rounded-xl shadow-sm border border-[#2a3b4e]/10 hover:shadow-md transition-shadow">
+                <div className="bg-white p-6 rounded-lg shadow-sm border border-[#2a3b4e]/10 hover:shadow-md transition-shadow">
                     <MessageCircle className="h-8 w-8 text-[#2a3b4e] mb-4" />
                     <h3 className="text-lg font-bold text-[#2a3b4e] mb-2">Contact Support</h3>
                     <p className="text-[#2a3b4e]/70 text-sm mb-4">

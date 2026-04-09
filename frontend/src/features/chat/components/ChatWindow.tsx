@@ -329,17 +329,17 @@ export default function ChatWindow({ documentId, onCitationClick }: ChatWindowPr
                             </a>
                         );
                     },
-                    p:          ({ node, children, ...props }) => <p className="mb-3 last:mb-0 leading-relaxed text-[13px]" {...props}>{children}</p>,
+                    p:          ({ node, children, ...props }) => <p className="mb-4 last:mb-0 leading-relaxed text-[14px] text-[#1a2332]/85" {...props}>{children}</p>,
                     strong:     ({ node, children, ...props }) => <strong className="font-bold text-[#1a2332]" {...props}>{children}</strong>,
                     em:         ({ node, children, ...props }) => <em className="italic text-[#1a2332]/90" {...props}>{children}</em>,
-                    ul:         ({ node, children, ...props }) => <ul className="list-disc pl-5 mb-3 space-y-1" {...props}>{children}</ul>,
-                    ol:         ({ node, children, ...props }) => <ol className="list-decimal pl-5 mb-3 space-y-1" {...props}>{children}</ol>,
-                    li:         ({ node, children, ...props }) => <li className="text-[13px]" {...props}>{children}</li>,
-                    h1:         ({ node, children, ...props }) => <h1 className="text-sm font-bold text-[#1a2332] mt-4 mb-2" {...props}>{children}</h1>,
-                    h2:         ({ node, children, ...props }) => <h2 className="text-[13px] font-bold text-[#1a2332] mt-3 mb-1.5 uppercase tracking-wide opacity-80" {...props}>{children}</h2>,
-                    h3:         ({ node, children, ...props }) => <h3 className="text-[13px] font-semibold text-[#1a2332] mt-2 mb-1" {...props}>{children}</h3>,
-                    blockquote: ({ node, children, ...props }) => <blockquote className="border-l-2 border-indigo-200 pl-3 italic bg-indigo-50/30 py-1 pr-2 rounded-r-md my-2" {...props}>{children}</blockquote>,
-                    code:       ({ node, children, ...props }) => <code className="font-mono text-[11px] bg-[#f7f3f1] px-1 py-0.5 rounded text-[#2a3b4e]/80" {...props}>{children}</code>,
+                    ul:         ({ node, children, ...props }) => <ul className="list-disc pl-5 mb-4 space-y-2" {...props}>{children}</ul>,
+                    ol:         ({ node, children, ...props }) => <ol className="list-decimal pl-5 mb-4 space-y-2" {...props}>{children}</ol>,
+                    li:         ({ node, children, ...props }) => <li className="text-[14px] text-[#1a2332]/85" {...props}>{children}</li>,
+                    h1:         ({ node, children, ...props }) => <h1 className="text-base font-serif font-bold text-[#1a2332] mt-6 mb-3 border-b border-[#e8e2de] pb-1" {...props}>{children}</h1>,
+                    h2:         ({ node, children, ...props }) => <h2 className="text-[13px] font-bold text-[#1a2332]/70 mt-5 mb-2 uppercase tracking-[0.1em]" {...props}>{children}</h2>,
+                    h3:         ({ node, children, ...props }) => <h3 className="text-[14px] font-bold text-[#1a2332] mt-4 mb-2" {...props}>{children}</h3>,
+                    blockquote: ({ node, children, ...props }) => <blockquote className="border-l-4 border-indigo-100 pl-4 italic bg-indigo-50/20 py-2 pr-2 rounded-r-xl my-4 text-[13px] text-indigo-900/70" {...props}>{children}</blockquote>,
+                    code:       ({ node, children, ...props }) => <code className="font-mono text-[12px] bg-[#f7f3f1] px-1.5 py-0.5 rounded text-[#2a3b4e]/90 font-medium" {...props}>{children}</code>,
                 }}
             >
                 {finalContent}
@@ -352,7 +352,7 @@ export default function ChatWindow({ documentId, onCitationClick }: ChatWindowPr
     if (isInitializing) {
         return (
             <div className="flex flex-col h-full bg-[#fdfcfb] items-center justify-center">
-                <div className="w-10 h-10 rounded-xl bg-[#f7f3f1] flex items-center justify-center mb-3">
+                <div className="w-10 h-10 rounded-lg bg-[#f7f3f1] flex items-center justify-center mb-3">
                     <Loader2 className="h-5 w-5 animate-spin text-[#2a3b4e]/30" />
                 </div>
                 <span className="text-[12px] text-[#2a3b4e]/30 font-medium">Loading conversation…</span>
@@ -372,17 +372,18 @@ export default function ChatWindow({ documentId, onCitationClick }: ChatWindowPr
         <div className="flex flex-col h-full bg-[#fdfcfb]">
 
             {/* Header */}
-            <div className="relative z-50 flex items-center justify-between px-5 py-3 border-b border-[#e8e2de] bg-[#faf8f6] flex-none">
-                <div className="flex items-center gap-3">
+            <div className="relative z-50 flex items-center justify-between px-4 lg:px-5 py-2.5 lg:py-3 border-b border-[#e8e2de] bg-white lg:bg-[#faf8f6] flex-none">
+                <div className="flex items-center gap-2.5 lg:gap-3">
                     <div className="relative">
-                        <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-[#2a3b4e] to-[#4a6b8e] flex items-center justify-center">
+                        <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-[#d97706] to-[#f59e0b] flex items-center justify-center shadow-md shadow-amber-900/10">
                             <Sparkles className="h-3.5 w-3.5 text-white" />
                         </div>
-                        <div className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 bg-emerald-400 rounded-full border-2 border-[#faf8f6]" />
+                        <div className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 bg-emerald-400 rounded-full border-2 border-white lg:border-[#faf8f6]" />
                     </div>
                     <div>
-                        <h2 className="text-[13px] font-bold text-[#1a2332]">AI Document Analyst</h2>
-                        <span className="text-[10px] text-emerald-600 font-medium">Ready to analyze</span>
+                        <h2 className="text-[13px] lg:text-[14px] font-bold text-[#1a2332] leading-tight">AI Analyst</h2>
+                        <span className="hidden lg:inline text-[10px] text-emerald-600 font-medium">Ready to analyze</span>
+                        <span className="lg:hidden text-[10px] text-emerald-600 font-medium">Online</span>
                     </div>
                 </div>
 
@@ -408,7 +409,7 @@ export default function ChatWindow({ documentId, onCitationClick }: ChatWindowPr
                                 animate={{ opacity: 1, y: 0, scale: 1 }}
                                 exit={{ opacity: 0, y: -4, scale: 0.98 }}
                                 transition={{ duration: 0.15 }}
-                                className="absolute top-full right-0 mt-2 w-72 bg-white rounded-xl shadow-2xl shadow-[#2a3b4e]/10 border border-[#e8e2de] z-50 overflow-hidden"
+                                className="absolute top-full right-0 mt-2 w-72 bg-white rounded-lg shadow-2xl shadow-[#2a3b4e]/10 border border-[#e8e2de] z-50 overflow-hidden"
                             >
                                 <div className="px-4 py-3 bg-[#faf8f6] border-b border-[#e8e2de] flex items-center justify-between">
                                     <div className="flex items-center gap-2">
@@ -425,7 +426,7 @@ export default function ChatWindow({ documentId, onCitationClick }: ChatWindowPr
                                 <div className="max-h-64 overflow-y-auto p-1.5">
                                     {sortedSessions.length === 0 ? (
                                         <div className="flex flex-col items-center py-8 px-4">
-                                            <div className="w-10 h-10 rounded-xl bg-[#f7f3f1] flex items-center justify-center mb-2.5">
+                                            <div className="w-10 h-10 rounded-lg bg-[#f7f3f1] flex items-center justify-center mb-2.5">
                                                 <MessageSquare className="h-4 w-4 text-[#2a3b4e]/15" />
                                             </div>
                                             <p className="text-[12px] font-medium text-[#2a3b4e]/30">No conversations yet</p>
@@ -498,7 +499,7 @@ export default function ChatWindow({ documentId, onCitationClick }: ChatWindowPr
                         transition={{ duration: 0.4 }}
                         className="flex flex-col items-center justify-center h-full text-center"
                     >
-                        <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-[#2a3b4e] to-[#4a6b8e] flex items-center justify-center mb-5 shadow-xl shadow-[#2a3b4e]/20">
+                        <div className="w-16 h-16 rounded-lg bg-gradient-to-br from-[#2a3b4e] to-[#4a6b8e] flex items-center justify-center mb-5 shadow-xl shadow-[#2a3b4e]/20">
                             <Sparkles className="h-8 w-8 text-white" />
                         </div>
                         <h3 className="text-xl font-serif font-bold text-[#1a2332] mb-2">
@@ -543,16 +544,16 @@ export default function ChatWindow({ documentId, onCitationClick }: ChatWindowPr
                                 className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
                             >
                                 {message.role === 'user' ? (
-                                    <div className="bg-gradient-to-r from-[#2a3b4e] to-[#3d5a80] text-white px-4 py-3 rounded-2xl rounded-br-md shadow-md shadow-[#2a3b4e]/10 max-w-[80%]">
+                                    <div className="bg-gradient-to-r from-[#2a3b4e] to-[#3d5a80] text-white px-4 py-2.5 lg:py-3 rounded-lg rounded-br-md shadow-md shadow-[#2a3b4e]/10 max-w-[85%] lg:max-w-[80%]">
                                         <p className="text-[13px] leading-relaxed">{message.content}</p>
                                     </div>
                                 ) : (
-                                    <div className="flex gap-3 max-w-[90%]">
-                                        <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-[#2a3b4e] to-[#4a6b8e] flex items-center justify-center shrink-0 mt-1 shadow-sm">
+                                    <div className="flex gap-2.5 lg:gap-3 max-w-[95%] lg:max-w-[90%]">
+                                        <div className="hidden lg:flex w-7 h-7 rounded-lg bg-gradient-to-br from-[#d97706] to-[#f59e0b] items-center justify-center shrink-0 mt-1 shadow-sm">
                                             <Sparkles className="h-3 w-3 text-white" />
                                         </div>
                                         <div className="min-w-0">
-                                            <div className="bg-white border border-[#e8e2de] rounded-2xl rounded-bl-md px-4 py-3.5 shadow-sm">
+                                            <div className="bg-white border border-[#e8e2de] rounded-lg rounded-bl-md px-4 py-3 lg:py-3.5 shadow-sm">
                                                 <div className="text-[13px] leading-relaxed text-[#1a2332]/80">
                                                     {renderMessageContent(message.content, message.citations)}
                                                 </div>
@@ -592,7 +593,7 @@ export default function ChatWindow({ documentId, onCitationClick }: ChatWindowPr
                             <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-[#2a3b4e] to-[#4a6b8e] flex items-center justify-center shrink-0 shadow-sm">
                                 <Sparkles className="h-3 w-3 text-white" />
                             </div>
-                            <div className="bg-white border border-[#e8e2de] rounded-xl px-4 py-3 flex items-center gap-2.5 shadow-sm">
+                            <div className="bg-white border border-[#e8e2de] rounded-lg px-4 py-3 flex items-center gap-2.5 shadow-sm">
                                 <Loader2 className="h-3.5 w-3.5 animate-spin text-[#2a3b4e]/30" />
                                 <span className="text-[11px] font-medium text-[#1a2332]/80">
                                     {agentStatus ?? 'Analyzing document…'}
@@ -607,7 +608,7 @@ export default function ChatWindow({ documentId, onCitationClick }: ChatWindowPr
                     <motion.div
                         initial={{ opacity: 0, y: 6 }}
                         animate={{ opacity: 1, y: 0 }}
-                        className="flex items-center gap-2.5 px-4 py-3 rounded-xl bg-red-50 text-red-600 border border-red-100 text-[13px]"
+                        className="flex items-center gap-2.5 px-4 py-3 rounded-lg bg-red-50 text-red-600 border border-red-100 text-[13px]"
                     >
                         <AlertCircle className="h-4 w-4 shrink-0" />
                         <span className="font-medium">{error}</span>
@@ -625,7 +626,7 @@ export default function ChatWindow({ documentId, onCitationClick }: ChatWindowPr
                             <Sparkles className="h-3.5 w-3.5 text-white" />
                         </div>
                         <div className="flex-1 min-w-0">
-                            <div className="inline-block bg-white border border-[#e8e2de] rounded-xl rounded-tl-sm px-4 py-3 shadow-sm text-[13px] text-[#1a2332] leading-relaxed">
+                            <div className="inline-block bg-white border border-[#e8e2de] rounded-lg rounded-tl-sm px-4 py-3 shadow-sm text-[13px] text-[#1a2332] leading-relaxed">
                                 {renderMessageContent(streamingContent)}
                                 <span className="inline-block w-[2px] h-[1em] bg-[#2a3b4e]/60 ml-0.5 align-middle animate-pulse" />
                             </div>
@@ -637,20 +638,20 @@ export default function ChatWindow({ documentId, onCitationClick }: ChatWindowPr
             </div>
 
             {/* Input area */}
-            <div className="flex-none p-4 border-t border-[#e8e2de] bg-white">
+            <div className="flex-none p-3 lg:p-4 border-t border-[#e8e2de] bg-white">
                 <form onSubmit={handleSubmit}>
-                    <div className="flex items-center gap-3 bg-[#faf8f6] border border-[#e8e2de] rounded-xl px-4 py-2 focus-within:bg-white focus-within:border-[#2a3b4e]/20 focus-within:ring-2 focus-within:ring-[#2a3b4e]/5 focus-within:shadow-sm transition-all duration-200">
+                    <div className="flex items-center gap-2 lg:gap-3 bg-[#faf8f6] lg:bg-[#faf8f6] border border-[#e8e2de] rounded-lg lg:rounded-lg px-3 lg:px-4 py-1 lg:py-2 focus-within:bg-white focus-within:border-[#2a3b4e]/20 focus-within:ring-2 focus-within:ring-[#2a3b4e]/5 focus-within:shadow-sm transition-all duration-200">
                         <button
                             type="button"
                             onClick={() => setSearchMode((m) => m === 'web' ? 'document' : 'web')}
-                            className={`p-1.5 shrink-0 rounded-md transition-all ${
+                            className={`p-1.5 shrink-0 rounded-lg transition-all ${
                                 searchMode === 'web'
                                     ? 'bg-indigo-50 text-indigo-600 ring-1 ring-indigo-200'
-                                    : 'text-[#2a3b4e]/40 hover:bg-[#e8e2de] hover:text-[#2a3b4e]'
+                                    : 'text-[#2a3b4e]/30 hover:bg-[#e8e2de] hover:text-[#2a3b4e]'
                             }`}
                             title={searchMode === 'web' ? 'Web Research Enabled' : 'Document Only Mode'}
                         >
-                            <Globe className="h-4 w-4" />
+                            <Globe className="h-3.5 lg:h-4 w-3.5 lg:w-4" />
                         </button>
                         <textarea
                             ref={inputRef}
@@ -660,16 +661,16 @@ export default function ChatWindow({ documentId, onCitationClick }: ChatWindowPr
                             placeholder={
                                 searchMode === 'web'
                                     ? 'Ask a web research question...'
-                                    : 'Ask a question about your document…'
+                                    : 'Ask a question…'
                             }
                             rows={1}
-                            className="flex-1 bg-transparent text-[13px] focus:outline-none text-[#1a2332] placeholder:text-[#2a3b4e]/30 resize-none h-8 pt-1.5"
+                            className="flex-1 bg-transparent text-[13px] focus:outline-none text-[#1a2332] placeholder:text-[#2a3b4e]/25 resize-none h-8 pt-1.5 lg:pt-1.5"
                             disabled={isLoading || !sessionId}
                         />
                         <button
                             type="submit"
                             disabled={!input.trim() || isLoading || !sessionId}
-                            className={`p-2 rounded-lg text-white disabled:opacity-20 disabled:cursor-not-allowed hover:shadow-md transition-all shrink-0 active:scale-95 ${
+                            className={`p-2 rounded-lg text-white disabled:opacity-20 disabled:cursor-not-allowed hover:shadow-lg transition-all shrink-0 active:scale-95 ${
                                 searchMode === 'web'
                                     ? 'bg-gradient-to-r from-indigo-500 to-indigo-600 shadow-indigo-500/20'
                                     : 'bg-gradient-to-r from-[#2a3b4e] to-[#3d5a80] shadow-[#2a3b4e]/15'
@@ -678,7 +679,7 @@ export default function ChatWindow({ documentId, onCitationClick }: ChatWindowPr
                             <Send className="h-3.5 w-3.5" />
                         </button>
                     </div>
-                    <p className="text-center mt-2 text-[9px] text-[#2a3b4e]/15 font-medium">
+                    <p className="hidden lg:block text-center mt-2 text-[9px] text-[#2a3b4e]/15 font-medium">
                         AI-generated analysis · Responses include page citations
                     </p>
                 </form>

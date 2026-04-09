@@ -64,7 +64,7 @@ export default function FeaturesPage() {
                             className={`flex flex-col ${index % 2 === 0 ? "md:flex-row" : "md:flex-row-reverse"} items-center gap-12 mb-32`}
                         >
                             <div className="flex-1 w-full">
-                                <div className="relative aspect-video rounded-2xl overflow-hidden shadow-2xl border border-primary/10 group">
+                                <div className="relative aspect-video rounded-lg overflow-hidden shadow-2xl border border-primary/10 group">
                                     <div className="absolute inset-0 bg-primary/20 group-hover:bg-transparent transition-colors duration-500 z-10" />
                                     {/* Using a colored div as placeholder if image fails, or the actual image */}
                                     <div
@@ -74,7 +74,7 @@ export default function FeaturesPage() {
                                 </div>
                             </div>
                             <div className="flex-1 w-full space-y-6">
-                                <div className="w-14 h-14 rounded-xl bg-primary/10 flex items-center justify-center text-primary mb-4">
+                                <div className="w-14 h-14 rounded-lg bg-primary/10 flex items-center justify-center text-primary mb-4">
                                     <feature.icon size={32} />
                                 </div>
                                 <h2 className="text-3xl md:text-4xl font-serif font-bold text-primary">{feature.title}</h2>

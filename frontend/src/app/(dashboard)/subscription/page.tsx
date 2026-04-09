@@ -127,7 +127,7 @@ export default function PricingPage() {
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: idx * 0.1 }}
                         className={cn(
-                            "relative flex flex-col p-8 rounded-3xl bg-white border h-full transition-all duration-300",
+                            "relative flex flex-col p-8 rounded-lg bg-white border h-full transition-all duration-300",
                             plan.popular 
                                 ? "border-[#1a2332] ring-4 ring-[#1a2332]/5 shadow-2xl scale-[1.02] z-10" 
                                 : "border-[#e8e2de] hover:border-[#1a2332]/20 shadow-sm"
@@ -140,7 +140,7 @@ export default function PricingPage() {
                         )}
 
                         <div className="mb-8">
-                            <div className={cn("w-12 h-12 rounded-2xl flex items-center justify-center mb-6 bg-gradient-to-br", plan.bg)}>
+                            <div className={cn("w-12 h-12 rounded-lg flex items-center justify-center mb-6 bg-gradient-to-br", plan.bg)}>
                                 <plan.icon className={cn("w-6 h-6", plan.color)} />
                             </div>
                             <h3 className="text-xl font-bold text-[#1a2332] mb-2">{plan.name}</h3>
@@ -172,7 +172,7 @@ export default function PricingPage() {
                             onClick={() => handleUpgrade(plan.name)}
                             disabled={isLoading === plan.name || plan.name === "Starter"}
                             className={cn(
-                                "w-full py-4 rounded-xl text-sm font-bold transition-all flex items-center justify-center gap-2",
+                                "w-full py-4 rounded-lg text-sm font-bold transition-all flex items-center justify-center gap-2",
                                 plan.popular
                                     ? "bg-[#1a2332] text-white hover:bg-[#1a2332]/90 shadow-lg shadow-[#1a2332]/20"
                                     : plan.name === "Starter"
@@ -194,7 +194,7 @@ export default function PricingPage() {
             </div>
 
             <div className="mt-24 max-w-3xl mx-auto text-center px-4">
-                <div className="p-8 rounded-3xl bg-[#1a2332]/5 border border-[#1a2332]/10">
+                <div className="p-8 rounded-lg bg-[#1a2332]/5 border border-[#1a2332]/10">
                     <h4 className="text-xl font-bold font-serif text-[#1a2332] mb-4">Enterprise Grade Security</h4>
                     <p className="text-[#1a2332]/50 text-sm leading-relaxed">
                         Every JurisQuery subscription includes bank-level encryption, localized document processing, 

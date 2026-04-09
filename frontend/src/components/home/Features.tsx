@@ -78,11 +78,11 @@ export function Features() {
                             viewport={{ once: true }}
                             transition={{ delay: index * 0.1 }}
                             whileHover={{ y: -5 }}
-                            className="group relative p-8 rounded-2xl bg-white/50 backdrop-blur-sm border border-gray-100 hover:border-primary/20 shadow-sm hover:shadow-xl transition-all duration-300 overflow-hidden"
+                            className="group relative p-8 rounded-lg bg-white/50 backdrop-blur-sm border border-gray-100 hover:border-primary/20 shadow-sm hover:shadow-xl transition-all duration-300 overflow-hidden"
                         >
                             <div className="absolute inset-0 bg-gradient-to-br from-primary/0 to-primary/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
 
-                            <div className="relative z-10 w-14 h-14 rounded-2xl bg-gradient-to-br from-primary/5 to-primary/10 text-primary flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
+                            <div className="relative z-10 w-14 h-14 rounded-lg bg-gradient-to-br from-primary/5 to-primary/10 text-primary flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
                                 <feature.icon size={28} className="drop-shadow-sm" />
                             </div>
 

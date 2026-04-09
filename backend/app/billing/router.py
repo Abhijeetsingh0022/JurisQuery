@@ -40,15 +40,26 @@ async def create_checkout_session(
             result = await db.execute(select(User).where(User.clerk_id == user["id"]))
             db_user = result.scalar_one_or_none()
             
-            if db_user:
-                db_user.plan_tier = "pro"
-                await db.commit()
-                return {"url": success_url}
+            if not db_user:
+                # In dummy mode, auto-create the user if missing from local DB
+                logger.warning(f"User {user['id']} not found in DB during dummy checkout. Auto-creating...")
+                db_user = User(
+                    clerk_id=user["id"],
+                    email=user.get("email", "dev@jurisquery.ai"),
+                    plan_tier="pro"
+                )
+                db.add(db_user)
             else:
-                raise HTTPException(status_code=404, detail="User not found in local DB")
+                db_user.plan_tier = "pro"
+            
+            await db.commit()
+            return {"url": success_url}
+        except HTTPException:
+            # Re-raise HTTP exceptions (like 404 or 400)
+            raise
         except Exception as e:
-            logger.error(f"Error in dummy checkout: {str(e)}")
-            raise HTTPException(status_code=500, detail="Dummy upgrade failed")
+            logger.exception(f"Unexpected error in dummy checkout: {str(e)}")
+            raise HTTPException(status_code=500, detail=f"Dummy upgrade failed: {str(e)}")
 
     if not settings.stripe_secret_key or not settings.stripe_pro_price_id:
         raise HTTPException(status_code=503, detail="Stripe is not configured")

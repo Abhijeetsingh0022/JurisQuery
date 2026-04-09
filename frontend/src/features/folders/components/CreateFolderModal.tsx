@@ -66,10 +66,10 @@ export default function CreateFolderModal({ isOpen, onClose }: CreateFolderModal
                             leaveFrom="opacity-100 scale-100 translate-y-0"
                             leaveTo="opacity-0 scale-95 translate-y-4"
                         >
-                            <Dialog.Panel className="w-full max-w-md transform overflow-hidden rounded-2xl bg-white text-left align-middle shadow-2xl transition-all border border-slate-200">
+                            <Dialog.Panel className="w-full max-w-md transform overflow-hidden rounded-lg bg-white text-left align-middle shadow-2xl transition-all border border-slate-200">
                                 <div className="flex items-center justify-between px-6 py-5 border-b border-slate-100/80 bg-slate-50/50">
                                     <div className="flex items-center gap-3">
-                                        <div className="p-2.5 rounded-xl bg-blue-100 text-blue-600 ring-4 ring-blue-50">
+                                        <div className="p-2.5 rounded-lg bg-blue-100 text-blue-600 ring-4 ring-blue-50">
                                             <FolderPlus className="w-5 h-5" />
                                         </div>
                                         <Dialog.Title as="h3" className="text-xl font-semibold text-slate-900 tracking-tight">
@@ -97,7 +97,7 @@ export default function CreateFolderModal({ isOpen, onClose }: CreateFolderModal
                                                 onChange={(e) => setName(e.target.value)}
                                                 autoFocus
                                                 placeholder="e.g. State v. Sharma"
-                                                className="w-full rounded-xl border border-slate-200 px-4 py-3 text-slate-900 placeholder:text-slate-400 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 bg-white shadow-sm transition-all text-sm"
+                                                className="w-full rounded-lg border border-slate-200 px-4 py-3 text-slate-900 placeholder:text-slate-400 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 bg-white shadow-sm transition-all text-sm"
                                             />
                                         </div>
                                         <div>
@@ -109,7 +109,7 @@ export default function CreateFolderModal({ isOpen, onClose }: CreateFolderModal
                                                 value={description}
                                                 onChange={(e) => setDescription(e.target.value)}
                                                 rows={3}
-                                                className="w-full rounded-xl border border-slate-200 px-4 py-3 text-slate-900 placeholder:text-slate-400 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 bg-white shadow-sm transition-all text-sm resize-none"
+                                                className="w-full rounded-lg border border-slate-200 px-4 py-3 text-slate-900 placeholder:text-slate-400 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 bg-white shadow-sm transition-all text-sm resize-none"
                                                 placeholder="Brief context about this case..."
                                             />
                                         </div>
@@ -120,7 +120,7 @@ export default function CreateFolderModal({ isOpen, onClose }: CreateFolderModal
                                     <button
                                         type="button"
                                         onClick={onClose}
-                                        className="px-5 py-2.5 text-sm font-medium text-slate-600 hover:text-slate-900 hover:bg-slate-200/50 rounded-xl transition-colors focus:outline-none focus:ring-2 focus:ring-slate-400/30"
+                                        className="px-5 py-2.5 text-sm font-medium text-slate-600 hover:text-slate-900 hover:bg-slate-200/50 rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-slate-400/30"
                                     >
                                         Cancel
                                     </button>
@@ -128,7 +128,7 @@ export default function CreateFolderModal({ isOpen, onClose }: CreateFolderModal
                                         type="submit"
                                         form="createFolderForm"
                                         disabled={isPending || !name.trim()}
-                                        className="flex items-center gap-2 px-5 py-2.5 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed rounded-xl transition-all shadow-sm shadow-blue-600/20 active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-blue-500/40"
+                                        className="flex items-center gap-2 px-5 py-2.5 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed rounded-lg transition-all shadow-sm shadow-blue-600/20 active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-blue-500/40"
                                     >
                                         {isPending ? (
                                             <>

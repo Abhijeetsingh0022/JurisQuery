@@ -68,7 +68,7 @@ function LoadingState() {
   return (
     <div className="flex flex-col justify-center items-center h-full gap-4 py-20">
         <div className="relative w-12 h-12 flex items-center justify-center">
-            <div className="absolute inset-0 rounded-xl bg-gradient-to-br from-[#2a3b4e] to-[#4a6b8e] opacity-20 animate-pulse" />
+            <div className="absolute inset-0 rounded-lg bg-gradient-to-br from-[#2a3b4e] to-[#4a6b8e] opacity-20 animate-pulse" />
             <Loader2 className="h-6 w-6 animate-spin text-[#2a3b4e]" />
         </div>
         <span className="text-[13px] text-[#2a3b4e]/50 font-medium tracking-wide">Analysing statute mapping...</span>
@@ -78,7 +78,7 @@ function LoadingState() {
 
 function ErrorState({ message }: { message: string }) {
   return (
-    <div className="bg-red-50 text-red-600 px-4 py-3.5 rounded-xl border border-red-100 text-[13px] flex items-start gap-2.5 mt-4">
+    <div className="bg-red-50 text-red-600 px-4 py-3.5 rounded-lg border border-red-100 text-[13px] flex items-start gap-2.5 mt-4">
         <AlertCircle className="h-4 w-4 mt-0.5 shrink-0" />
         <span>{message}</span>
     </div>
@@ -102,12 +102,12 @@ function SectionCard({
   const isLong = description.length > 150;
 
   return (
-    <div className="bg-white rounded-xl border border-[#e8e2de] overflow-hidden flex-1 flex flex-col shadow-sm">
+    <div className="bg-white rounded-lg border border-[#e8e2de] overflow-hidden flex-1 flex flex-col shadow-sm">
       <div className="px-5 py-5 flex-1 flex flex-col h-full">
         {/* Header with section number box */}
         <div className="flex items-start justify-between mb-4">
             <div className="flex items-center gap-3">
-                <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-[#2a3b4e] to-[#3d5a80] flex items-center justify-center shrink-0 shadow-md relative">
+                <div className="w-11 h-11 rounded-lg bg-gradient-to-br from-[#2a3b4e] to-[#3d5a80] flex items-center justify-center shrink-0 shadow-md relative">
                     <span className="text-white font-bold text-[13px]">{sectionNumber}</span>
                     <div className="absolute -bottom-1.5 -right-1.5 bg-white rounded-md text-[8px] font-bold px-1.5 py-0.5 border border-[#e8e2de] text-[#2a3b4e] shadow-sm uppercase tracking-wider z-10">
                       {badgeText}
@@ -130,7 +130,7 @@ function SectionCard({
 
         {/* Text Area */}
         <div className="flex-1 flex flex-col relative mt-2">
-            <div className={`bg-[#fdfcfb] rounded-xl px-4 py-4 border border-[#e8e2de]/60 flex-1 relative transition-all duration-300 ${expanded ? 'max-h-[350px] overflow-y-auto custom-scrollbar' : 'max-h-[140px] overflow-hidden'}`}>
+            <div className={`bg-[#fdfcfb] rounded-lg px-4 py-4 border border-[#e8e2de]/60 flex-1 relative transition-all duration-300 ${expanded ? 'max-h-[350px] overflow-y-auto custom-scrollbar' : 'max-h-[140px] overflow-hidden'}`}>
                 <div className="text-[13px] text-[#1a2332]/80 leading-relaxed font-sans whitespace-pre-wrap">
                     {description}
                 </div>
@@ -198,7 +198,7 @@ export function StatuteBridgePanel({
       {/* Header */}
       <div className="flex items-center justify-between px-6 py-4 border-b border-[#e8e2de] bg-[#faf8f6] flex-none">
           <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#2a3b4e] to-[#4a6b8e] flex items-center justify-center shadow-lg shadow-[#2a3b4e]/20">
+              <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-[#2a3b4e] to-[#4a6b8e] flex items-center justify-center shadow-lg shadow-[#2a3b4e]/20">
                   <Scale className="h-5 w-5 text-white" />
               </div>
               <div>
@@ -243,7 +243,7 @@ export function StatuteBridgePanel({
             </div>
 
             {/* AI Summary Callout using standard reasoning styling */}
-            <div className="bg-[#f0f4f8] rounded-xl px-5 py-4 border border-[#e1e9f0] shadow-sm relative mt-2">
+            <div className="bg-[#f0f4f8] rounded-lg px-5 py-4 border border-[#e1e9f0] shadow-sm relative mt-2">
                 <div className="text-[11px] font-bold text-[#1a2332]/60 uppercase tracking-widest mb-2 flex items-center gap-1.5">
                     <AlertCircle className="h-3.5 w-3.5 text-[#4a6b8e]" /> Translation Summary
                 </div>
@@ -264,7 +264,7 @@ export function StatuteBridgePanel({
                   badgeText="Indian Penal Code (IPC)"
                 />
               ) : (
-                <div className="bg-white rounded-xl border border-[#e8e2de] overflow-hidden flex-1 flex flex-col items-center justify-center py-10 text-center">
+                <div className="bg-white rounded-lg border border-[#e8e2de] overflow-hidden flex-1 flex flex-col items-center justify-center py-10 text-center">
                     <AlertCircle className="h-6 w-6 text-[#2a3b4e]/20 mb-2" />
                     <p className="text-[13px] font-medium text-[#2a3b4e]/40">IPC Section Not Found</p>
                 </div>
@@ -272,7 +272,7 @@ export function StatuteBridgePanel({
 
               {/* Transformation Arrow */}
               <div className="hidden md:flex flex-col items-center justify-center px-1">
-                  <div className="w-8 h-8 rounded-xl bg-[#faf8f6] border border-[#e8e2de] shadow-sm flex items-center justify-center text-[#2a3b4e]/30 z-10">
+                  <div className="w-8 h-8 rounded-lg bg-[#faf8f6] border border-[#e8e2de] shadow-sm flex items-center justify-center text-[#2a3b4e]/30 z-10">
                       <ChevronRight className="h-4 w-4" />
                   </div>
               </div>
@@ -287,8 +287,8 @@ export function StatuteBridgePanel({
                   badgeText="Bharatiya Nyaya Sanhita (BNS)"
                 />
               ) : (
-                <div className="bg-white rounded-xl border border-[#e8e2de] overflow-hidden flex-1 flex flex-col items-center justify-center py-10 text-center">
-                    <div className="w-10 h-10 rounded-xl bg-red-50 flex items-center justify-center mb-3 text-red-500 ring-1 ring-red-100">
+                <div className="bg-white rounded-lg border border-[#e8e2de] overflow-hidden flex-1 flex flex-col items-center justify-center py-10 text-center">
+                    <div className="w-10 h-10 rounded-lg bg-red-50 flex items-center justify-center mb-3 text-red-500 ring-1 ring-red-100">
                       <Shield className="h-5 w-5" />
                     </div>
                     <p className="text-sm font-semibold text-[#1a2332]">No Equivalent Provision</p>

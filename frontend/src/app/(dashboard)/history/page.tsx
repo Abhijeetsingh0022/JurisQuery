@@ -110,7 +110,7 @@ export default function HistoryPage() {
             {/* Header */}
             <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3.5">
-                    <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#2a3b4e] to-[#4a6b8e] flex items-center justify-center shadow-lg shadow-[#2a3b4e]/15">
+                    <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-[#2a3b4e] to-[#4a6b8e] flex items-center justify-center shadow-lg shadow-[#2a3b4e]/15">
                         <Clock className="h-4.5 w-4.5 text-white" />
                     </div>
                     <div>
@@ -141,17 +141,17 @@ export default function HistoryPage() {
             </div>
 
             {/* Timeline */}
-            <div className="bg-white rounded-xl border border-[#e8e2de] overflow-hidden">
+            <div className="bg-white rounded-lg border border-[#e8e2de] overflow-hidden">
                 {isLoading ? (
                     <div className="flex flex-col items-center justify-center py-20">
-                        <div className="w-10 h-10 rounded-xl bg-[#f7f3f1] flex items-center justify-center mb-3">
+                        <div className="w-10 h-10 rounded-lg bg-[#f7f3f1] flex items-center justify-center mb-3">
                             <Loader2 className="h-5 w-5 animate-spin text-[#2a3b4e]/20" />
                         </div>
                         <p className="text-[12px] font-medium text-[#2a3b4e]/25">Loading history…</p>
                     </div>
                 ) : filteredItems.length === 0 ? (
                     <div className="flex flex-col items-center justify-center py-20">
-                        <div className="w-14 h-14 rounded-2xl bg-[#f7f3f1] flex items-center justify-center mb-4">
+                        <div className="w-14 h-14 rounded-lg bg-[#f7f3f1] flex items-center justify-center mb-4">
                             <Clock className="h-6 w-6 text-[#2a3b4e]/12" />
                         </div>
                         <p className="text-[13px] font-semibold text-[#2a3b4e]/25">No activity yet</p>

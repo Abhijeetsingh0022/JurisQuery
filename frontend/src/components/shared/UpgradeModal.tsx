@@ -54,7 +54,7 @@ export default function UpgradeModal({
                             leaveFrom="opacity-100 scale-100 translate-y-0"
                             leaveTo="opacity-0 scale-95 translate-y-4"
                         >
-                            <Dialog.Panel className="w-full max-w-md transform overflow-hidden rounded-[2.5rem] bg-white p-8 text-left align-middle shadow-2xl border border-slate-100 transition-all">
+                            <Dialog.Panel className="w-full max-w-md transform overflow-hidden rounded-lg bg-white p-6 sm:p-8 text-left align-middle shadow-2xl border border-slate-100 transition-all">
                                 <div className="absolute top-6 right-6">
                                     <button
                                         onClick={onClose}
@@ -65,7 +65,7 @@ export default function UpgradeModal({
                                 </div>
 
                                 <div className="flex flex-col items-center text-center">
-                                    <div className="w-20 h-20 rounded-3xl bg-gradient-to-br from-[#d97706] to-[#f59e0b] flex items-center justify-center mb-6 shadow-xl shadow-[#d97706]/20">
+                                    <div className="w-20 h-20 rounded-lg bg-gradient-to-br from-[#d97706] to-[#f59e0b] flex items-center justify-center mb-6 shadow-xl shadow-[#d97706]/20">
                                         <Sparkles className="w-10 h-10 text-white" />
                                     </div>
 
@@ -77,7 +77,7 @@ export default function UpgradeModal({
                                         {description}
                                     </p>
 
-                                    <div className="w-full bg-[#f7f3f1] rounded-2xl p-6 mb-8 text-left border border-[#2a3b4e]/5">
+                                    <div className="w-full bg-[#f7f3f1] rounded-lg p-6 mb-8 text-left border border-[#2a3b4e]/5">
                                         <p className="text-[10px] font-bold text-[#1a1a1a]/30 uppercase tracking-widest mb-4">Pro Plan Features</p>
                                         <div className="space-y-3">
                                             {[
@@ -100,7 +100,7 @@ export default function UpgradeModal({
                                     <div className="w-full flex flex-col gap-3">
                                         <button
                                             onClick={handleUpgrade}
-                                            className="w-full py-4 bg-[#2a3b4e] text-white rounded-2xl font-bold text-sm shadow-xl shadow-[#2a3b4e]/20 hover:bg-[#1a2332] transition-all flex items-center justify-center gap-2 group active:scale-[0.98]"
+                                            className="w-full py-4 bg-[#2a3b4e] text-white rounded-lg font-bold text-sm shadow-xl shadow-[#2a3b4e]/20 hover:bg-[#1a2332] transition-all flex items-center justify-center gap-2 group active:scale-[0.98]"
                                         >
                                             <Zap className="w-4 h-4 fill-[#d97706] text-[#d97706] group-hover:animate-pulse" />
                                             Upgrade to Pro

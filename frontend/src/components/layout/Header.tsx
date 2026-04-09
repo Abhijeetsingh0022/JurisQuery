@@ -77,7 +77,7 @@ export function Header() {
                             appearance={{
                                 elements: {
                                     avatarBox: "w-10 h-10",
-                                    userButtonPopoverCard: "shadow-2xl border-0 rounded-2xl bg-white",
+                                    userButtonPopoverCard: "shadow-2xl border-0 rounded-lg bg-white",
                                     userButtonPopoverFooter: "hidden", // Hide "Secured by Clerk" from popover
                                     userButtonPopoverActionButton: "hover:bg-soft-cream text-foreground",
                                     userButtonPopoverActionButtonText: "text-foreground font-medium",
@@ -94,7 +94,7 @@ export function Header() {
                             userProfileProps={{
                                 appearance: {
                                     elements: {
-                                        card: "shadow-2xl border-0 rounded-2xl bg-white",
+                                        card: "shadow-2xl border-0 rounded-lg bg-white",
                                         footer: "hidden", // Hide "Secured by Clerk" from modal
                                         navbar: "hidden",
                                         headerTitle: "font-serif text-2xl text-primary font-bold",
@@ -155,7 +155,7 @@ export function Header() {
                                     appearance={{
                                         elements: {
                                             avatarBox: "w-10 h-10",
-                                            userButtonPopoverCard: "shadow-2xl border-0 rounded-2xl bg-white",
+                                            userButtonPopoverCard: "shadow-2xl border-0 rounded-lg bg-white",
                                             userButtonPopoverFooter: "hidden",
                                         },
                                         variables: {

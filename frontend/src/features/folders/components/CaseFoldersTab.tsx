@@ -50,10 +50,10 @@ function CreateFolderModal({ isOpen, onClose, onLimitReached }: { isOpen: boolea
                 <div className="fixed inset-0 overflow-y-auto">
                     <div className="flex min-h-full items-center justify-center p-4">
                         <Transition.Child as={Fragment} enter="ease-out duration-200" enterFrom="opacity-0 scale-95 translate-y-2" enterTo="opacity-100 scale-100 translate-y-0" leave="ease-in duration-150" leaveFrom="opacity-100 scale-100 translate-y-0" leaveTo="opacity-0 scale-95 translate-y-2">
-                            <Dialog.Panel className="w-full max-w-md rounded-2xl bg-white shadow-2xl border border-slate-200 overflow-hidden">
+                            <Dialog.Panel className="w-full max-w-md rounded-lg bg-white shadow-2xl border border-slate-200 overflow-hidden">
                                 <div className="flex items-center justify-between px-6 py-5 border-b border-slate-100 bg-slate-50/60">
                                     <div className="flex items-center gap-3">
-                                        <div className="p-2.5 rounded-xl bg-[#2a3b4e]/10 text-[#2a3b4e]">
+                                        <div className="p-2.5 rounded-lg bg-[#2a3b4e]/10 text-[#2a3b4e]">
                                             <FolderPlus className="w-5 h-5" />
                                         </div>
                                         <Dialog.Title as="h3" className="text-lg font-semibold text-[#1a2332]">New Case Folder</Dialog.Title>
@@ -69,7 +69,7 @@ function CreateFolderModal({ isOpen, onClose, onLimitReached }: { isOpen: boolea
                                             autoFocus type="text" value={name}
                                             onChange={(e) => setName(e.target.value)}
                                             placeholder="e.g. State v. Sharma, 2024"
-                                            className="w-full rounded-xl border border-slate-200 px-4 py-3 text-[#1a2332] text-sm placeholder:text-slate-400 focus:border-[#2a3b4e]/40 focus:outline-none focus:ring-2 focus:ring-[#2a3b4e]/10 bg-white transition-all"
+                                            className="w-full rounded-lg border border-slate-200 px-4 py-3 text-[#1a2332] text-sm placeholder:text-slate-400 focus:border-[#2a3b4e]/40 focus:outline-none focus:ring-2 focus:ring-[#2a3b4e]/10 bg-white transition-all"
                                         />
                                     </div>
                                     <div>
@@ -77,14 +77,14 @@ function CreateFolderModal({ isOpen, onClose, onLimitReached }: { isOpen: boolea
                                         <textarea
                                             value={description} onChange={(e) => setDescription(e.target.value)}
                                             rows={3} placeholder="Brief context about this case..."
-                                            className="w-full rounded-xl border border-slate-200 px-4 py-3 text-[#1a2332] text-sm placeholder:text-slate-400 focus:border-[#2a3b4e]/40 focus:outline-none focus:ring-2 focus:ring-[#2a3b4e]/10 bg-white transition-all resize-none"
+                                            className="w-full rounded-lg border border-slate-200 px-4 py-3 text-[#1a2332] text-sm placeholder:text-slate-400 focus:border-[#2a3b4e]/40 focus:outline-none focus:ring-2 focus:ring-[#2a3b4e]/10 bg-white transition-all resize-none"
                                         />
                                     </div>
                                     <div className="flex justify-end gap-3 pt-2">
-                                        <button type="button" onClick={onClose} className="px-4 py-2.5 text-sm font-medium text-slate-600 hover:bg-slate-100 rounded-xl transition-colors">Cancel</button>
+                                        <button type="button" onClick={onClose} className="px-4 py-2.5 text-sm font-medium text-slate-600 hover:bg-slate-100 rounded-lg transition-colors">Cancel</button>
                                         <button
                                             type="submit" disabled={isPending || !name.trim()}
-                                            className="flex items-center gap-2 px-5 py-2.5 text-sm font-semibold text-white bg-[#2a3b4e] hover:bg-[#1a2332] disabled:opacity-50 disabled:cursor-not-allowed rounded-xl transition-all shadow-sm active:scale-[0.98]"
+                                            className="flex items-center gap-2 px-5 py-2.5 text-sm font-semibold text-white bg-[#2a3b4e] hover:bg-[#1a2332] disabled:opacity-50 disabled:cursor-not-allowed rounded-lg transition-all shadow-sm active:scale-[0.98]"
                                         >
                                             {isPending ? <><Loader2 className="w-3.5 h-3.5 animate-spin" /> Creating...</> : 'Create Folder'}
                                         </button>
@@ -123,10 +123,10 @@ function AddToFolderModal({ isOpen, onClose, documentId, documentName }: { isOpe
                 <div className="fixed inset-0 overflow-y-auto">
                     <div className="flex min-h-full items-center justify-center p-4">
                         <Transition.Child as={Fragment} enter="ease-out duration-200" enterFrom="opacity-0 scale-95 translate-y-2" enterTo="opacity-100 scale-100 translate-y-0" leave="ease-in duration-150" leaveFrom="opacity-100 scale-100 translate-y-0" leaveTo="opacity-0 scale-95 translate-y-2">
-                            <Dialog.Panel className="w-full max-w-md rounded-2xl bg-white shadow-2xl border border-slate-200 overflow-hidden">
+                            <Dialog.Panel className="w-full max-w-md rounded-lg bg-white shadow-2xl border border-slate-200 overflow-hidden">
                                 <div className="flex items-center justify-between px-6 py-5 border-b border-slate-100 bg-slate-50/60">
                                     <div className="flex items-center gap-3">
-                                        <div className="p-2.5 rounded-xl bg-blue-50 text-blue-600">
+                                        <div className="p-2.5 rounded-lg bg-blue-50 text-blue-600">
                                             <FolderOpen className="w-5 h-5" />
                                         </div>
                                         <div>
@@ -152,7 +152,7 @@ function AddToFolderModal({ isOpen, onClose, documentId, documentName }: { isOpe
                                                     key={f.id}
                                                     onClick={() => handleAdd(f.id)}
                                                     disabled={isPending}
-                                                    className="w-full flex items-center justify-between gap-3 p-3.5 rounded-xl hover:bg-[#faf8f6] border border-transparent hover:border-[#e8e2de] transition-all group text-left disabled:opacity-50"
+                                                    className="w-full flex items-center justify-between gap-3 p-3.5 rounded-lg hover:bg-[#faf8f6] border border-transparent hover:border-[#e8e2de] transition-all group text-left disabled:opacity-50"
                                                 >
                                                     <div className="flex items-center gap-3 min-w-0">
                                                         <div className="p-2 rounded-lg bg-[#f7f3f1] group-hover:bg-[#2a3b4e]/8 transition-colors">
@@ -192,12 +192,12 @@ function FolderCard({ folder, onDelete }: { folder: any; onDelete: (id: string) 
     return (
         <motion.div
             layout initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}
-            className="group relative bg-white rounded-xl border border-[#e8e2de] hover:border-[#2a3b4e]/25 hover:shadow-md transition-all overflow-hidden"
+            className="group relative bg-white rounded-lg border border-[#e8e2de] hover:border-[#2a3b4e]/25 hover:shadow-md transition-all overflow-hidden"
         >
             <div className="absolute inset-0 bg-gradient-to-br from-[#2a3b4e]/3 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
             <div className="relative p-5">
                 <div className="flex items-start justify-between mb-4">
-                    <div className="p-3 rounded-xl bg-gradient-to-br from-[#2a3b4e]/10 to-[#3d5a80]/10 border border-[#2a3b4e]/8">
+                    <div className="p-3 rounded-lg bg-gradient-to-br from-[#2a3b4e]/10 to-[#3d5a80]/10 border border-[#2a3b4e]/8">
                         <FolderOpen className="w-6 h-6 text-[#2a3b4e]/60" />
                     </div>
                     <button
@@ -257,7 +257,7 @@ export default function CaseFoldersTab() {
                 </div>
                 <button
                     onClick={() => setCreateOpen(true)}
-                    className="flex items-center gap-2 px-4 py-2.5 bg-[#2a3b4e] text-white text-sm font-semibold rounded-xl hover:bg-[#1a2332] transition-all shadow-sm active:scale-[0.98]"
+                    className="flex items-center gap-2 px-4 py-2.5 bg-[#2a3b4e] text-white text-sm font-semibold rounded-lg hover:bg-[#1a2332] transition-all shadow-sm active:scale-[0.98]"
                 >
                     <Plus className="w-4 h-4" />
                     New Folder
@@ -267,22 +267,22 @@ export default function CaseFoldersTab() {
             {isLoading ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                     {[1, 2, 3].map((i) => (
-                        <div key={i} className="h-44 rounded-xl bg-[#faf8f6] animate-pulse border border-[#e8e2de]" />
+                        <div key={i} className="h-44 rounded-lg bg-[#faf8f6] animate-pulse border border-[#e8e2de]" />
                     ))}
                 </div>
             ) : folders.length === 0 ? (
                 <motion.div
                     initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}
-                    className="flex flex-col items-center justify-center py-20 border-2 border-dashed border-[#e8e2de] rounded-xl bg-[#faf8f6]/40"
+                    className="flex flex-col items-center justify-center py-20 border-2 border-dashed border-[#e8e2de] rounded-lg bg-[#faf8f6]/40"
                 >
-                    <div className="w-16 h-16 rounded-2xl bg-[#f7f3f1] flex items-center justify-center mb-4">
+                    <div className="w-16 h-16 rounded-lg bg-[#f7f3f1] flex items-center justify-center mb-4">
                         <FolderPlus className="w-7 h-7 text-[#2a3b4e]/15" />
                     </div>
                     <p className="text-[15px] font-bold text-[#1a2332]/30 mb-1">No case folders yet</p>
                     <p className="text-[12px] text-[#2a3b4e]/25 mb-5">Group documents for cross-document AI analysis</p>
                     <button
                         onClick={() => setCreateOpen(true)}
-                        className="flex items-center gap-2 px-4 py-2 bg-[#2a3b4e] text-white text-sm font-semibold rounded-xl hover:bg-[#1a2332] transition-all"
+                        className="flex items-center gap-2 px-4 py-2 bg-[#2a3b4e] text-white text-sm font-semibold rounded-lg hover:bg-[#1a2332] transition-all"
                     >
                         <Plus className="w-4 h-4" />
                         Create First Folder

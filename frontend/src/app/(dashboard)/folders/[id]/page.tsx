@@ -75,11 +75,11 @@ export default function FolderDetailPage() {
         <div className="space-y-6">
             {/* Header */}
             <div className="flex items-center gap-4">
-                <button onClick={() => router.back()} className="p-2 rounded-xl hover:bg-[#f7f3f1] text-[#2a3b4e]/40 hover:text-[#2a3b4e] transition-colors">
+                <button onClick={() => router.back()} className="p-2 rounded-lg hover:bg-[#f7f3f1] text-[#2a3b4e]/40 hover:text-[#2a3b4e] transition-colors">
                     <ArrowLeft className="w-5 h-5" />
                 </button>
                 <div className="flex items-center gap-3">
-                    <div className="p-2.5 rounded-xl bg-gradient-to-br from-[#2a3b4e]/10 to-[#3d5a80]/10 border border-[#2a3b4e]/8">
+                    <div className="p-2.5 rounded-lg bg-gradient-to-br from-[#2a3b4e]/10 to-[#3d5a80]/10 border border-[#2a3b4e]/8">
                         <FolderOpen className="w-6 h-6 text-[#2a3b4e]/60" />
                     </div>
                     <div>
@@ -100,14 +100,14 @@ export default function FolderDetailPage() {
                 <div className="flex items-center gap-3">
                     <Link
                         href={`/folders/${id}/chat`}
-                        className="flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-[#2a3b4e] to-[#3d5a80] text-white text-sm font-semibold rounded-xl hover:shadow-lg hover:shadow-[#2a3b4e]/20 transition-all active:scale-[0.98]"
+                        className="flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-[#2a3b4e] to-[#3d5a80] text-white text-sm font-semibold rounded-lg hover:shadow-lg hover:shadow-[#2a3b4e]/20 transition-all active:scale-[0.98]"
                     >
                         <MessageSquare className="w-4 h-4" />
                         Chat with Folder
                     </Link>
                     <button
                         onClick={() => setAddDocOpen(true)}
-                        className="flex items-center gap-2 px-4 py-2.5 bg-white border border-[#e8e2de] text-[#2a3b4e] text-sm font-semibold rounded-xl hover:bg-[#faf8f6] transition-all"
+                        className="flex items-center gap-2 px-4 py-2.5 bg-white border border-[#e8e2de] text-[#2a3b4e] text-sm font-semibold rounded-lg hover:bg-[#faf8f6] transition-all"
                     >
                         <Plus className="w-4 h-4" />
                         Add Document
@@ -117,22 +117,22 @@ export default function FolderDetailPage() {
 
             {/* Document List */}
             {docs.length === 0 ? (
-                <div className="flex flex-col items-center justify-center py-20 border-2 border-dashed border-[#e8e2de] rounded-xl bg-[#faf8f6]/40">
-                    <div className="w-16 h-16 rounded-2xl bg-[#f7f3f1] flex items-center justify-center mb-4">
+                <div className="flex flex-col items-center justify-center py-20 border-2 border-dashed border-[#e8e2de] rounded-lg bg-[#faf8f6]/40">
+                    <div className="w-16 h-16 rounded-lg bg-[#f7f3f1] flex items-center justify-center mb-4">
                         <FileText className="w-7 h-7 text-[#2a3b4e]/15" />
                     </div>
                     <p className="text-[15px] font-bold text-[#1a2332]/30 mb-1">No documents in this folder</p>
                     <p className="text-[12px] text-[#2a3b4e]/25 mb-5">Add documents to run AI-powered cross-document analysis</p>
                     <button
                         onClick={() => setAddDocOpen(true)}
-                        className="flex items-center gap-2 px-4 py-2 bg-[#2a3b4e] text-white text-sm font-semibold rounded-xl hover:bg-[#1a2332] transition-all"
+                        className="flex items-center gap-2 px-4 py-2 bg-[#2a3b4e] text-white text-sm font-semibold rounded-lg hover:bg-[#1a2332] transition-all"
                     >
                         <Plus className="w-4 h-4" />
                         Add Document
                     </button>
                 </div>
             ) : (
-                <div className="bg-white rounded-xl border border-[#e8e2de] shadow-sm overflow-hidden">
+                <div className="bg-white rounded-lg border border-[#e8e2de] shadow-sm overflow-hidden">
                     <div className="grid grid-cols-12 gap-4 px-6 py-3 bg-[#faf8f6] border-b border-[#e8e2de]">
                         <div className="col-span-6 text-[10px] font-bold text-[#2a3b4e]/30 uppercase tracking-wider">Document</div>
                         <div className="col-span-3 text-[10px] font-bold text-[#2a3b4e]/30 uppercase tracking-wider">Status</div>
@@ -151,7 +151,7 @@ export default function FolderDetailPage() {
                                         className="grid grid-cols-12 gap-4 px-6 py-4 items-center group hover:bg-[#faf8f6]/80 transition-colors"
                                     >
                                         <div className="col-span-6 flex items-center gap-3.5 min-w-0">
-                                            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#f7f3f1] to-[#eee8e4] flex items-center justify-center shrink-0">
+                                            <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-[#f7f3f1] to-[#eee8e4] flex items-center justify-center shrink-0">
                                                 <FileText className="h-4 w-4 text-[#2a3b4e]/40" />
                                             </div>
                                             <div className="min-w-0">
@@ -242,7 +242,7 @@ function PickDocumentsModal({ folderId, existingDocIds, isOpen, onClose }: {
                 <div className="fixed inset-0 overflow-y-auto">
                     <div className="flex min-h-full items-center justify-center p-4">
                         <Transition.Child as={Fragment} enter="ease-out duration-200" enterFrom="opacity-0 scale-95" enterTo="opacity-100 scale-100" leave="ease-in duration-150" leaveFrom="opacity-100 scale-100" leaveTo="opacity-0 scale-95">
-                            <Dialog.Panel className="w-full max-w-md rounded-2xl bg-white shadow-2xl border border-slate-200 overflow-hidden">
+                            <Dialog.Panel className="w-full max-w-md rounded-lg bg-white shadow-2xl border border-slate-200 overflow-hidden">
                                 <div className="flex items-center justify-between px-6 py-5 border-b border-slate-100 bg-slate-50/60">
                                     <Dialog.Title as="h3" className="text-base font-semibold text-[#1a2332]">Add Document to Folder</Dialog.Title>
                                     <button onClick={onClose} className="p-1.5 rounded-full text-slate-400 hover:bg-slate-100 transition-colors"><X className="w-4 h-4" /></button>
@@ -261,7 +261,7 @@ function PickDocumentsModal({ folderId, existingDocIds, isOpen, onClose }: {
                                                     key={doc.id}
                                                     onClick={() => handleAdd(doc.id)}
                                                     disabled={isPending}
-                                                    className="w-full flex items-center gap-3 p-3.5 rounded-xl hover:bg-[#faf8f6] border border-transparent hover:border-[#e8e2de] transition-all text-left disabled:opacity-50"
+                                                    className="w-full flex items-center gap-3 p-3.5 rounded-lg hover:bg-[#faf8f6] border border-transparent hover:border-[#e8e2de] transition-all text-left disabled:opacity-50"
                                                 >
                                                     <div className="p-2 rounded-lg bg-[#f7f3f1]">
                                                         <FileText className="w-4 h-4 text-[#2a3b4e]/50" />

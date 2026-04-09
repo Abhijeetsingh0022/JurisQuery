@@ -19,7 +19,7 @@ export default function QuickActions({
     onError
 }: QuickActionsProps) {
     return (
-        <div className="bg-white rounded-xl border border-gray-200 shadow-sm mb-8">
+        <div className="bg-white rounded-lg border border-gray-200 shadow-sm mb-8">
             <div className="p-6 border-b border-gray-100">
                 <h3 className="text-lg font-semibold text-gray-900">Quick Actions</h3>
             </div>
@@ -50,7 +50,7 @@ export default function QuickActions({
                         <motion.button
                             key="button"
                             onClick={() => setShowUpload(true)}
-                            className="w-full flex items-center justify-center gap-3 p-4 border-2 border-dashed border-gray-300 rounded-xl hover:border-primary hover:bg-primary/5 transition-all group"
+                            className="w-full flex items-center justify-center gap-3 p-4 border-2 border-dashed border-gray-300 rounded-lg hover:border-primary hover:bg-primary/5 transition-all group"
                             whileHover={{ scale: 1.01 }}
                             whileTap={{ scale: 0.99 }}
                         >

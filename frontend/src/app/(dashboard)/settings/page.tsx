@@ -15,7 +15,7 @@ export default function SettingsPage() {
         <div className="space-y-5">
             {/* Header */}
             <div className="flex items-center gap-3.5">
-                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#2a3b4e] to-[#4a6b8e] flex items-center justify-center shadow-lg shadow-[#2a3b4e]/15">
+                <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-[#2a3b4e] to-[#4a6b8e] flex items-center justify-center shadow-lg shadow-[#2a3b4e]/15">
                     <Settings className="h-4.5 w-4.5 text-white" />
                 </div>
                 <div>
@@ -26,7 +26,7 @@ export default function SettingsPage() {
 
             <div className="max-w-2xl space-y-4">
                 {/* Profile Card */}
-                <div className="bg-white rounded-xl border border-[#e8e2de] overflow-hidden">
+                <div className="bg-white rounded-lg border border-[#e8e2de] overflow-hidden">
                     <div className="px-5 py-3.5 bg-[#faf8f6] border-b border-[#e8e2de] flex items-center gap-2">
                         <User className="h-3.5 w-3.5 text-[#2a3b4e]/25" />
                         <span className="text-[11px] font-bold text-[#2a3b4e]/30 uppercase tracking-wider">Profile</span>
@@ -34,7 +34,7 @@ export default function SettingsPage() {
 
                     <div className="p-5">
                         <div className="flex items-center gap-4 mb-5">
-                            <div className="relative w-16 h-16 rounded-xl overflow-hidden ring-2 ring-[#e8e2de] shrink-0">
+                            <div className="relative w-16 h-16 rounded-lg overflow-hidden ring-2 ring-[#e8e2de] shrink-0">
                                 {user?.imageUrl ? (
                                     <Image
                                         src={user.imageUrl}
@@ -87,7 +87,7 @@ export default function SettingsPage() {
                 </div>
 
                 {/* Security Card */}
-                <div className="bg-white rounded-xl border border-[#e8e2de] overflow-hidden">
+                <div className="bg-white rounded-lg border border-[#e8e2de] overflow-hidden">
                     <div className="px-5 py-3.5 bg-[#faf8f6] border-b border-[#e8e2de] flex items-center gap-2">
                         <Key className="h-3.5 w-3.5 text-[#2a3b4e]/25" />
                         <span className="text-[11px] font-bold text-[#2a3b4e]/30 uppercase tracking-wider">Security</span>

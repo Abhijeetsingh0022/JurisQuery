@@ -67,7 +67,7 @@ export default function ContactPage() {
                         initial={{ opacity: 0, x: 20 }}
                         animate={{ opacity: 1, x: 0 }}
                         transition={{ delay: 0.2 }}
-                        className="bg-white p-8 rounded-2xl shadow-lg border border-gray-100"
+                        className="bg-white p-8 rounded-lg shadow-lg border border-gray-100"
                     >
                         <form className="space-y-6" onSubmit={handleSubmit}>
                             <div className="grid grid-cols-2 gap-4">

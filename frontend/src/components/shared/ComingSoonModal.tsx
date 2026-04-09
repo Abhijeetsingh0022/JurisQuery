@@ -42,7 +42,7 @@ export default function ComingSoonModal({
                             leaveFrom="opacity-100 scale-100 translate-y-0"
                             leaveTo="opacity-0 scale-95 translate-y-4"
                         >
-                            <Dialog.Panel className="w-full max-w-md transform overflow-hidden rounded-[2.5rem] bg-white p-8 text-left align-middle shadow-2xl border border-slate-100 transition-all">
+                            <Dialog.Panel className="w-full max-w-md transform overflow-hidden rounded-lg bg-white p-6 sm:p-8 text-left align-middle shadow-2xl border border-slate-100 transition-all">
                                 <div className="absolute top-6 right-6">
                                     <button
                                         onClick={onClose}
@@ -53,7 +53,7 @@ export default function ComingSoonModal({
                                 </div>
 
                                 <div className="flex flex-col items-center text-center">
-                                    <div className="w-20 h-20 rounded-3xl bg-gradient-to-br from-[#2a3b4e] to-[#1a2332] flex items-center justify-center mb-6 shadow-xl shadow-[#2a3b4e]/20">
+                                    <div className="w-20 h-20 rounded-lg bg-gradient-to-br from-[#2a3b4e] to-[#1a2332] flex items-center justify-center mb-6 shadow-xl shadow-[#2a3b4e]/20">
                                         <Clock className="w-10 h-10 text-white" />
                                     </div>
 
@@ -66,7 +66,7 @@ export default function ComingSoonModal({
                                         Advanced synthesis, unlimited folders, and priority analysis are just around the corner.
                                     </p>
 
-                                    <div className="w-full bg-[#f7f3f1] rounded-2xl p-6 mb-8 text-left border border-[#2a3b4e]/5">
+                                    <div className="w-full bg-[#f7f3f1] rounded-lg p-6 mb-8 text-left border border-[#2a3b4e]/5">
                                         <div className="flex items-center gap-3 mb-4">
                                             <div className="w-8 h-8 rounded-lg bg-[#2a3b4e]/10 flex items-center justify-center">
                                                 <Sparkles className="w-4 h-4 text-[#2a3b4e]" />
@@ -91,7 +91,7 @@ export default function ComingSoonModal({
                                     <div className="w-full flex flex-col gap-3">
                                         <button
                                             onClick={onClose}
-                                            className="w-full py-4 bg-[#2a3b4e] text-white rounded-2xl font-bold text-sm shadow-xl shadow-[#2a3b4e]/20 hover:bg-[#1a2332] transition-all flex items-center justify-center gap-2 active:scale-[0.98]"
+                                            className="w-full py-4 bg-[#2a3b4e] text-white rounded-lg font-bold text-sm shadow-xl shadow-[#2a3b4e]/20 hover:bg-[#1a2332] transition-all flex items-center justify-center gap-2 active:scale-[0.98]"
                                         >
                                             <Bell className="w-4 h-4" />
                                             Notify Me on Launch

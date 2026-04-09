@@ -72,9 +72,9 @@ export default function SecurityPage() {
                             initial={{ opacity: 0, y: 20 }}
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ delay: index * 0.1 }}
-                            className="bg-white p-8 rounded-2xl border border-gray-100 shadow-sm hover:shadow-md transition-shadow"
+                            className="bg-white p-8 rounded-lg border border-gray-100 shadow-sm hover:shadow-md transition-shadow"
                         >
-                            <div className="w-12 h-12 bg-primary/5 rounded-xl flex items-center justify-center text-primary mb-6">
+                            <div className="w-12 h-12 bg-primary/5 rounded-lg flex items-center justify-center text-primary mb-6">
                                 <feature.icon size={24} />
                             </div>
                             <h3 className="text-xl font-bold text-primary mb-3">{feature.title}</h3>

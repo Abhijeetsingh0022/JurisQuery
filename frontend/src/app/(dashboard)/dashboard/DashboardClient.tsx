@@ -22,6 +22,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import UpgradeModal from "@/components/shared/UpgradeModal";
+import { cn } from "@/lib/utils";
 
 export default function DashboardClient() {
     const { user } = useUser();
@@ -109,22 +110,22 @@ export default function DashboardClient() {
     }, []);
 
     return (
-        <div className="space-y-6">
+        <div className="space-y-8">
             {/* Header */}
-            <div className="flex items-center justify-between">
-                <div className="flex items-center gap-4">
-                    <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-[#2a3b4e] to-[#4a6b8e] flex items-center justify-center shadow-lg shadow-[#2a3b4e]/20">
-                        <Sparkles className="h-5 w-5 text-white" />
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6 pb-2">
+                <div className="flex items-center gap-5">
+                    <div className="w-14 h-14 rounded-lg bg-gradient-to-br from-[#d97706] to-[#f59e0b] flex items-center justify-center shadow-xl shadow-amber-900/20 shrink-0">
+                        <Sparkles className="h-6 w-6 text-white" />
                     </div>
                     <div>
-                        <h1 className="text-2xl font-bold font-serif text-[#1a2332] tracking-tight">
+                        <h1 className="text-2xl md:text-3xl font-bold font-serif text-[#1a2332] tracking-tight">
                             {greeting}, {user?.firstName || "Counsel"}
                         </h1>
-                        <p className="text-xs text-[#2a3b4e]/35">Here&apos;s your legal workspace overview</p>
+                        <p className="text-sm text-[#2a3b4e]/40 mt-1">Manage cases, analyze law, and query documents</p>
                     </div>
                 </div>
 
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-3 w-full sm:w-auto">
                     <input
                         type="file"
                         ref={fileInputRef}
@@ -135,7 +136,7 @@ export default function DashboardClient() {
                     <button
                         onClick={() => fileInputRef.current?.click()}
                         disabled={uploadMutation.isPending}
-                        className="flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-[#2a3b4e] to-[#3d5a80] text-white rounded-xl text-sm font-semibold hover:shadow-lg hover:shadow-[#2a3b4e]/20 transition-all active:scale-[0.98] disabled:opacity-70 disabled:cursor-not-allowed"
+                        className="flex-1 sm:flex-none flex items-center justify-center gap-2.5 px-6 py-3 bg-gradient-to-r from-[#2a3b4e] to-[#3d5a80] text-white rounded-lg text-[14px] font-bold shadow-lg shadow-[#2a3b4e]/10 hover:shadow-xl hover:shadow-[#2a3b4e]/20 transition-all active:scale-[0.98] disabled:opacity-70 disabled:cursor-not-allowed"
                     >
                         {uploadMutation.isPending ? (
                             <>
@@ -145,7 +146,7 @@ export default function DashboardClient() {
                         ) : (
                             <>
                                 <Upload className="h-4 w-4" />
-                                Upload Document
+                                Add Document
                             </>
                         )}
                     </button>
@@ -153,34 +154,26 @@ export default function DashboardClient() {
             </div>
 
             {/* Stat Cards */}
-            <div className="grid grid-cols-3 gap-3">
-                <div className="bg-white rounded-xl border border-[#e8e2de] p-4 flex items-center gap-3.5">
-                    <div className="w-10 h-10 rounded-lg bg-blue-50 flex items-center justify-center">
-                        <FileText className="h-4.5 w-4.5 text-blue-600" />
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-5">
+                {[
+                    { label: 'Documents', value: recentDocuments.length, icon: FileText, color: 'blue' },
+                    { label: 'IPC Analyses', value: savedQueries.length, icon: Scale, color: 'amber' },
+                    { label: 'Conversations', value: analysisHistory.length, icon: MessageSquare, color: 'emerald' }
+                ].map((stat) => (
+                    <div key={stat.label} className="group bg-white rounded-lg border border-[#e8e2de]/60 p-5 md:p-6 flex items-center gap-5 transition-all hover:shadow-xl hover:shadow-[#2a3b4e]/5 hover:-translate-y-0.5">
+                        <div className={cn(
+                            "w-14 h-14 rounded-lg flex items-center justify-center shrink-0 transition-transform group-hover:scale-110",
+                            stat.color === 'blue' ? 'bg-blue-50 text-blue-600' : 
+                            stat.color === 'amber' ? 'bg-amber-50 text-[#d97706]' : 'bg-emerald-50 text-emerald-600'
+                        )}>
+                            <stat.icon className="h-6 w-6" />
+                        </div>
+                        <div>
+                            <p className="text-[11px] font-bold text-[#2a3b4e]/25 uppercase tracking-[0.15em]">{stat.label}</p>
+                            <p className="text-2xl font-bold text-[#1a2332] mt-0.5 tracking-tight">{stat.value}</p>
+                        </div>
                     </div>
-                    <div>
-                        <p className="text-[10px] font-bold text-[#2a3b4e]/25 uppercase tracking-wider">Documents</p>
-                        <p className="text-xl font-bold text-[#1a2332] mt-0.5">{recentDocuments.length}</p>
-                    </div>
-                </div>
-                <div className="bg-white rounded-xl border border-[#e8e2de] p-4 flex items-center gap-3.5">
-                    <div className="w-10 h-10 rounded-lg bg-purple-50 flex items-center justify-center">
-                        <Scale className="h-4.5 w-4.5 text-purple-600" />
-                    </div>
-                    <div>
-                        <p className="text-[10px] font-bold text-[#2a3b4e]/25 uppercase tracking-wider">IPC Analyses</p>
-                        <p className="text-xl font-bold text-[#1a2332] mt-0.5">{savedQueries.length}</p>
-                    </div>
-                </div>
-                <div className="bg-white rounded-xl border border-[#e8e2de] p-4 flex items-center gap-3.5">
-                    <div className="w-10 h-10 rounded-lg bg-emerald-50 flex items-center justify-center">
-                        <MessageSquare className="h-4.5 w-4.5 text-emerald-600" />
-                    </div>
-                    <div>
-                        <p className="text-[10px] font-bold text-[#2a3b4e]/25 uppercase tracking-wider">Conversations</p>
-                        <p className="text-xl font-bold text-[#1a2332] mt-0.5">{analysisHistory.length}</p>
-                    </div>
-                </div>
+                ))}
             </div>
 
             {/* Recent Documents */}
@@ -198,16 +191,16 @@ export default function DashboardClient() {
                 {isLoadingDocs ? (
                     <div className="grid grid-cols-3 gap-3">
                         {[1, 2, 3].map((i) => (
-                            <div key={i} className="h-28 bg-[#f7f3f1] rounded-xl animate-pulse" />
+                            <div key={i} className="h-28 bg-[#f7f3f1] rounded-lg animate-pulse" />
                         ))}
                     </div>
                 ) : recentDocuments.length > 0 ? (
-                    <div className="grid grid-cols-3 gap-3">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
                         {recentDocuments.map((doc: any) => (
                             <Link key={doc.id} href={`/documents/${doc.id}`}>
-                                <div className="bg-white rounded-xl border border-[#e8e2de] p-4 hover:border-[#2a3b4e]/15 hover:shadow-sm transition-all group cursor-pointer">
+                                <div className="bg-white rounded-lg border border-[#e8e2de] p-4 hover:border-[#2a3b4e]/15 hover:shadow-sm transition-all group cursor-pointer h-full">
                                     <div className="flex items-start justify-between mb-3">
-                                        <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-[#f7f3f1] to-[#eee8e4] flex items-center justify-center group-hover:from-[#2a3b4e]/5 group-hover:to-[#2a3b4e]/10 transition-all">
+                                        <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-[#f7f3f1] to-[#eee8e4] flex items-center justify-center group-hover:from-[#2a3b4e]/5 group-hover:to-[#2a3b4e]/10 transition-all shrink-0">
                                             <FileText className="h-4 w-4 text-[#2a3b4e]/30 group-hover:text-[#2a3b4e]/60" />
                                         </div>
                                         <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-semibold ring-1 ${doc.status === "ready"
@@ -235,8 +228,8 @@ export default function DashboardClient() {
                         ))}
                     </div>
                 ) : (
-                    <div className="bg-white rounded-xl border border-[#e8e2de] p-10 text-center">
-                        <div className="w-12 h-12 rounded-xl bg-[#f7f3f1] flex items-center justify-center mx-auto mb-3">
+                    <div className="bg-white rounded-lg border border-[#e8e2de] p-10 text-center">
+                        <div className="w-12 h-12 rounded-lg bg-[#f7f3f1] flex items-center justify-center mx-auto mb-3">
                             <FolderOpen className="h-5 w-5 text-[#2a3b4e]/15" />
                         </div>
                         <p className="text-[12px] font-medium text-[#2a3b4e]/25">No documents yet</p>
@@ -251,7 +244,7 @@ export default function DashboardClient() {
             </section>
 
             {/* Bottom Grid */}
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
                 {/* IPC Predictions */}
                 <section>
                     <div className="flex items-center justify-between mb-3">
@@ -264,7 +257,7 @@ export default function DashboardClient() {
                         </Link>
                     </div>
 
-                    <div className="bg-white rounded-xl border border-[#e8e2de] overflow-hidden">
+                    <div className="bg-white rounded-lg border border-[#e8e2de] overflow-hidden">
                         {isLoadingIPC ? (
                             <div className="p-10 flex items-center justify-center">
                                 <Loader2 className="h-5 w-5 animate-spin text-[#2a3b4e]/20" />
@@ -294,7 +287,7 @@ export default function DashboardClient() {
                             </div>
                         ) : (
                             <div className="p-10 text-center">
-                                <div className="w-10 h-10 rounded-xl bg-[#f7f3f1] flex items-center justify-center mx-auto mb-2.5">
+                                <div className="w-10 h-10 rounded-lg bg-[#f7f3f1] flex items-center justify-center mx-auto mb-2.5">
                                     <Scale className="h-4 w-4 text-[#2a3b4e]/15" />
                                 </div>
                                 <p className="text-[11px] font-medium text-[#2a3b4e]/25">No predictions yet</p>
@@ -315,7 +308,7 @@ export default function DashboardClient() {
                         </Link>
                     </div>
 
-                    <div className="bg-white rounded-xl border border-[#e8e2de] overflow-hidden">
+                    <div className="bg-white rounded-lg border border-[#e8e2de] overflow-hidden">
                         {isLoadingSessions ? (
                             <div className="p-10 flex items-center justify-center">
                                 <Loader2 className="h-5 w-5 animate-spin text-[#2a3b4e]/20" />
@@ -342,7 +335,7 @@ export default function DashboardClient() {
                             </div>
                         ) : (
                             <div className="p-10 text-center">
-                                <div className="w-10 h-10 rounded-xl bg-[#f7f3f1] flex items-center justify-center mx-auto mb-2.5">
+                                <div className="w-10 h-10 rounded-lg bg-[#f7f3f1] flex items-center justify-center mx-auto mb-2.5">
                                     <MessageSquare className="h-4 w-4 text-[#2a3b4e]/15" />
                                 </div>
                                 <p className="text-[11px] font-medium text-[#2a3b4e]/25">No conversations yet</p>

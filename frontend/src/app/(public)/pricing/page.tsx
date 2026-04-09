@@ -72,7 +72,7 @@ export default function PricingPage() {
                             initial={{ opacity: 0, y: 20 }}
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ delay: index * 0.1 }}
-                            className={`relative p-8 rounded-2xl border ${plan.popular
+                            className={`relative p-8 rounded-lg border ${plan.popular
                                     ? "border-primary bg-primary text-primary-foreground shadow-2xl scale-105 z-10"
                                     : "border-gray-200 bg-white text-foreground hover:shadow-xl transition-shadow"
                                 }`}
@@ -97,7 +97,7 @@ export default function PricingPage() {
 
                             <Link href={plan.name === "Enterprise" ? "/contact" : "/sign-up"} className="w-full">
                                 <Button
-                                    className={`w-full mb-8 rounded-xl font-semibold h-12 ${plan.popular
+                                    className={`w-full mb-8 rounded-lg font-semibold h-12 ${plan.popular
                                             ? "bg-white text-primary hover:bg-gray-100"
                                             : "bg-primary text-primary-foreground hover:bg-primary/90"
                                         }`}

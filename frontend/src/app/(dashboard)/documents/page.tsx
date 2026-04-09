@@ -157,40 +157,28 @@ export default function DocumentsPage() {
     return (
         <div className="space-y-5 relative">
             {/* Header */}
-            <div className="flex items-center justify-between">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                 <div className="flex items-center gap-4">
-                    <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#2a3b4e] to-[#4a6b8e] flex items-center justify-center shadow-lg shadow-[#2a3b4e]/20">
+                    <div className="w-11 h-11 rounded-lg bg-gradient-to-br from-[#d97706] to-[#f59e0b] flex items-center justify-center shadow-lg shadow-amber-900/20 shrink-0">
                         <FolderOpen className="h-5 w-5 text-white" />
                     </div>
                     <div>
-                        <h1 className="text-2xl font-bold font-serif text-[#1a2332] tracking-tight">Documents</h1>
+                        <h1 className="text-xl md:text-2xl font-bold font-serif text-[#1a2332] tracking-tight">Documents</h1>
                         <p className="text-xs text-[#2a3b4e]/40">Manage and analyze your legal documents</p>
                     </div>
 
-                    {/* Stat pills */}
-                    <div className="hidden md:flex items-center gap-2 ml-4 pl-4 border-l border-[#2a3b4e]/8">
-                        <div className="flex items-center gap-1.5 bg-blue-50 text-blue-700 px-3 py-1 rounded-full text-[11px] font-semibold">
-                            <FileText className="h-3 w-3" />
+                    {/* Stat pills - Hidden on Mobile */}
+                    <div className="hidden lg:flex items-center gap-2 ml-4 pl-4 border-l border-[#2a3b4e]/8">
+                        <div className="flex items-center gap-1.5 bg-blue-50 text-blue-700 px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-tight">
                             {documents.length} Total
                         </div>
-                        <div className="flex items-center gap-1.5 bg-emerald-50 text-emerald-700 px-3 py-1 rounded-full text-[11px] font-semibold">
-                            <CheckCircle2 className="h-3 w-3" />
+                        <div className="flex items-center gap-1.5 bg-emerald-50 text-emerald-700 px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-tight">
                             {readyCount} Ready
-                        </div>
-                        {processingCount > 0 && (
-                            <div className="flex items-center gap-1.5 bg-amber-50 text-amber-700 px-3 py-1 rounded-full text-[11px] font-semibold">
-                                <Timer className="h-3 w-3 animate-pulse" />
-                                {processingCount} Processing
-                            </div>
-                        )}
-                        <div className="flex items-center gap-1.5 bg-purple-50 text-purple-700 px-3 py-1 rounded-full text-[11px] font-semibold">
-                            <HardDrive className="h-3 w-3" />
-                            {formatFileSize(totalSize)}
                         </div>
                     </div>
                 </div>
 
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-3 w-full sm:w-auto">
                     <input
                         type="file"
                         ref={fileInputRef}
@@ -201,7 +189,7 @@ export default function DocumentsPage() {
                     <button
                         onClick={() => fileInputRef.current?.click()}
                         disabled={uploadMutation.isPending}
-                        className="flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-[#2a3b4e] to-[#3d5a80] text-white rounded-xl text-sm font-semibold hover:shadow-lg hover:shadow-[#2a3b4e]/20 transition-all active:scale-[0.98] disabled:opacity-70 disabled:cursor-not-allowed"
+                        className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-4 py-2.5 bg-gradient-to-r from-[#2a3b4e] to-[#3d5a80] text-white rounded-lg text-sm font-semibold hover:shadow-lg hover:shadow-[#2a3b4e]/20 transition-all active:scale-[0.98] disabled:opacity-70 disabled:cursor-not-allowed"
                     >
                         {uploadMutation.isPending ? (
                             <>
@@ -210,8 +198,8 @@ export default function DocumentsPage() {
                             </>
                         ) : (
                             <>
-                                <Upload className="h-4 w-4" />
-                                Upload Document
+                                <Plus className="h-4 w-4" />
+                                Add Document
                             </>
                         )}
                     </button>
@@ -219,7 +207,7 @@ export default function DocumentsPage() {
             </div>
 
             {/* Tab Switcher */}
-            <div className="flex items-center gap-1 p-1 bg-[#faf8f6] rounded-xl border border-[#e8e2de] w-fit">
+            <div className="flex items-center gap-1 p-1 bg-[#f7f3f1] rounded-lg border border-[#e8e2de]/60 w-full sm:w-fit">
                 {([
                     { id: 'documents', label: 'All Documents', icon: FileText },
                     { id: 'folders', label: 'Case Folders', icon: FolderPlus },
@@ -227,13 +215,13 @@ export default function DocumentsPage() {
                     <button
                         key={id}
                         onClick={() => setActiveTab(id)}
-                        className={`flex items-center gap-2 px-4 py-2 rounded-lg text-[13px] font-semibold transition-all ${
+                        className={`flex-1 sm:flex-none flex items-center justify-center gap-2.5 px-5 py-2.5 rounded-lg text-[13px] font-bold transition-all ${
                             activeTab === id
-                                ? 'bg-white text-[#1a2332] shadow-sm ring-1 ring-[#e8e2de]'
-                                : 'text-[#2a3b4e]/40 hover:text-[#2a3b4e]'
+                                ? 'bg-white text-[#1a2332] shadow-sm ring-1 ring-[#e8e2de] scale-[1.02]'
+                                : 'text-[#2a3b4e]/40 hover:text-[#2a3b4e] hover:bg-white/50'
                         }`}
                     >
-                        <Icon className="h-3.5 w-3.5" />
+                        <Icon className={`h-4 w-4 ${activeTab === id ? 'text-[#d97706]' : ''}`} />
                         {label}
                     </button>
                 ))}
@@ -252,7 +240,7 @@ export default function DocumentsPage() {
                         placeholder="Search documents by name…"
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
-                        className="w-full pl-11 pr-4 py-2.5 bg-white rounded-xl border border-[#e8e2de] text-[13px] text-[#1a2332] placeholder:text-[#2a3b4e]/25 focus:outline-none focus:border-[#2a3b4e]/20 focus:ring-2 focus:ring-[#2a3b4e]/5 transition-all"
+                        className="w-full pl-11 pr-4 py-2.5 bg-white rounded-lg border border-[#e8e2de] text-[13px] text-[#1a2332] placeholder:text-[#2a3b4e]/25 focus:outline-none focus:border-[#2a3b4e]/20 focus:ring-2 focus:ring-[#2a3b4e]/5 transition-all"
                     />
                     {searchQuery && (
                         <button
@@ -280,7 +268,7 @@ export default function DocumentsPage() {
                         onDragOver={handleDragOver}
                         onDragLeave={handleDragLeave}
                     >
-                        <div className="bg-white rounded-2xl border-2 border-dashed border-[#2a3b4e]/20 p-16 text-center shadow-2xl">
+                        <div className="bg-white rounded-lg border-2 border-dashed border-[#2a3b4e]/20 p-16 text-center shadow-2xl">
                             <Upload className="h-12 w-12 text-[#2a3b4e]/30 mx-auto mb-4" />
                             <p className="text-lg font-bold text-[#1a2332]">Drop your document here</p>
                             <p className="text-sm text-[#2a3b4e]/40 mt-2">PDF, DOCX, or TXT files supported</p>
@@ -291,13 +279,13 @@ export default function DocumentsPage() {
 
             {/* Documents Table */}
             <div
-                className="bg-white rounded-xl border border-[#e8e2de] shadow-sm overflow-hidden"
+                className="bg-white rounded-lg border border-[#e8e2de] shadow-sm overflow-hidden"
                 onDragOver={handleDragOver}
                 onDragLeave={handleDragLeave}
                 onDrop={handleDrop}
             >
-                {/* Table Header */}
-                <div className="grid grid-cols-12 gap-4 px-6 py-3 bg-[#faf8f6] border-b border-[#e8e2de]">
+                {/* Table Header - Hidden on Mobile */}
+                <div className="hidden md:grid grid-cols-12 gap-4 px-6 py-3 bg-[#faf8f6] border-b border-[#e8e2de]">
                     <div className="col-span-5 text-[10px] font-bold text-[#2a3b4e]/30 uppercase tracking-wider">Document</div>
                     <div className="col-span-2 text-[10px] font-bold text-[#2a3b4e]/30 uppercase tracking-wider">Status</div>
                     <div className="col-span-2 text-[10px] font-bold text-[#2a3b4e]/30 uppercase tracking-wider">Uploaded</div>
@@ -309,14 +297,14 @@ export default function DocumentsPage() {
                 <div className="divide-y divide-[#e8e2de]/50">
                     {isLoading ? (
                         <div className="px-6 py-20 text-center">
-                            <div className="w-12 h-12 rounded-xl bg-[#f7f3f1] flex items-center justify-center mx-auto mb-3">
+                            <div className="w-12 h-12 rounded-lg bg-[#f7f3f1] flex items-center justify-center mx-auto mb-3">
                                 <Loader2 className="h-5 w-5 animate-spin text-[#2a3b4e]/30" />
                             </div>
                             <p className="text-[13px] font-medium text-[#2a3b4e]/40">Loading documents…</p>
                         </div>
                     ) : filteredDocs.length === 0 ? (
                         <div className="px-6 py-20 text-center">
-                            <div className="w-16 h-16 rounded-2xl bg-[#f7f3f1] flex items-center justify-center mx-auto mb-4">
+                            <div className="w-16 h-16 rounded-lg bg-[#f7f3f1] flex items-center justify-center mx-auto mb-4">
                                 <FolderOpen className="h-7 w-7 text-[#2a3b4e]/15" />
                             </div>
                             <p className="text-[15px] font-bold text-[#1a2332]/30 mb-1">
@@ -346,75 +334,80 @@ export default function DocumentsPage() {
                                     initial={{ opacity: 0, y: 4 }}
                                     animate={{ opacity: 1, y: 0 }}
                                     transition={{ duration: 0.2, delay: idx * 0.03 }}
-                                    className="grid grid-cols-12 gap-4 px-6 py-4 items-center group hover:bg-[#faf8f6]/80 transition-colors"
+                                    className="flex flex-col md:grid md:grid-cols-12 gap-4 px-4 md:px-6 py-4 items-start md:items-center group hover:bg-[#faf8f6]/80 transition-colors"
                                 >
-                                    {/* Document name */}
-                                    <div className="col-span-5 flex items-center gap-3.5 min-w-0">
-                                        <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#f7f3f1] to-[#eee8e4] flex items-center justify-center shrink-0 group-hover:from-[#2a3b4e]/5 group-hover:to-[#2a3b4e]/10 transition-all">
+                                    {/* Document name & Primary Info - Full width on mobile */}
+                                    <div className="w-full md:col-span-5 flex items-center gap-3.5 min-w-0">
+                                        <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-[#f7f3f1] to-[#eee8e4] flex items-center justify-center shrink-0 group-hover:from-[#2a3b4e]/5 group-hover:to-[#2a3b4e]/10 transition-all">
                                             <FileText className="h-4.5 w-4.5 text-[#2a3b4e]/40 group-hover:text-[#2a3b4e]/60" />
                                         </div>
                                         <div className="min-w-0">
                                             <p className="text-[13px] font-semibold text-[#1a2332] truncate group-hover:text-[#2a3b4e]">
                                                 {doc.original_filename || doc.filename || 'Untitled'}
                                             </p>
-                                            <p className="text-[10px] text-[#2a3b4e]/25 mt-0.5 font-medium uppercase">
-                                                {doc.file_type || (doc.original_filename || doc.filename || '').split('.').pop()?.toUpperCase() || 'FILE'}
-                                                {doc.page_count ? ` · ${doc.page_count} pages` : ''}
-                                            </p>
+                                            <div className="flex items-center gap-2 mt-0.5">
+                                                <p className="text-[10px] text-[#2a3b4e]/25 font-medium uppercase">
+                                                    {doc.file_type || (doc.original_filename || doc.filename || '').split('.').pop()?.toUpperCase() || 'FILE'}
+                                                    {doc.page_count ? ` · ${doc.page_count} pages` : ''}
+                                                </p>
+                                                <span className="md:hidden text-[10px] text-[#2a3b4e]/20">•</span>
+                                                <span className="md:hidden text-[10px] text-[#2a3b4e]/45 font-mono">{formatFileSize(doc.file_size)}</span>
+                                            </div>
                                         </div>
                                     </div>
 
-                                    {/* Status */}
-                                    <div className="col-span-2">
-                                        <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[11px] font-semibold ${statusConfig.bg} ${statusConfig.text} ring-1 ${statusConfig.ring}`}>
-                                            <div className={`w-1.5 h-1.5 rounded-full ${statusConfig.dot} ${doc.status === 'processing' || doc.status === 'vectorizing' ? 'animate-pulse' : ''}`} />
-                                            {statusConfig.label}
-                                        </span>
+                                    {/* Status & Date - Stacked row on mobile */}
+                                    <div className="w-full md:col-span-4 flex items-center justify-between md:justify-start gap-4">
+                                        <div className="md:col-span-2">
+                                            <span className={`inline-flex items-center gap-1.5 px-2 py-0.5 md:py-1 rounded-lg text-[10px] md:text-[11px] font-semibold ${statusConfig.bg} ${statusConfig.text} ring-1 ${statusConfig.ring}`}>
+                                                <div className={`w-1 h-1 md:w-1.5 md:h-1.5 rounded-full ${statusConfig.dot} ${doc.status === 'processing' || doc.status === 'vectorizing' ? 'animate-pulse' : ''}`} />
+                                                {statusConfig.label}
+                                            </span>
+                                        </div>
+
+                                        <div className="md:col-span-2">
+                                            <span className="text-[11px] md:text-[12px] text-[#2a3b4e]/45 font-medium">
+                                                {formatDate(doc.created_at)}
+                                            </span>
+                                        </div>
                                     </div>
 
-                                    {/* Date */}
-                                    <div className="col-span-2">
-                                        <span className="text-[12px] text-[#2a3b4e]/45 font-medium">
-                                            {formatDate(doc.created_at)}
-                                        </span>
-                                    </div>
-
-                                    {/* Size */}
-                                    <div className="col-span-1">
+                                    {/* Desktop Size Column */}
+                                    <div className="hidden md:block md:col-span-1">
                                         <span className="text-[12px] text-[#2a3b4e]/45 font-mono font-medium">
                                             {formatFileSize(doc.file_size)}
                                         </span>
                                     </div>
 
-                                    {/* Actions */}
-                                    <div className="col-span-2 flex items-center justify-end gap-1">
+                                    {/* Actions - Full width on mobile footer of card */}
+                                    <div className="w-full md:col-span-2 flex items-center justify-end gap-1 pt-3 md:pt-0 border-t border-[#e8e2de]/50 md:border-0">
                                         <Link
                                             href={`/documents/${doc.id}`}
                                             className="p-2 text-[#2a3b4e]/40 hover:text-[#2a3b4e] hover:bg-white rounded-lg transition-all ring-1 ring-transparent hover:ring-[#e8e2de] hover:shadow-sm"
                                             title="Chat with Document"
                                         >
-                                            <MessageSquare className="h-3.5 w-3.5" />
+                                            <MessageSquare className="h-4 w-4 md:h-3.5 md:w-3.5" />
                                         </Link>
                                         <button
                                             onClick={() => setAddToFolderDoc(doc)}
                                             className="p-2 text-[#2a3b4e]/40 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-all ring-1 ring-transparent hover:ring-blue-100"
                                             title="Add to Case Folder"
                                         >
-                                            <FolderPlus className="h-3.5 w-3.5" />
+                                            <FolderPlus className="h-4 w-4 md:h-3.5 md:w-3.5" />
                                         </button>
                                         <button
                                             onClick={() => setViewDoc(doc)}
                                             className="p-2 text-[#2a3b4e]/40 hover:text-[#2a3b4e] hover:bg-white rounded-lg transition-all ring-1 ring-transparent hover:ring-[#e8e2de] hover:shadow-sm"
                                             title="View Details"
                                         >
-                                            <Eye className="h-3.5 w-3.5" />
+                                            <Eye className="h-4 w-4 md:h-3.5 md:w-3.5" />
                                         </button>
                                         <button
                                             onClick={() => setDeleteDoc(doc)}
                                             className="p-2 text-[#2a3b4e]/40 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all ring-1 ring-transparent hover:ring-red-100"
                                             title="Delete"
                                         >
-                                            <Trash2 className="h-3.5 w-3.5" />
+                                            <Trash2 className="h-4 w-4 md:h-3.5 md:w-3.5" />
                                         </button>
                                     </div>
                                 </motion.div>
@@ -498,10 +491,10 @@ function DeleteModal({ document, isOpen, onClose, onConfirm, isDeleting }: { doc
                 animate={{ scale: 1, opacity: 1 }}
                 exit={{ scale: 0.95, opacity: 0 }}
                 transition={{ type: 'spring', damping: 25, stiffness: 400 }}
-                className="bg-white rounded-xl shadow-2xl w-full max-w-lg overflow-hidden flex flex-col max-h-[85vh]"
+                className="bg-white rounded-lg shadow-2xl w-full max-w-lg overflow-hidden flex flex-col max-h-[85vh]"
             >
                 <div className="p-6 text-center shrink-0">
-                    <div className={`h-14 w-14 rounded-xl flex items-center justify-center mx-auto mb-4 transition-all duration-300 ${isDeleting ? 'bg-red-500 shadow-lg shadow-red-200' : 'bg-red-50'}`}>
+                    <div className={`h-14 w-14 rounded-lg flex items-center justify-center mx-auto mb-4 transition-all duration-300 ${isDeleting ? 'bg-red-500 shadow-lg shadow-red-200' : 'bg-red-50'}`}>
                         <AlertTriangle className={`h-6 w-6 transition-colors duration-300 ${isDeleting ? 'text-white' : 'text-red-600'}`} />
                     </div>
                     <h3 className="text-lg font-bold text-[#1a2332] mb-1">
@@ -517,7 +510,7 @@ function DeleteModal({ document, isOpen, onClose, onConfirm, isDeleting }: { doc
                 </div>
 
                 <div className="px-6 pb-2 flex-1 overflow-hidden flex flex-col min-h-0">
-                    <div className="bg-[#faf8f6] rounded-xl border border-[#e8e2de] flex-1 overflow-hidden flex flex-col">
+                    <div className="bg-[#faf8f6] rounded-lg border border-[#e8e2de] flex-1 overflow-hidden flex flex-col">
                         <div className="px-4 py-3 border-b border-[#e8e2de] flex justify-between items-center shrink-0">
                             <span className="text-[10px] font-bold text-[#2a3b4e]/30 uppercase tracking-wider">
                                 Linked Chunks ({isLoadingChunks ? '…' : chunksData?.chunks?.length || 0})
@@ -560,14 +553,14 @@ function DeleteModal({ document, isOpen, onClose, onConfirm, isDeleting }: { doc
                     <button
                         onClick={onClose}
                         disabled={isDeleting}
-                        className="px-4 py-2.5 rounded-xl border border-[#e8e2de] text-[#2a3b4e] text-sm font-medium hover:bg-[#faf8f6] transition-colors disabled:opacity-50"
+                        className="px-4 py-2.5 rounded-lg border border-[#e8e2de] text-[#2a3b4e] text-sm font-medium hover:bg-[#faf8f6] transition-colors disabled:opacity-50"
                     >
                         Cancel
                     </button>
                     <button
                         onClick={() => onConfirm(document.id)}
                         disabled={isDeleting}
-                        className="px-4 py-2.5 rounded-xl bg-red-600 text-white text-sm font-semibold hover:bg-red-700 transition-all flex items-center shadow-sm shadow-red-200 disabled:opacity-80 active:scale-[0.98]"
+                        className="px-4 py-2.5 rounded-lg bg-red-600 text-white text-sm font-semibold hover:bg-red-700 transition-all flex items-center shadow-sm shadow-red-200 disabled:opacity-80 active:scale-[0.98]"
                     >
                         {isDeleting ? (
                             <>
@@ -634,16 +627,16 @@ function DocumentDetailsModal({ documentId, initialData, isOpen, onClose }: { do
                 animate={{ scale: 1, opacity: 1 }}
                 exit={{ scale: 0.95, opacity: 0 }}
                 transition={{ type: 'spring', damping: 25, stiffness: 400 }}
-                className="bg-white rounded-xl shadow-2xl w-full max-w-5xl overflow-hidden flex h-[85vh]"
+                className="bg-white rounded-lg shadow-2xl w-full max-w-5xl overflow-hidden flex flex-col md:flex-row h-[90vh] md:h-[85vh]"
             >
-                {/* Sidebar */}
-                <div className="w-60 bg-[#faf8f6] border-r border-[#e8e2de] flex flex-col shrink-0">
-                    <div className="p-5">
-                        <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#2a3b4e] to-[#4a6b8e] flex items-center justify-center mb-4 shadow-sm">
+                {/* Sidebar - Mobile: Top Tabs, Desktop: Left Sidebar */}
+                <div className="w-full md:w-60 bg-[#faf8f6] border-b md:border-b-0 md:border-r border-[#e8e2de] flex flex-row md:flex-col shrink-0">
+                    <div className="p-4 md:p-5 flex md:flex-col items-center md:items-start w-full gap-4 md:gap-0">
+                        <div className="hidden md:flex w-10 h-10 rounded-lg bg-gradient-to-br from-[#2a3b4e] to-[#4a6b8e] items-center justify-center mb-4 shadow-sm">
                             <FileText className="h-5 w-5 text-white" />
                         </div>
-                        <h2 className="text-[10px] font-bold text-[#2a3b4e]/25 uppercase tracking-wider mb-4">Document Details</h2>
-                        <nav className="space-y-1">
+                        <h2 className="hidden md:block text-[10px] font-bold text-[#2a3b4e]/25 uppercase tracking-wider mb-4">Document Details</h2>
+                        <nav className="flex md:flex-col items-center gap-1 md:space-y-1">
                             {[
                                 { id: 'overview' as const, label: 'Overview', icon: FileText },
                                 { id: 'chunks' as const, label: 'Chunks', icon: BookOpen },
@@ -654,7 +647,7 @@ function DocumentDetailsModal({ documentId, initialData, isOpen, onClose }: { do
                                     <button
                                         key={item.id}
                                         onClick={() => setActiveTab(item.id)}
-                                        className={`w-full flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-[13px] font-medium transition-all ${isActive
+                                        className={`flex items-center gap-2.5 px-4 md:px-3 py-2 md:py-2.5 rounded-lg text-[13px] font-medium transition-all ${isActive
                                             ? 'bg-white text-[#1a2332] shadow-sm ring-1 ring-[#e8e2de]'
                                             : 'text-[#2a3b4e]/40 hover:text-[#2a3b4e] hover:bg-white/50'
                                             }`}
@@ -667,8 +660,8 @@ function DocumentDetailsModal({ documentId, initialData, isOpen, onClose }: { do
                         </nav>
                     </div>
 
-                    {/* Quick Info */}
-                    <div className="mt-auto p-5 border-t border-[#e8e2de]">
+                    {/* Quick Info - Hidden on Mobile */}
+                    <div className="hidden md:block mt-auto p-5 border-t border-[#e8e2de]">
                         <div className="space-y-3">
                             <div>
                                 <p className="text-[10px] font-bold text-[#2a3b4e]/20 uppercase tracking-wider">Size</p>
@@ -683,9 +676,9 @@ function DocumentDetailsModal({ documentId, initialData, isOpen, onClose }: { do
                 </div>
 
                 {/* Main Content */}
-                <div className="flex-1 flex flex-col min-w-0">
+                <div className="flex-1 flex flex-col min-w-0 bg-white">
                     {/* Header */}
-                    <div className="flex items-center justify-between px-8 py-5 border-b border-[#e8e2de] shrink-0 bg-[#faf8f6]/50">
+                    <div className="flex items-center justify-between px-4 md:px-8 py-4 md:py-5 border-b border-[#e8e2de] shrink-0 bg-[#faf8f6]/50">
                         <div className="min-w-0 mr-4">
                             <h2 className="text-lg font-bold text-[#1a2332] truncate" title={document.original_filename}>
                                 {document.original_filename}
@@ -703,7 +696,7 @@ function DocumentDetailsModal({ documentId, initialData, isOpen, onClose }: { do
                     </div>
 
                     {/* Body */}
-                    <div className="overflow-y-auto flex-1 p-8">
+                    <div className="overflow-y-auto flex-1 p-4 md:p-8">
                         {activeTab === 'overview' ? (
                             <motion.div
                                 initial={{ opacity: 0, y: 8 }}
@@ -712,8 +705,8 @@ function DocumentDetailsModal({ documentId, initialData, isOpen, onClose }: { do
                             >
                                 <div>
                                     <h3 className="text-[11px] font-bold text-[#2a3b4e]/25 uppercase tracking-wider mb-4">General Information</h3>
-                                    <div className="grid grid-cols-2 gap-4">
-                                        <div className="bg-[#faf8f6] rounded-xl p-4 border border-[#e8e2de]/60">
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                        <div className="bg-[#faf8f6] rounded-lg p-4 border border-[#e8e2de]/60">
                                             <p className="text-[10px] font-bold text-[#2a3b4e]/20 uppercase tracking-wider mb-2">Status</p>
                                             <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[12px] font-semibold ${document.status === "ready"
                                                 ? "bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200"
@@ -723,17 +716,17 @@ function DocumentDetailsModal({ documentId, initialData, isOpen, onClose }: { do
                                                 {document.status}
                                             </span>
                                         </div>
-                                        <div className="bg-[#faf8f6] rounded-xl p-4 border border-[#e8e2de]/60">
+                                        <div className="bg-[#faf8f6] rounded-lg p-4 border border-[#e8e2de]/60">
                                             <p className="text-[10px] font-bold text-[#2a3b4e]/20 uppercase tracking-wider mb-2">Upload Date</p>
                                             <p className="text-[13px] font-medium text-[#1a2332]">
                                                 {new Date(document.created_at).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
                                             </p>
                                         </div>
-                                        <div className="bg-[#faf8f6] rounded-xl p-4 border border-[#e8e2de]/60">
+                                        <div className="bg-[#faf8f6] rounded-lg p-4 border border-[#e8e2de]/60">
                                             <p className="text-[10px] font-bold text-[#2a3b4e]/20 uppercase tracking-wider mb-2">File Size</p>
                                             <p className="text-[13px] font-mono font-semibold text-[#1a2332]">{formatFileSize(document.file_size)}</p>
                                         </div>
-                                        <div className="bg-[#faf8f6] rounded-xl p-4 border border-[#e8e2de]/60">
+                                        <div className="bg-[#faf8f6] rounded-lg p-4 border border-[#e8e2de]/60">
                                             <p className="text-[10px] font-bold text-[#2a3b4e]/20 uppercase tracking-wider mb-2">Total Pages</p>
                                             <p className="text-[13px] font-semibold text-[#1a2332]">{document.page_count || '—'}</p>
                                         </div>
@@ -749,7 +742,7 @@ function DocumentDetailsModal({ documentId, initialData, isOpen, onClose }: { do
                                                 href={document.file_url}
                                                 target="_blank"
                                                 rel="noopener noreferrer"
-                                                className="flex items-center justify-between p-4 bg-white rounded-xl border border-[#e8e2de] hover:border-[#2a3b4e]/15 hover:shadow-sm transition-all group"
+                                                className="flex items-center justify-between p-4 bg-white rounded-lg border border-[#e8e2de] hover:border-[#2a3b4e]/15 hover:shadow-sm transition-all group"
                                             >
                                                 <div className="flex items-center gap-3">
                                                     <div className="w-10 h-10 rounded-lg bg-[#f7f3f1] flex items-center justify-center group-hover:bg-[#2a3b4e]/5 transition-colors">
@@ -765,7 +758,7 @@ function DocumentDetailsModal({ documentId, initialData, isOpen, onClose }: { do
                                         )}
                                         <Link
                                             href={`/documents/${document.id}`}
-                                            className="flex items-center justify-between p-4 bg-white rounded-xl border border-[#e8e2de] hover:border-[#2a3b4e]/15 hover:shadow-sm transition-all group"
+                                            className="flex items-center justify-between p-4 bg-white rounded-lg border border-[#e8e2de] hover:border-[#2a3b4e]/15 hover:shadow-sm transition-all group"
                                         >
                                             <div className="flex items-center gap-3">
                                                 <div className="w-10 h-10 rounded-lg bg-[#f7f3f1] flex items-center justify-center group-hover:bg-[#2a3b4e]/5 transition-colors">
@@ -785,7 +778,7 @@ function DocumentDetailsModal({ documentId, initialData, isOpen, onClose }: { do
                             <div className="max-w-4xl mx-auto">
                                 {isLoadingChunks ? (
                                     <div className="flex flex-col items-center justify-center py-20">
-                                        <div className="w-12 h-12 rounded-xl bg-[#f7f3f1] flex items-center justify-center mb-3">
+                                        <div className="w-12 h-12 rounded-lg bg-[#f7f3f1] flex items-center justify-center mb-3">
                                             <Loader2 className="h-5 w-5 animate-spin text-[#2a3b4e]/30" />
                                         </div>
                                         <span className="text-[12px] font-medium text-[#2a3b4e]/30">Loading chunks…</span>
@@ -808,7 +801,7 @@ function DocumentDetailsModal({ documentId, initialData, isOpen, onClose }: { do
                                                     initial={{ opacity: 0, y: 4 }}
                                                     animate={{ opacity: 1, y: 0 }}
                                                     transition={{ delay: idx * 0.02 }}
-                                                    className="bg-white rounded-xl p-5 border border-[#e8e2de] hover:border-[#2a3b4e]/12 hover:shadow-sm transition-all"
+                                                    className="bg-white rounded-lg p-5 border border-[#e8e2de] hover:border-[#2a3b4e]/12 hover:shadow-sm transition-all"
                                                 >
                                                     <div className="flex items-center gap-2.5 mb-3">
                                                         <span className="px-2 py-0.5 rounded-md bg-[#2a3b4e]/5 text-[#2a3b4e] text-[10px] font-bold font-mono">
@@ -829,7 +822,7 @@ function DocumentDetailsModal({ documentId, initialData, isOpen, onClose }: { do
                                     </motion.div>
                                 ) : (
                                     <div className="flex flex-col items-center justify-center py-20">
-                                        <div className="w-16 h-16 rounded-2xl bg-[#f7f3f1] flex items-center justify-center mb-4">
+                                        <div className="w-16 h-16 rounded-lg bg-[#f7f3f1] flex items-center justify-center mb-4">
                                             <BookOpen className="h-7 w-7 text-[#2a3b4e]/15" />
                                         </div>
                                         <p className="text-[13px] font-medium text-[#2a3b4e]/30">No chunks analyzed yet</p>

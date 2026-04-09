@@ -148,7 +148,7 @@ export default function DocumentUpload({ onUploadComplete, onError }: DocumentUp
                         <div
                             {...getRootProps()}
                             className={`
-                relative overflow-hidden rounded-2xl border-2 border-dashed p-12
+                relative overflow-hidden rounded-lg border-2 border-dashed p-12
                 transition-all duration-300 cursor-pointer
                 ${isDragActive ? 'border-blue-500 bg-blue-50/50' : ''}
                 ${isDragReject ? 'border-red-500 bg-red-50/50' : ''}
@@ -194,10 +194,10 @@ export default function DocumentUpload({ onUploadComplete, onError }: DocumentUp
                         initial={{ opacity: 0, scale: 0.95 }}
                         animate={{ opacity: 1, scale: 1 }}
                         exit={{ opacity: 0, scale: 0.95 }}
-                        className="rounded-2xl border border-gray-200 bg-white p-6"
+                        className="rounded-lg border border-gray-200 bg-white p-6"
                     >
                         <div className="flex items-start gap-4">
-                            <div className="p-3 rounded-xl bg-blue-50">
+                            <div className="p-3 rounded-lg bg-blue-50">
                                 <FileText className="h-6 w-6 text-blue-600" />
                             </div>
 

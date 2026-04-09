@@ -306,37 +306,35 @@ export default function IPCPredictorPage() {
     };
 
     return (
-        <div className="h-[calc(100vh-6rem)] flex flex-col">
+        <div className="h-[calc(100vh-6rem)] md:h-[calc(100vh-8rem)] flex flex-col">
             {/* Top Bar */}
-            <div className="flex items-center justify-between pb-4 flex-none">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pb-6 flex-none">
                 <div className="flex items-center gap-4">
                     <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#2a3b4e] to-[#4a6b8e] flex items-center justify-center shadow-lg shadow-[#2a3b4e]/20">
+                        <div className="w-11 h-11 rounded-lg bg-gradient-to-br from-[#d97706] to-[#f59e0b] flex items-center justify-center shadow-lg shadow-amber-900/20">
                             <Gavel className="h-5 w-5 text-white" />
                         </div>
                         <div>
-                            <h1 className="text-2xl font-bold font-serif text-[#1a2332] tracking-tight">IPC Predictor</h1>
+                            <h1 className="text-xl md:text-2xl font-bold font-serif text-[#1a2332] tracking-tight">IPC Predictor</h1>
                             <p className="text-xs text-[#2a3b4e]/40">AI-powered criminal law analysis</p>
                         </div>
                     </div>
-                    {/* Stat pills */}
-                    <div className="hidden md:flex items-center gap-2 ml-4 pl-4 border-l border-[#2a3b4e]/8">
-                        <div className="flex items-center gap-1.5 bg-blue-50 text-blue-700 px-3 py-1 rounded-full text-[11px] font-semibold">
-                            <Search className="h-3 w-3" />
+                    {/* Stat pills - Hidden on small screens */}
+                    <div className="hidden lg:flex items-center gap-2 ml-4 pl-4 border-l border-[#2a3b4e]/8">
+                        <div className="flex items-center gap-1.5 bg-blue-50 text-blue-700 px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-tight">
                             {queryCount} Queries
                         </div>
-                        <div className="flex items-center gap-1.5 bg-emerald-50 text-emerald-700 px-3 py-1 rounded-full text-[11px] font-semibold">
-                            <BookOpen className="h-3 w-3" />
+                        <div className="flex items-center gap-1.5 bg-emerald-50 text-emerald-700 px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-tight">
                             {totalSectionsFound} Sections
                         </div>
                     </div>
                 </div>
-                <div className="flex items-center gap-2">
-                    <div className="relative">
+                <div className="flex items-center gap-2 w-full sm:w-auto">
+                    <div className="relative flex-1 sm:flex-none">
                         <select
                             value={maxSections}
                             onChange={(e) => setMaxSections(Number(e.target.value))}
-                            className="appearance-none bg-white border border-[#2a3b4e]/10 rounded-lg px-3 py-2 pr-8 text-xs font-medium text-[#2a3b4e] focus:outline-none focus:ring-2 focus:ring-[#2a3b4e]/10 focus:border-[#2a3b4e]/20 cursor-pointer hover:border-[#2a3b4e]/20 transition-colors"
+                            className="w-full appearance-none bg-white border border-[#2a3b4e]/10 rounded-lg px-4 py-2.5 pr-10 text-[13px] font-semibold text-[#2a3b4e] focus:outline-none focus:ring-2 focus:ring-[#2a3b4e]/10 focus:border-[#2a3b4e]/20 cursor-pointer hover:border-[#2a3b4e]/20 transition-all"
                             disabled={isLoading}
                         >
                             <option value={1}>Top 1 Section</option>
@@ -344,34 +342,34 @@ export default function IPCPredictorPage() {
                             <option value={5}>Top 5 Sections</option>
                             <option value={10}>Top 10 Sections</option>
                         </select>
-                        <ChevronDown className="absolute right-2.5 top-1/2 -translate-y-1/2 h-3 w-3 text-[#2a3b4e]/30 pointer-events-none" />
+                        <ChevronDown className="absolute right-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-[#2a3b4e]/30 pointer-events-none" />
                     </div>
                     <button
                         onClick={() => router.push('/dashboard')}
-                        className="bg-white border border-[#2a3b4e]/10 text-[#2a3b4e]/60 px-3 py-2 rounded-lg text-xs font-medium flex items-center hover:text-[#2a3b4e] hover:border-[#2a3b4e]/20 transition-all"
+                        className="bg-white border border-[#2a3b4e]/10 text-[#2a3b4e]/60 px-4 py-2.5 rounded-lg text-[13px] font-semibold flex items-center hover:text-[#2a3b4e] hover:border-[#2a3b4e]/20 transition-all"
                     >
-                        <ArrowLeft className="mr-1.5 h-3 w-3" />
-                        Back
+                        <ArrowLeft className="mr-2 h-4 w-4" />
+                        <span className="hidden sm:inline">Dashboard</span>
                     </button>
                 </div>
             </div>
 
-            {/* Main Content */}
-            <div className="flex-1 flex gap-4 min-h-0">
+            {/* Main Content Area */}
+            <div className="flex-1 flex flex-col lg:flex-row gap-6 min-h-0 overflow-y-auto lg:overflow-hidden">
 
-                {/* Left Sidebar */}
-                <div className="w-72 shrink-0 flex flex-col gap-3">
+                {/* Left Sidebar (History) - Scrollable on Desktop, Stacked or hidden on Mobile */}
+                <div className="w-full lg:w-[320px] shrink-0 flex flex-col gap-4">
                     {/* New Chat Button */}
                     <button
                         onClick={handleNewChat}
-                        className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-gradient-to-r from-[#2a3b4e] to-[#3d5a80] text-white rounded-xl text-sm font-semibold hover:shadow-lg hover:shadow-[#2a3b4e]/20 transition-all active:scale-[0.98]"
+                        className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-gradient-to-r from-[#2a3b4e] to-[#3d5a80] text-white rounded-lg text-sm font-semibold hover:shadow-lg hover:shadow-[#2a3b4e]/20 transition-all active:scale-[0.98]"
                     >
                         <Plus className="h-4 w-4" />
                         New Analysis
                     </button>
 
                     {/* History / Prompts Panel */}
-                    <div className="bg-white rounded-xl border border-[#e8e2de] flex-1 flex flex-col overflow-hidden shadow-sm">
+                    <div className="bg-white rounded-lg border border-[#e8e2de] flex-1 flex flex-col overflow-hidden shadow-sm">
                         {/* Tabs */}
                         <div className="flex border-b border-[#e8e2de] bg-[#faf8f6]">
                             <button
@@ -410,7 +408,7 @@ export default function IPCPredictorPage() {
                             {sidebarTab === 'history' ? (
                                 historyEntries.length === 0 ? (
                                     <div className="flex flex-col items-center justify-center h-full text-center px-6 py-12">
-                                        <div className="w-12 h-12 rounded-xl bg-[#f7f3f1] flex items-center justify-center mb-3">
+                                        <div className="w-12 h-12 rounded-lg bg-[#f7f3f1] flex items-center justify-center mb-3">
                                             <History className="h-5 w-5 text-[#2a3b4e]/20" />
                                         </div>
                                         <p className="text-[13px] font-medium text-[#2a3b4e]/40">No history yet</p>
@@ -549,7 +547,7 @@ export default function IPCPredictorPage() {
                 </div>
 
                 {/* Main Chat Panel */}
-                <div className="flex-1 bg-white rounded-xl border border-[#e8e2de] flex flex-col overflow-hidden shadow-sm">
+                <div className="flex-1 bg-white rounded-lg border border-[#e8e2de] flex flex-col overflow-hidden shadow-sm">
 
                     {/* Chat Header Bar */}
                     <div className="flex items-center justify-between px-6 py-3.5 border-b border-[#e8e2de] bg-[#faf8f6] flex-none">
@@ -585,7 +583,7 @@ export default function IPCPredictorPage() {
                     <div className="flex-1 overflow-y-auto px-6 py-5 space-y-5 bg-[#fdfcfb]">
                         {isInitializing ? (
                             <div className="flex flex-col justify-center items-center h-full gap-3">
-                                <div className="w-10 h-10 rounded-xl bg-[#f7f3f1] flex items-center justify-center">
+                                <div className="w-10 h-10 rounded-lg bg-[#f7f3f1] flex items-center justify-center">
                                     <Loader2 className="h-5 w-5 animate-spin text-[#2a3b4e]/30" />
                                 </div>
                                 <span className="text-[12px] text-[#2a3b4e]/30 font-medium">Loading history…</span>
@@ -597,7 +595,7 @@ export default function IPCPredictorPage() {
                                 transition={{ duration: 0.4, ease: 'easeOut' }}
                                 className="flex flex-col items-center justify-center h-full text-center"
                             >
-                                <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-[#2a3b4e] to-[#4a6b8e] flex items-center justify-center mb-6 shadow-xl shadow-[#2a3b4e]/20">
+                                <div className="w-20 h-20 rounded-lg bg-gradient-to-br from-[#2a3b4e] to-[#4a6b8e] flex items-center justify-center mb-6 shadow-xl shadow-[#2a3b4e]/20">
                                     <Scale className="h-10 w-10 text-white" />
                                 </div>
                                 <h2 className="text-2xl font-serif font-bold text-[#1a2332] mb-2">Describe the incident</h2>
@@ -628,7 +626,7 @@ export default function IPCPredictorPage() {
                                     className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
                                 >
                                     {msg.role === 'user' ? (
-                                        <div className="bg-gradient-to-r from-[#2a3b4e] to-[#3d5a80] text-white px-5 py-3.5 rounded-2xl rounded-br-md shadow-md shadow-[#2a3b4e]/10 max-w-[65%]">
+                                        <div className="bg-gradient-to-r from-[#2a3b4e] to-[#3d5a80] text-white px-5 py-3.5 rounded-lg rounded-br-md shadow-md shadow-[#2a3b4e]/10 max-w-[65%]">
                                             <p className="text-[13px] leading-relaxed">{msg.content}</p>
                                         </div>
                                     ) : (
@@ -661,7 +659,7 @@ export default function IPCPredictorPage() {
                                                             return (
                                                                 <div
                                                                     key={pred.section.section_number}
-                                                                    className={`bg-white rounded-xl border overflow-hidden transition-all duration-200 ${isExpanded ? 'border-[#2a3b4e]/15 shadow-md' : 'border-[#e8e2de] hover:border-[#2a3b4e]/12 hover:shadow-sm'}`}
+                                                                    className={`bg-white rounded-lg border overflow-hidden transition-all duration-200 ${isExpanded ? 'border-[#2a3b4e]/15 shadow-md' : 'border-[#e8e2de] hover:border-[#2a3b4e]/12 hover:shadow-sm'}`}
                                                                 >
                                                                     {/* Clickable header area */}
                                                                     <div
@@ -671,7 +669,7 @@ export default function IPCPredictorPage() {
                                                                         {/* Section number + offense + confidence */}
                                                                         <div className="flex items-start justify-between mb-3">
                                                                             <div className="flex items-center gap-3">
-                                                                                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#2a3b4e] to-[#3d5a80] flex items-center justify-center shrink-0 shadow-sm">
+                                                                                <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-[#2a3b4e] to-[#3d5a80] flex items-center justify-center shrink-0 shadow-sm">
                                                                                     <span className="text-white font-bold text-[11px]">{pred.section.section_number}</span>
                                                                                 </div>
                                                                                 <div>
@@ -783,7 +781,7 @@ export default function IPCPredictorPage() {
                                                         })}
                                                     </div>
                                                 ) : (
-                                                    <div className="bg-red-50 text-red-600 px-4 py-3.5 rounded-xl border border-red-100 text-[13px] flex items-start gap-2.5">
+                                                    <div className="bg-red-50 text-red-600 px-4 py-3.5 rounded-lg border border-red-100 text-[13px] flex items-start gap-2.5">
                                                         <AlertCircle className="h-4 w-4 mt-0.5 shrink-0" />
                                                         <span>{msg.content}</span>
                                                     </div>
@@ -801,7 +799,7 @@ export default function IPCPredictorPage() {
                                     <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-[#2a3b4e] to-[#4a6b8e] flex items-center justify-center shrink-0 shadow-sm">
                                         <Scale className="h-3.5 w-3.5 text-white" />
                                     </div>
-                                    <div className="bg-white border border-[#e8e2de] rounded-xl px-5 py-3.5 flex items-center gap-3 shadow-sm">
+                                    <div className="bg-white border border-[#e8e2de] rounded-lg px-5 py-3.5 flex items-center gap-3 shadow-sm">
                                         <Loader2 className="h-4 w-4 animate-spin text-[#2a3b4e]/40" />
                                         <div>
                                             <span className="text-[12px] font-medium text-[#1a2332]/50 block">Analyzing incident…</span>
@@ -816,7 +814,7 @@ export default function IPCPredictorPage() {
 
                     {/* Input Area */}
                     <div className="flex-none border-t border-[#e8e2de] bg-white px-6 py-4">
-                        <div className="flex items-center gap-3 bg-[#faf8f6] border border-[#e8e2de] rounded-xl px-4 py-2 focus-within:bg-white focus-within:border-[#2a3b4e]/20 focus-within:ring-2 focus-within:ring-[#2a3b4e]/5 focus-within:shadow-sm transition-all duration-200">
+                        <div className="flex items-center gap-3 bg-[#faf8f6] border border-[#e8e2de] rounded-lg px-4 py-2 focus-within:bg-white focus-within:border-[#2a3b4e]/20 focus-within:ring-2 focus-within:ring-[#2a3b4e]/5 focus-within:shadow-sm transition-all duration-200">
                             <textarea
                                 ref={inputRef}
                                 value={input}
@@ -868,7 +866,7 @@ export default function IPCPredictorPage() {
                                 leaveFrom="opacity-100 scale-100"
                                 leaveTo="opacity-0 scale-95"
                             >
-                                <Dialog.Panel className="w-full max-w-4xl transform overflow-hidden rounded-2xl bg-white text-left align-middle shadow-2xl transition-all border border-[#e8e2de]">
+                                <Dialog.Panel className="w-full max-w-4xl transform overflow-hidden rounded-lg bg-white text-left align-middle shadow-2xl transition-all border border-[#e8e2de]">
                                     {bridgeSection && (
                                         <div className="max-h-[85vh] overflow-y-auto">
                                             <StatuteBridgePanel
