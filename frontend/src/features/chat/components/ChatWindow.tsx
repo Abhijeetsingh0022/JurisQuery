@@ -42,12 +42,19 @@ interface ChatWindowProps {
     onCitationClick?: (citation: Citation) => void;
 }
 
+function createMessageId(prefix: string): string {
+    if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
+        return `${prefix}-${crypto.randomUUID()}`;
+    }
+
+    return `${prefix}-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
+}
+
 
 export default function ChatWindow({ documentId, onCitationClick }: ChatWindowProps) {
     const [messages, setMessages] = useState<Message[]>([]);
     const [input, setInput] = useState('');
     const [isLoading, setIsLoading] = useState(false);
-    const [streamingContent, setStreamingContent] = useState<string | null>(null);
     const [isInitializing, setIsInitializing] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [sessionId, setSessionId] = useState<string | null>(null);
@@ -60,6 +67,7 @@ export default function ChatWindow({ documentId, onCitationClick }: ChatWindowPr
     const inputRef = useRef<HTMLTextAreaElement>(null);
     const dropdownRef = useRef<HTMLDivElement>(null);
     const abortControllerRef = useRef<AbortController | null>(null);
+    const pendingAssistantMessageIdRef = useRef<string | null>(null);
 
 
     // ── Close dropdown on outside click ──────────────────────────────────
@@ -152,19 +160,26 @@ export default function ChatWindow({ documentId, onCitationClick }: ChatWindowPr
 
         const isFirstMessage = messages.length === 0;
         const userContent = input.trim();
+        const assistantMessageId = createMessageId('assistant');
 
         setMessages((prev) => [
             ...prev,
             {
-                id: `user-${Date.now()}`,
+                id: createMessageId('user'),
                 role: 'user',
                 content: userContent,
                 timestamp: new Date(),
             },
+            {
+                id: assistantMessageId,
+                role: 'assistant',
+                content: '',
+                timestamp: new Date(),
+            },
         ]);
+        pendingAssistantMessageIdRef.current = assistantMessageId;
         setInput('');
         setIsLoading(true);
-        setStreamingContent('');
         setAgentStatus('Thinking...');
         setError(null);
 
@@ -173,24 +188,20 @@ export default function ChatWindow({ documentId, onCitationClick }: ChatWindowPr
             userContent,
             searchMode,
             (token) => {
-                setStreamingContent((prev) => (prev ?? '') + token);
+                const pendingId = pendingAssistantMessageIdRef.current;
+                if (!pendingId) return;
+
+                setMessages((prev) =>
+                    prev.map((message) => (
+                        message.id === pendingId
+                            ? { ...message, content: message.content + token }
+                            : message
+                    ))
+                );
                 messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
             },
             () => {
-                setStreamingContent((prev) => {
-                    if (prev) {
-                        setMessages((msgs) => [
-                            ...msgs,
-                            {
-                                id: `assistant-${Date.now()}`,
-                                role: 'assistant',
-                                content: prev,
-                                timestamp: new Date(),
-                            },
-                        ]);
-                    }
-                    return null;
-                });
+                pendingAssistantMessageIdRef.current = null;
                 setIsLoading(false);
                 setAgentStatus(null);
                 if (isFirstMessage) fetchSessions();
@@ -198,7 +209,7 @@ export default function ChatWindow({ documentId, onCitationClick }: ChatWindowPr
             (errMsg) => {
                 setError(errMsg);
                 setIsLoading(false);
-                setStreamingContent(null);
+                pendingAssistantMessageIdRef.current = null;
                 setAgentStatus(null);
             },
             (statusMsg) => {
@@ -220,6 +231,7 @@ export default function ChatWindow({ documentId, onCitationClick }: ChatWindowPr
         try {
             setIsInitializing(true);
             setMessages([]);
+            pendingAssistantMessageIdRef.current = null;
             setShowHistoryDropdown(false);
             const newSession = await createChatSession(documentId);
             setSessionId(newSession.id);
@@ -553,7 +565,14 @@ export default function ChatWindow({ documentId, onCitationClick }: ChatWindowPr
                                         <div className="min-w-0">
                                             <div className="bg-white border border-[#e8e2de] rounded-2xl rounded-bl-md px-4 py-3.5 shadow-sm">
                                                 <div className="text-[13px] leading-relaxed text-[#1a2332]/80">
-                                                    {renderMessageContent(message.content, message.citations)}
+                                                    {pendingAssistantMessageIdRef.current === message.id && message.content === '' && isLoading ? (
+                                                        <span className="inline-flex items-center gap-2 text-[#2a3b4e]/40">
+                                                            <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                                                            Generating response...
+                                                        </span>
+                                                    ) : (
+                                                        renderMessageContent(message.content, message.citations)
+                                                    )}
                                                 </div>
                                                 {message.citations && message.citations.length > 0 && (
                                                     <div className="mt-3 pt-3 border-t border-[#e8e2de]/50">
@@ -610,25 +629,6 @@ export default function ChatWindow({ documentId, onCitationClick }: ChatWindowPr
                     >
                         <AlertCircle className="h-4 w-4 shrink-0" />
                         <span className="font-medium">{error}</span>
-                    </motion.div>
-                )}
-
-                {/* Streaming bubble */}
-                {streamingContent !== null && streamingContent !== '' && (
-                    <motion.div
-                        initial={{ opacity: 0, y: 6 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        className="flex gap-3"
-                    >
-                        <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-[#2a3b4e] to-[#4a6b8e] flex items-center justify-center shrink-0 shadow-sm mt-0.5">
-                            <Sparkles className="h-3.5 w-3.5 text-white" />
-                        </div>
-                        <div className="flex-1 min-w-0">
-                            <div className="inline-block bg-white border border-[#e8e2de] rounded-xl rounded-tl-sm px-4 py-3 shadow-sm text-[13px] text-[#1a2332] leading-relaxed">
-                                {renderMessageContent(streamingContent)}
-                                <span className="inline-block w-[2px] h-[1em] bg-[#2a3b4e]/60 ml-0.5 align-middle animate-pulse" />
-                            </div>
-                        </div>
                     </motion.div>
                 )}
 
