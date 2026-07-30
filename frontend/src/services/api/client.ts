@@ -24,7 +24,7 @@ export class ApiClientError extends Error {
     }
 }
 
-async function getAuthToken(): Promise<string | null> {
+export async function getAuthToken(): Promise<string | null> {
     try {
         // Clerk exposes getToken on the global window object in the browser
         const clerk = (window as any).Clerk;
@@ -100,6 +100,13 @@ export const api = {
         apiClient<T>(endpoint, {
             ...options,
             method: 'PUT',
+            body: data ? JSON.stringify(data) : undefined,
+        }),
+
+    patch: <T>(endpoint: string, data?: unknown, options?: RequestInit) =>
+        apiClient<T>(endpoint, {
+            ...options,
+            method: 'PATCH',
             body: data ? JSON.stringify(data) : undefined,
         }),
 

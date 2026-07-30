@@ -181,6 +181,31 @@ class QdrantVectorStore:
             for hit in response.points
         ]
 
+    async def get_collection_info(self) -> dict:
+        """
+        Get Qdrant collection status and points count for admin diagnostics.
+        """
+        try:
+            info = await self.client.get_collection(self.collection_name)
+            return {
+                "collection_name": self.collection_name,
+                "points_count": info.points_count or 0,
+                "vectors_count": info.indexed_vectors_count or info.points_count or 0,
+                "status": str(info.status.name if hasattr(info.status, "name") else info.status),
+                "dimension": self.dimension,
+            }
+        except Exception as e:
+            logger.warning("Could not fetch Qdrant collection info: %s", e)
+            return {
+                "collection_name": self.collection_name,
+                "points_count": 0,
+                "vectors_count": 0,
+                "status": "unavailable",
+                "dimension": self.dimension,
+                "error": str(e),
+            }
+
+
 
 # ---------------------------------------------------------------------------
 # Module-level helpers

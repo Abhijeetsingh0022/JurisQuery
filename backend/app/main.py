@@ -19,6 +19,7 @@ from app.folders.router import router as folders_router
 from app.ipc.router import router as ipc_router
 from app.billing.router import router as billing_router
 from app.webhooks.router import router as webhooks_router
+from app.admin.router import router as admin_router
 
 from app.ipc import bns_service
 from app.database import async_session_maker
@@ -72,6 +73,7 @@ app.include_router(ipc_router, prefix="/api/v1/ipc", tags=["IPC Sections"])
 app.include_router(folders_router, prefix="/api/folders", tags=["Folders"])
 app.include_router(billing_router, prefix="/api/v1/billing", tags=["Billing"])
 app.include_router(webhooks_router, prefix="/api/v1/webhooks", tags=["Webhooks"])
+app.include_router(admin_router, prefix="/api", tags=["Admin"])
 
 
 @app.api_route("/", methods=["GET", "HEAD"], tags=["Health"])

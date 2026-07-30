@@ -10,8 +10,7 @@ from fastapi import Header, Depends
 from jose import JWTError, jwt
 
 from app.config import settings
-from app.exceptions import UnauthorizedError
-
+from app.exceptions import UnauthorizedError, ForbiddenError
 
 logger = logging.getLogger(__name__)
 
@@ -21,6 +20,8 @@ DEV_USER = {
     "id": "dev_user_123",
     "email": "dev@jurisquery.ai",
     "clerk_id": "dev_clerk_123",
+    "plan_tier": "pro",
+    "is_admin": True,
 }
 
 # Cached JWKS keys (fetched once per process)
@@ -113,6 +114,7 @@ async def get_current_user(
             )
 
         user_id = payload.get("sub")
+        email = payload.get("email", "").lower()
         if not user_id:
             raise UnauthorizedError("Invalid token payload")
 
@@ -122,22 +124,37 @@ async def get_current_user(
         
         plan_tier = "free"
         stripe_customer_id = None
+        is_admin = email in settings.admin_emails_list
         if db_user:
             plan_tier = db_user.plan_tier
             stripe_customer_id = db_user.stripe_customer_id
+            if getattr(db_user, "is_admin", False):
+                is_admin = True
 
         return {
             "id": user_id,
-            "email": payload.get("email"),
+            "email": email or (db_user.email if db_user else None),
             "clerk_id": user_id,
             "plan_tier": plan_tier,
-            "stripe_customer_id": stripe_customer_id
+            "stripe_customer_id": stripe_customer_id,
+            "is_admin": is_admin,
         }
 
     except JWTError as e:
         if settings.environment == "development":
             return DEV_USER
         raise UnauthorizedError(f"Token validation failed: {str(e)}")
+
+
+async def get_admin_user(
+    current_user: dict = Depends(get_current_user),
+) -> dict:
+    """
+    Ensure the current user has admin permissions.
+    """
+    if not current_user.get("is_admin"):
+        raise ForbiddenError("Admin access required")
+    return current_user
 
 
 async def get_optional_user(
@@ -154,3 +171,4 @@ async def get_optional_user(
         return await get_current_user(authorization)
     except UnauthorizedError:
         return None
+

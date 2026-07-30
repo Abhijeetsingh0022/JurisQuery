@@ -53,13 +53,19 @@ class Settings(BaseSettings):
     cloudinary_api_key: str
     cloudinary_api_secret: str
 
-    # Auth
+    # Auth & Admin
     jwt_secret: str
     jwt_algorithm: str = "HS256"
     jwt_expiry_minutes: int = 60
     clerk_secret_key: str | None = None
     # Clerk JWKS endpoint base, e.g. https://grown-hyena-6.clerk.accounts.dev
     clerk_frontend_api: str | None = None
+    admin_emails: str = "dev@jurisquery.ai,admin@jurisquery.ai"
+
+    @property
+    def admin_emails_list(self) -> list[str]:
+        """Parse admin emails from comma-separated string."""
+        return [email.strip().lower() for email in self.admin_emails.split(",") if email.strip()]
 
     # Stripe Billing
     stripe_secret_key: str | None = None

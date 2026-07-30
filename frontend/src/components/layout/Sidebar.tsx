@@ -11,7 +11,8 @@ import {
     Settings,
     HelpCircle,
     LogOut,
-    CreditCard
+    CreditCard,
+    ShieldCheck
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { motion } from "framer-motion";
@@ -22,6 +23,7 @@ const navigation = [
     { name: "IPC Predictor", href: "/ipc-predictor", icon: Scale },
     { name: "History", href: "/history", icon: History },
     { name: "Subscription", href: "/subscription", icon: CreditCard },
+    { name: "Admin Console", href: "/admin", icon: ShieldCheck },
     { name: "Settings", href: "/settings", icon: Settings },
 ];
 

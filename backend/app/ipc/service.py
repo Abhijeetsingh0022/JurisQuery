@@ -113,32 +113,40 @@ def _parse_bool_field(value: str, true_token: str, false_token: str) -> bool | N
 async def load_ipc_dataset(
     db: AsyncSession,
     csv_path: Path = _CSV_PATH,
+    force_reload: bool = False,
 ) -> int:
     """
-    Load IPC sections from a CSV dataset into the database.
-    Skips loading if records already exist (idempotent).
+    Load or update IPC sections from a CSV dataset into the database.
 
     Args:
         db: Database session
         csv_path: Path to the FIR dataset CSV file
+        force_reload: If True, re-syncs and updates existing sections from CSV
 
     Returns:
         Number of sections present after the operation
     """
     existing = (await db.execute(select(func.count(IPCSection.id)))).scalar() or 0
-    if existing > 0:
+    if existing > 0 and not force_reload:
         logger.info("IPC dataset already loaded (%d sections)", existing)
         return existing
 
     if not csv_path.exists():
         logger.error("CSV file not found: %s", csv_path)
-        return 0
+        return existing
 
     with open(csv_path, encoding="utf-8") as f:
         rows = await asyncio.to_thread(list, csv.DictReader(f))
 
+    # Fetch existing sections into a dictionary if force_reload
+    existing_sections: dict[str, IPCSection] = {}
+    if force_reload:
+        res = await db.execute(select(IPCSection))
+        existing_sections = {s.section_number: s for s in res.scalars().all()}
+
     seen: set[str] = set()
     loaded = 0
+    updated = 0
 
     for row in rows:
         section_num = _extract_section_number(row.get("URL", ""))
@@ -146,21 +154,41 @@ async def load_ipc_dataset(
             continue
         seen.add(section_num)
 
-        db.add(IPCSection(
-            section_number=section_num,
-            description=row.get("Description", "").strip(),
-            offense=row.get("Offense", "").strip() or None,
-            punishment=row.get("Punishment", "").strip() or None,
-            cognizable=_parse_bool_field(row.get("Cognizable", ""), "cognizable", "non-cognizable"),
-            bailable=_parse_bool_field(row.get("Bailable", ""), "bailable", "non-bailable"),
-            court=row.get("Court", "").strip() or None,
-            source_url=row.get("URL") or None,
-        ))
-        loaded += 1
+        desc = row.get("Description", "").strip()
+        off = row.get("Offense", "").strip() or None
+        pun = row.get("Punishment", "").strip() or None
+        cog = _parse_bool_field(row.get("Cognizable", ""), "cognizable", "non-cognizable")
+        bai = _parse_bool_field(row.get("Bailable", ""), "bailable", "non-bailable")
+        crt = row.get("Court", "").strip() or None
+        src = row.get("URL") or None
+
+        if section_num in existing_sections:
+            sec = existing_sections[section_num]
+            sec.description = desc
+            sec.offense = off
+            sec.punishment = pun
+            sec.cognizable = cog
+            sec.bailable = bai
+            sec.court = crt
+            sec.source_url = src
+            updated += 1
+        else:
+            db.add(IPCSection(
+                section_number=section_num,
+                description=desc,
+                offense=off,
+                punishment=pun,
+                cognizable=cog,
+                bailable=bai,
+                court=crt,
+                source_url=src,
+            ))
+            loaded += 1
 
     await db.commit()
-    logger.info("Loaded %d IPC sections from dataset", loaded)
-    return loaded
+    total = (await db.execute(select(func.count(IPCSection.id)))).scalar() or 0
+    logger.info("IPC dataset sync finished: %d inserted, %d updated, %d total", loaded, updated, total)
+    return total
 
 
 # ---------------------------------------------------------------------------
