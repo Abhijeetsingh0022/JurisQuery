@@ -1,18 +1,23 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
     Scale,
-    Search,
-    AlertCircle,
+    Send,
     Shield,
     Clock,
     Building2,
     ChevronRight,
     Loader2,
-    FileText
+    FileText,
+    Sparkles,
+    AlertCircle,
+    User,
+    ArrowLeft
 } from 'lucide-react';
+import { useApi } from '@/hooks/use-api';
 
 interface PredictedSection {
     section: {
@@ -35,240 +40,368 @@ interface PredictionResponse {
     error?: string | null;
 }
 
+interface Message {
+    id: string;
+    role: 'user' | 'assistant';
+    content?: string;
+    prediction?: PredictionResponse;
+    timestamp: Date;
+}
+
 export default function IPCPredictorPage() {
-    const [description, setDescription] = useState('');
+    const { fetcher } = useApi();
+    const [messages, setMessages] = useState<Message[]>([]);
+    const [input, setInput] = useState('');
     const [isLoading, setIsLoading] = useState(false);
-    const [result, setResult] = useState<PredictionResponse | null>(null);
-    const [error, setError] = useState<string | null>(null);
+    const messagesEndRef = useRef<HTMLDivElement>(null);
+    const inputRef = useRef<HTMLTextAreaElement>(null);
+    const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({});
 
-    const handlePredict = async () => {
-        if (!description.trim() || description.length < 20) {
-            setError('Please provide a detailed description (at least 20 characters)');
-            return;
-        }
+    const router = useRouter(); // Initialized useRouter
 
+    const scrollToBottom = () => {
+        messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    };
+
+    useEffect(() => {
+        scrollToBottom();
+    }, [messages]);
+
+    const handlePredict = async (e?: React.FormEvent) => {
+        e?.preventDefault();
+        if (!input.trim() || isLoading) return;
+
+        const userMessage: Message = {
+            id: `user-${Date.now()}`,
+            role: 'user',
+            content: input.trim(),
+            timestamp: new Date(),
+        };
+
+        setMessages((prev) => [...prev, userMessage]);
+        setInput('');
         setIsLoading(true);
-        setError(null);
-        setResult(null);
 
         try {
-            const response = await fetch('/api/v1/ipc/predict', {
+            const data = await fetcher('/api/v1/ipc/predict', {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
                 body: JSON.stringify({
-                    description: description.trim(),
+                    description: userMessage.content,
                     max_sections: 5,
                 }),
             });
 
-            if (!response.ok) {
-                throw new Error('Failed to predict IPC sections');
-            }
+            const assistantMessage: Message = {
+                id: `assistant-${Date.now()}`,
+                role: 'assistant',
+                prediction: data.error ? undefined : data,
+                content: data.error ? `Error: ${data.error}` : undefined,
+                timestamp: new Date(),
+            };
 
-            const data = await response.json();
-
-            if (data.error) {
-                setError(data.error);
-                return;
-            }
-
-            setResult(data);
+            setMessages((prev) => [...prev, assistantMessage]);
         } catch (err) {
-            setError(err instanceof Error ? err.message : 'An error occurred');
+            const errorMessage: Message = {
+                id: `error-${Date.now()}`,
+                role: 'assistant',
+                content: err instanceof Error ? err.message : 'An error occurred while analyzing.',
+                timestamp: new Date(),
+            };
+            setMessages((prev) => [...prev, errorMessage]);
         } finally {
             setIsLoading(false);
         }
     };
 
-    const getConfidenceColor = (confidence: number) => {
-        if (confidence >= 0.8) return 'text-green-700';
-        if (confidence >= 0.6) return 'text-yellow-700';
-        return 'text-orange-700';
+    const handleKeyDown = (e: React.KeyboardEvent) => {
+        if (e.key === 'Enter' && !e.shiftKey) {
+            e.preventDefault();
+            handlePredict();
+        }
     };
 
-    const getConfidenceBg = (confidence: number) => {
-        if (confidence >= 0.8) return 'bg-green-50 border-green-200';
-        if (confidence >= 0.6) return 'bg-yellow-50 border-yellow-200';
-        return 'bg-orange-50 border-orange-200';
+    const toggleSection = (messageId: string, sectionNumber: string) => {
+        const key = `${messageId}-${sectionNumber}`;
+        setExpandedSections(prev => ({ ...prev, [key]: !prev[key] }));
+    };
+
+    const getConfidenceColor = (confidence: number) => {
+        if (confidence >= 0.8) return 'text-emerald-600 bg-emerald-50 border-emerald-100';
+        if (confidence >= 0.6) return 'text-amber-600 bg-amber-50 border-amber-100';
+        return 'text-orange-600 bg-orange-50 border-orange-100';
     };
 
     return (
-        <div className="space-y-6">
-            <div className="max-w-4xl mx-auto">
-                {/* Header */}
-                <div className="text-center mb-8">
-                    <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-[#2a3b4e]/5 mb-4">
-                        <Scale className="w-8 h-8 text-[#2a3b4e]" />
-                    </div>
-                    <h1 className="text-3xl font-bold font-serif text-[#2a3b4e] mb-2">
-                        IPC Section Predictor
-                    </h1>
-                    <p className="text-[#2a3b4e]/70 max-w-xl mx-auto">
-                        Describe a crime or incident and get predicted applicable IPC sections
-                        with legal classification and punishment details.
-                    </p>
-                </div>
-
-                {/* Input Section */}
-                <div className="bg-white rounded-2xl shadow-sm border border-[#2a3b4e]/10 p-6 mb-6">
-                    <label className="block text-sm font-medium text-[#2a3b4e] mb-2">
-                        Describe the Crime or Incident
-                    </label>
-                    <textarea
-                        value={description}
-                        onChange={(e) => setDescription(e.target.value)}
-                        placeholder="e.g., A person broke into a house at night and stole jewelry worth Rs. 50,000. The owner was not present at that time..."
-                        className="w-full h-40 p-4 border border-[#2a3b4e]/10 rounded-xl focus:ring-2 focus:ring-[#2a3b4e]/20 focus:border-[#2a3b4e] resize-none text-[#2a3b4e] placeholder:text-[#2a3b4e]/40 outline-none"
-                    />
-                    <div className="flex items-center justify-between mt-4">
-                        <span className="text-sm text-[#2a3b4e]/60">
-                            {description.length} / 5000 characters
-                        </span>
-                        <button
-                            onClick={handlePredict}
-                            disabled={isLoading || description.length < 20}
-                            className="inline-flex items-center gap-2 px-6 py-3 bg-[#2a3b4e] text-white font-medium rounded-xl hover:bg-[#2a3b4e]/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                        >
-                            {isLoading ? (
-                                <>
-                                    <Loader2 className="w-5 h-5 animate-spin" />
-                                    Analyzing...
-                                </>
-                            ) : (
-                                <>
-                                    <Search className="w-5 h-5" />
-                                    Predict IPC Sections
-                                </>
-                            )}
-                        </button>
-                    </div>
-                </div>
-
-                {/* Error Message */}
-                <AnimatePresence>
-                    {error && (
-                        <motion.div
-                            initial={{ opacity: 0, y: -10 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            exit={{ opacity: 0, y: -10 }}
-                            className="flex items-center gap-3 p-4 bg-red-50 border border-red-200 rounded-xl mb-6 text-red-700"
-                        >
-                            <AlertCircle className="w-5 h-5 flex-shrink-0" />
-                            <p>{error}</p>
-                        </motion.div>
-                    )}
-                </AnimatePresence>
-
-                {/* Results */}
-                <AnimatePresence>
-                    {result && (
-                        <motion.div
-                            initial={{ opacity: 0, y: 20 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            exit={{ opacity: 0, y: 20 }}
-                        >
-                            {/* Stats */}
-                            <div className="flex items-center gap-4 mb-6 text-sm text-[#2a3b4e]/60">
-                                <span>Searched {result.total_sections_searched} sections</span>
-                                <span>•</span>
-                                <span>{result.processing_time_ms.toFixed(0)}ms</span>
-                                <span>•</span>
-                                <span>{result.predicted_sections.length} matches found</span>
-                            </div>
-
-                            {/* Predicted Sections */}
-                            {result.predicted_sections.length > 0 ? (
-                                <div className="space-y-4">
-                                    {result.predicted_sections.map((prediction, index) => (
-                                        <motion.div
-                                            key={prediction.section.section_number}
-                                            initial={{ opacity: 0, x: -20 }}
-                                            animate={{ opacity: 1, x: 0 }}
-                                            transition={{ delay: index * 0.1 }}
-                                            className={`bg-white rounded-xl border p-5 ${getConfidenceBg(prediction.confidence)}`}
-                                        >
-                                            <div className="flex items-start justify-between">
-                                                <div className="flex items-center gap-3">
-                                                    <div className="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-[#2a3b4e] text-white font-bold">
-                                                        {prediction.section.section_number}
-                                                    </div>
-                                                    <div>
-                                                        <h3 className="font-semibold text-[#2a3b4e]">
-                                                            IPC Section {prediction.section.section_number}
-                                                        </h3>
-                                                        <p className="text-sm text-[#2a3b4e]/80">
-                                                            {prediction.section.offense || 'No offense title'}
-                                                        </p>
-                                                    </div>
-                                                </div>
-                                                <div className={`text-right ${getConfidenceColor(prediction.confidence)}`}>
-                                                    <div className="text-2xl font-bold">
-                                                        {(prediction.confidence * 100).toFixed(0)}%
-                                                    </div>
-                                                    <div className="text-xs uppercase tracking-wide">
-                                                        Confidence
-                                                    </div>
-                                                </div>
-                                            </div>
-
-                                            {/* Reasoning */}
-                                            <p className="mt-4 text-[#2a3b4e]/80 bg-[#f7f3f1]/50 rounded-lg p-3">
-                                                {prediction.reasoning}
-                                            </p>
-
-                                            {/* Legal Info */}
-                                            <div className="mt-4 grid grid-cols-2 md:grid-cols-4 gap-3">
-                                                <div className="flex items-center gap-2 text-sm">
-                                                    <Clock className="w-4 h-4 text-[#2a3b4e]/40" />
-                                                    <span className="text-[#2a3b4e]/70 truncate">
-                                                        {prediction.section.punishment || 'N/A'}
-                                                    </span>
-                                                </div>
-                                                <div className="flex items-center gap-2 text-sm">
-                                                    <Shield className={`w-4 h-4 ${prediction.section.cognizable ? 'text-red-500' : 'text-green-600'}`} />
-                                                    <span className="text-[#2a3b4e]/70">
-                                                        {prediction.section.cognizable ? 'Cognizable' : 'Non-Cognizable'}
-                                                    </span>
-                                                </div>
-                                                <div className="flex items-center gap-2 text-sm">
-                                                    <Building2 className={`w-4 h-4 ${prediction.section.bailable ? 'text-green-600' : 'text-red-500'}`} />
-                                                    <span className="text-[#2a3b4e]/70">
-                                                        {prediction.section.bailable ? 'Bailable' : 'Non-Bailable'}
-                                                    </span>
-                                                </div>
-                                                <button className="flex items-center gap-1 text-sm text-[#2a3b4e] font-medium hover:underline">
-                                                    View Details
-                                                    <ChevronRight className="w-4 h-4" />
-                                                </button>
-                                            </div>
-                                        </motion.div>
-                                    ))}
-                                </div>
-                            ) : (
-                                <div className="text-center py-12 bg-white rounded-xl border border-[#2a3b4e]/10">
-                                    <FileText className="w-12 h-12 text-[#2a3b4e]/30 mx-auto mb-4" />
-                                    <h3 className="text-lg font-medium text-[#2a3b4e] mb-2">
-                                        No Matching Sections Found
-                                    </h3>
-                                    <p className="text-[#2a3b4e]/60">
-                                        Try providing more details about the incident.
-                                    </p>
-                                </div>
-                            )}
-
-                            {/* Disclaimer */}
-                            <div className="mt-6 p-4 bg-amber-50 border border-amber-200 rounded-xl">
-                                <p className="text-sm text-amber-800">
-                                    <strong>Disclaimer:</strong> This tool provides AI-assisted predictions for educational
-                                    purposes only. Always consult a qualified legal professional for accurate legal advice.
+        <div className="h-[calc(100vh)] -m-8 bg-[#f7f3f1] flex flex-col overflow-hidden">
+            <main className="flex-1 flex flex-col overflow-hidden w-full max-w-[1920px] mx-auto">
+                {/* Header with Title and Back Button Logic */}
+                <div className="px-4 py-4 flex-none">
+                    <header className="h-18 bg-white/80 backdrop-blur-md border border-white/20 rounded-2xl flex items-center justify-between px-6 shadow-sm z-20 transition-all hover:shadow-md hover:bg-white/90">
+                        <div className="flex items-center gap-4 py-3">
+                            <button
+                                onClick={() => router.back()}
+                                className="p-2.5 bg-[#f7f3f1] hover:bg-[#2a3b4e] hover:text-white rounded-xl transition-all duration-300 text-[#2a3b4e] group shadow-sm"
+                            >
+                                <ArrowLeft className="h-5 w-5 group-hover:-translate-x-0.5 transition-transform" />
+                            </button>
+                            <div className="min-w-0 flex flex-col">
+                                <h1 className="text-lg font-serif font-bold text-[#2a3b4e] truncate max-w-xl tracking-tight">
+                                    IPC Section Predictor
+                                </h1>
+                                <p className="text-[10px] text-[#2a3b4e]/60 flex items-center gap-2 font-medium uppercase tracking-widest mt-0.5">
+                                    <span className="inline-block w-1.5 h-1.5 rounded-full bg-[#2a3b4e] shadow-[0_0_8px_rgba(42,59,78,0.4)]" />
+                                    AI Legal Criminologist
                                 </p>
                             </div>
-                        </motion.div>
-                    )}
-                </AnimatePresence>
-            </div>
+                        </div>
+                    </header>
+                </div>
+
+                {/* Main Content - Chat Panel */}
+                <div className="flex-1 flex overflow-hidden px-4 pb-4">
+                    <div className="flex-1 flex flex-col h-full bg-white rounded-2xl shadow-sm border border-[#2a3b4e]/5 overflow-hidden relative hover:border-[#2a3b4e]/10 transition-colors">
+                        {/* Chat Area */}
+                        <div className="flex-1 overflow-y-auto p-4 md:p-8 space-y-6 scroll-smooth">
+                            {messages.length === 0 ? (
+                                <motion.div
+                                    initial={{ opacity: 0, y: 20 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    className="flex flex-col items-center justify-center h-full pb-20 text-center"
+                                >
+                                    <div className="w-20 h-20 rounded-2xl bg-white shadow-xl flex items-center justify-center mb-6 rotate-3">
+                                        <Scale className="h-10 w-10 text-[#2a3b4e]" />
+                                    </div>
+                                    <h2 className="text-2xl font-serif font-bold text-[#2a3b4e] mb-3">
+                                        Describe the incident
+                                    </h2>
+                                    <p className="text-gray-600 max-w-md leading-relaxed">
+                                        I can analyze criminal incidents, identify potential IPC sections, and explain the legal reasoning.
+                                    </p>
+
+                                    <div className="mt-8 grid gap-3 w-full max-w-md">
+                                        {[
+                                            'Identify offenses for a jewelry theft at night',
+                                            'What sections apply to online fraud?',
+                                            'Explain charges for causing hurt during a fight'
+                                        ].map((suggestion) => (
+                                            <button
+                                                key={suggestion}
+                                                onClick={() => {
+                                                    setInput(suggestion);
+                                                    inputRef.current?.focus();
+                                                }}
+                                                className="p-3 text-sm text-left font-medium text-gray-600 bg-white/60 hover:bg-white border border-white/40 hover:border-[#2a3b4e]/20 rounded-xl transition-all shadow-sm hover:shadow-md"
+                                            >
+                                                "{suggestion}"
+                                            </button>
+                                        ))}
+                                    </div>
+                                </motion.div>
+                            ) : (
+                                messages.map((msg) => (
+                                    <motion.div
+                                        key={msg.id}
+                                        initial={{ opacity: 0, y: 10 }}
+                                        animate={{ opacity: 1, y: 0 }}
+                                        className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
+                                    >
+                                        <div className={`max-w-[90%] md:max-w-[80%] ${msg.role === 'user' ? 'ml-auto' : ''}`}>
+                                            {msg.role === 'user' ? (
+                                                <div className="bg-[#2a3b4e] text-white px-5 py-3.5 rounded-2xl rounded-tr-sm shadow-md">
+                                                    <p className="text-sm md:text-[15px] leading-relaxed whitespace-pre-wrap">
+                                                        {msg.content}
+                                                    </p>
+                                                </div>
+                                            ) : (
+                                                <div className="flex gap-4">
+                                                    <div className="w-8 h-8 rounded-full bg-white shadow-sm flex items-center justify-center shrink-0 mt-1">
+                                                        <Scale className="h-4 w-4 text-[#2a3b4e]" />
+                                                    </div>
+
+                                                    <div className="flex-1 space-y-2">
+                                                        {/* AI Response Card */}
+                                                        {msg.prediction ? (
+                                                            <div className="bg-white/80 backdrop-blur-sm rounded-2xl rounded-tl-sm border border-white/40 shadow-sm overflow-hidden">
+                                                                {/* Header */}
+                                                                <div className="bg-[#2a3b4e]/5 px-5 py-3 border-b border-[#2a3b4e]/5 flex items-center justify-between">
+                                                                    <span className="text-xs font-bold text-[#2a3b4e] uppercase tracking-wider">
+                                                                        Analysis Result
+                                                                    </span>
+                                                                    <span className="text-xs font-medium text-[#2a3b4e]/60 bg-white px-2 py-0.5 rounded-full shadow-sm">
+                                                                        {msg.prediction.predicted_sections.length} Sections Found
+                                                                    </span>
+                                                                </div>
+
+                                                                {/* Prediction List */}
+                                                                <div className="p-2 space-y-2">
+                                                                    {msg.prediction.predicted_sections.map((pred) => (
+                                                                        <div
+                                                                            key={pred.section.section_number}
+                                                                            className="bg-white border border-gray-100 rounded-xl overflow-hidden hover:shadow-md transition-shadow duration-200"
+                                                                        >
+                                                                            {/* Section Header */}
+                                                                            <div
+                                                                                className="p-4 cursor-pointer"
+                                                                                onClick={() => toggleSection(msg.id, pred.section.section_number)}
+                                                                            >
+                                                                                <div className="flex items-start justify-between gap-4">
+                                                                                    <div className="flex items-center gap-3">
+                                                                                        <div className="w-10 h-10 rounded-lg bg-[#2a3b4e] flex items-center justify-center shrink-0">
+                                                                                            <span className="text-white font-bold text-sm">
+                                                                                                {pred.section.section_number}
+                                                                                            </span>
+                                                                                        </div>
+                                                                                        <div>
+                                                                                            <h3 className="font-bold text-[#2a3b4e] text-sm md:text-base">
+                                                                                                IPC Section {pred.section.section_number}
+                                                                                            </h3>
+                                                                                            <p className="text-xs text-[#2a3b4e]/60 font-medium">
+                                                                                                {pred.section.offense || 'Unspecified Offense'}
+                                                                                            </p>
+                                                                                        </div>
+                                                                                    </div>
+
+                                                                                    <div className={`px-2.5 py-1 rounded-lg border text-xs font-bold ${getConfidenceColor(pred.confidence)}`}>
+                                                                                        {(pred.confidence * 100).toFixed(0)}% Match
+                                                                                    </div>
+                                                                                </div>
+
+                                                                                {/* Quick Reasoning */}
+                                                                                <p className="mt-3 text-sm text-gray-600 bg-gray-50 p-2.5 rounded-lg border border-gray-100 italic">
+                                                                                    "{pred.reasoning}"
+                                                                                </p>
+
+                                                                                <div className="mt-3 flex items-center gap-2 text-xs font-medium text-[#2a3b4e]/50">
+                                                                                    <span>Show details</span>
+                                                                                    <ChevronRight className={`h-3 w-3 transition-transform duration-300 ${expandedSections[`${msg.id}-${pred.section.section_number}`] ? 'rotate-90' : ''}`} />
+                                                                                </div>
+                                                                            </div>
+
+                                                                            {/* Expanded Details */}
+                                                                            <AnimatePresence>
+                                                                                {expandedSections[`${msg.id}-${pred.section.section_number}`] && (
+                                                                                    <motion.div
+                                                                                        initial={{ height: 0, opacity: 0 }}
+                                                                                        animate={{ height: 'auto', opacity: 1 }}
+                                                                                        exit={{ height: 0, opacity: 0 }}
+                                                                                        className="border-t border-gray-100 bg-[#fafafa]"
+                                                                                    >
+                                                                                        <div className="p-4 grid grid-cols-2 gap-3 text-xs">
+                                                                                            <div className="bg-white p-2.5 rounded-lg border border-gray-100 shadow-sm">
+                                                                                                <div className="flex items-center gap-1.5 text-[#2a3b4e]/60 mb-1">
+                                                                                                    <Shield className="h-3 w-3" />
+                                                                                                    <span className="font-semibold uppercase tracking-wider">Classification</span>
+                                                                                                </div>
+                                                                                                <span className={`font-medium ${pred.section.cognizable ? 'text-red-600' : 'text-emerald-600'}`}>
+                                                                                                    {pred.section.cognizable ? 'Cognizable' : 'Non-Cognizable'}
+                                                                                                </span>
+                                                                                            </div>
+                                                                                            <div className="bg-white p-2.5 rounded-lg border border-gray-100 shadow-sm">
+                                                                                                <div className="flex items-center gap-1.5 text-[#2a3b4e]/60 mb-1">
+                                                                                                    <Building2 className="h-3 w-3" />
+                                                                                                    <span className="font-semibold uppercase tracking-wider">Bail Status</span>
+                                                                                                </div>
+                                                                                                <span className={`font-medium ${pred.section.bailable ? 'text-emerald-600' : 'text-red-600'}`}>
+                                                                                                    {pred.section.bailable ? 'Bailable' : 'Non-Bailable'}
+                                                                                                </span>
+                                                                                            </div>
+                                                                                            <div className="col-span-2 bg-white p-2.5 rounded-lg border border-gray-100 shadow-sm">
+                                                                                                <div className="flex items-center gap-1.5 text-[#2a3b4e]/60 mb-1">
+                                                                                                    <Clock className="h-3 w-3" />
+                                                                                                    <span className="font-semibold uppercase tracking-wider">Punishment</span>
+                                                                                                </div>
+                                                                                                <span className="text-gray-700 font-medium">
+                                                                                                    {pred.section.punishment}
+                                                                                                </span>
+                                                                                            </div>
+
+                                                                                            {pred.relevant_excerpt && (
+                                                                                                <div className="col-span-2 mt-2">
+                                                                                                    <div className="flex items-center gap-1.5 text-[#2a3b4e]/60 mb-1.5">
+                                                                                                        <FileText className="h-3 w-3" />
+                                                                                                        <span className="font-semibold uppercase tracking-wider">Legal Text</span>
+                                                                                                    </div>
+                                                                                                    <p className="text-gray-600 bg-white p-3 rounded-lg border border-gray-100 leading-relaxed font-serif">
+                                                                                                        {pred.relevant_excerpt}
+                                                                                                    </p>
+                                                                                                </div>
+                                                                                            )}
+                                                                                        </div>
+                                                                                    </motion.div>
+                                                                                )}
+                                                                            </AnimatePresence>
+                                                                        </div>
+                                                                    ))}
+                                                                </div>
+
+                                                                {/* Footer Info */}
+                                                                <div className="px-5 py-3 bg-white/50 border-t border-white/60 flex items-center justify-between text-[10px] text-gray-400">
+                                                                    <span>Processed in {msg.prediction.processing_time_ms.toFixed(0)}ms</span>
+                                                                    <span className="flex items-center gap-1">
+                                                                        <Sparkles className="h-3 w-3" />
+                                                                        AI Analysis
+                                                                    </span>
+                                                                </div>
+                                                            </div>
+                                                        ) : (
+                                                            /* Error Message within Bubble */
+                                                            <div className="bg-red-50 text-red-700 px-4 py-3 rounded-2xl rounded-tl-sm border border-red-100 text-sm">
+                                                                {msg.content}
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                </div>
+                                            )}
+                                        </div>
+                                    </motion.div>
+                                ))
+                            )}
+
+                            {isLoading && (
+                                <motion.div
+                                    initial={{ opacity: 0 }}
+                                    animate={{ opacity: 1 }}
+                                    className="flex justify-start"
+                                >
+                                    <div className="bg-white border border-gray-100 rounded-2xl rounded-tl-sm px-5 py-4 shadow-sm flex items-center gap-3 text-gray-500">
+                                        <Loader2 className="h-4 w-4 animate-spin text-[#2a3b4e]" />
+                                        <span className="text-xs font-medium tracking-wide uppercase">Analyzing Criminology...</span>
+                                    </div>
+                                </motion.div>
+                            )}
+                            <div ref={messagesEndRef} />
+                        </div>
+
+                        {/* Input Area */}
+                        <div className="flex-shrink-0 p-6 bg-white border-t border-gray-200/50 shadow-[0_-4px_20px_rgba(0,0,0,0.02)] z-10 relative">
+                            <div className="absolute inset-x-0 -top-12 h-12 bg-gradient-to-t from-[#ffffff] to-transparent pointer-events-none" />
+                            <div className="relative max-w-4xl mx-auto">
+                                <textarea
+                                    ref={inputRef}
+                                    value={input}
+                                    onChange={(e) => setInput(e.target.value)}
+                                    onKeyDown={handleKeyDown}
+                                    placeholder="Describe the incident (e.g., House break-in at night...)"
+                                    rows={1}
+                                    className="w-full resize-none rounded-2xl border border-gray-200 bg-gray-50/50 px-5 py-4 pr-14 text-sm focus:outline-none focus:ring-2 focus:ring-[#2a3b4e]/10 focus:border-[#2a3b4e]/30 focus:bg-white transition-all placeholder:text-gray-400"
+                                    disabled={isLoading}
+                                    style={{ minHeight: '56px', maxHeight: '150px' }}
+                                />
+                                <button
+                                    onClick={() => handlePredict()}
+                                    disabled={!input.trim() || isLoading}
+                                    className="absolute right-2 top-1/2 -translate-y-1/2 p-2.5 rounded-xl bg-[#2a3b4e] text-white shadow-md disabled:opacity-50 disabled:cursor-not-allowed hover:bg-[#1f2b3a] hover:shadow-lg transition-all duration-200 transform hover:scale-105 active:scale-95"
+                                >
+                                    <Send className="h-4 w-4" />
+                                </button>
+                            </div>
+                            <div className="text-center mt-2 text-[10px] text-gray-400">
+                                AI generated information. Verify with legal counsel.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </main>
         </div>
     );
 }

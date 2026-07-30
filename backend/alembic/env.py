@@ -10,12 +10,13 @@ from sqlalchemy import pool
 from sqlalchemy.engine import Connection
 from sqlalchemy.ext.asyncio import async_engine_from_config
 
-from src.config import settings
-from src.database import Base
+from app.config import settings
+from app.database import Base
 
 # Import all models to ensure they are registered
-from src.documents.models import Document, DocumentChunk  # noqa: F401
-from src.chat.models import ChatSession, Message  # noqa: F401
+from app.documents.models import Document, DocumentChunk  # noqa: F401
+from app.chat.models import ChatSession, Message  # noqa: F401
+from app.ipc.models import IPCSection, IPCPrediction  # noqa: F401
 
 # this is the Alembic Config object
 config = context.config

@@ -33,10 +33,10 @@ export function Header() {
     return (
         <header
             className={cn(
-                "fixed top-0 left-0 right-0 z-50 transition-all duration-300",
+                "fixed z-50 transition-all duration-700 cubic-bezier(0.4, 0, 0.2, 1)",
                 isScrolled
-                    ? "bg-background/80 backdrop-blur-md border-b border-gray-200/50 py-3 shadow-sm"
-                    : "bg-transparent py-5"
+                    ? "top-6 left-1/2 -translate-x-1/2 w-[90%] max-w-5xl rounded-full bg-white/40 backdrop-blur-3xl backdrop-saturate-150 border border-white/50 shadow-2xl py-3 ring-1 ring-white/50"
+                    : "top-0 left-0 right-0 w-full bg-transparent py-6 border-b border-transparent shadow-none rounded-none"
             )}
         >
             <div className="container mx-auto px-4 md:px-6 flex items-center justify-between">
