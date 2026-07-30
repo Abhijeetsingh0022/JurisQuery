@@ -3,6 +3,22 @@
 import { useEffect, useState, useCallback } from "react";
 import { useAuth } from "@clerk/nextjs";
 import {
+  ShieldCheck,
+  Users,
+  Database,
+  RefreshCw,
+  Search,
+  Lock,
+  Activity,
+  CheckCircle2,
+  AlertCircle,
+  X,
+  ChevronLeft,
+  ChevronRight,
+  UserCheck,
+  SlidersHorizontal,
+} from "lucide-react";
+import {
   fetchAdminStats,
   fetchAdminUsers,
   fetchDatasetStatus,
@@ -56,7 +72,6 @@ export default function AdminDashboardPage() {
     return () => clearTimeout(handler);
   }, [searchQuery]);
 
-  // Reset pagination on filter or search change
   const handleSearchChange = (val: string) => {
     setSearchQuery(val);
     setPage(1);
@@ -194,26 +209,28 @@ export default function AdminDashboardPage() {
 
   if (!isLoaded) {
     return (
-      <div className="min-h-[70vh] flex flex-col items-center justify-center p-6 text-center">
-        <div className="animate-spin text-3xl mb-4 text-emerald-400">⏳</div>
-        <p className="text-slate-400 text-sm">Verifying administrative credentials...</p>
+      <div className="min-h-[60vh] flex flex-col items-center justify-center p-6 text-center">
+        <div className="w-10 h-10 rounded-lg bg-[#f7f3f1] flex items-center justify-center mb-3">
+          <RefreshCw className="h-5 w-5 animate-spin text-[#d97706]" />
+        </div>
+        <p className="text-xs font-semibold text-[#2a3b4e]/40">Verifying administrative credentials...</p>
       </div>
     );
   }
 
   if (accessDenied) {
     return (
-      <div className="min-h-[70vh] flex flex-col items-center justify-center p-6 text-center">
-        <div className="w-16 h-16 rounded-full bg-red-500/10 text-red-400 flex items-center justify-center mb-4 text-3xl border border-red-500/20">
-          🔒
+      <div className="min-h-[60vh] flex flex-col items-center justify-center p-6 text-center">
+        <div className="w-14 h-14 rounded-full bg-red-50 text-red-500 flex items-center justify-center mb-4 border border-red-200 shadow-sm">
+          <Lock className="h-6 w-6" />
         </div>
-        <h1 className="text-2xl font-bold text-slate-100 mb-2">Access Denied (403)</h1>
-        <p className="text-slate-400 max-w-md mb-6">
+        <h1 className="text-xl font-bold font-serif text-[#1a2332] mb-1.5">Access Denied (403)</h1>
+        <p className="text-xs text-[#2a3b4e]/50 max-w-sm mb-5">
           You do not have administrative privileges to access the JurisQuery Admin Console.
         </p>
         <a
           href="/dashboard"
-          className="px-5 py-2.5 rounded-lg bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-medium transition"
+          className="px-4 py-2 rounded-lg bg-[#1a2332] hover:bg-[#2a3b4e] text-white font-semibold text-xs shadow-sm transition-all"
         >
           Return to Dashboard
         </a>
@@ -224,52 +241,59 @@ export default function AdminDashboardPage() {
   const totalPages = Math.ceil(totalUsers / limit) || 1;
 
   return (
-    <div className="space-y-8 p-6 max-w-7xl mx-auto">
-      {/* Top Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-800 pb-6">
-        <div>
-          <div className="flex items-center gap-3 mb-1">
-            <h1 className="text-3xl font-bold tracking-tight text-white">Admin Console</h1>
-            <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
-              System Admin
-            </span>
+    <div className="space-y-6">
+      {/* Header */}
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div className="flex items-center gap-3.5">
+          <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-[#d97706] to-[#f59e0b] flex items-center justify-center shadow-lg shadow-amber-900/20 text-white shrink-0">
+            <ShieldCheck className="h-5 w-5" />
           </div>
-          <p className="text-slate-400 text-sm">
-            Monitor user analytics, manage subscription tiers, and control statute datasets & vector stores.
-          </p>
+          <div>
+            <div className="flex items-center gap-2">
+              <h1 className="text-2xl font-bold font-serif text-[#1a2332]">Admin Console</h1>
+              <span className="px-2 py-0.5 rounded-md text-[10px] font-bold bg-amber-50 text-amber-700 border border-amber-200">
+                System Admin
+              </span>
+            </div>
+            <p className="text-xs text-[#2a3b4e]/40">
+              Monitor user analytics, manage subscription tiers, and control statute datasets & vector stores
+            </p>
+          </div>
         </div>
 
         {/* Tab Switcher & Manual Refresh */}
-        <div className="flex flex-wrap items-center gap-3 self-start">
+        <div className="flex items-center gap-2 self-start md:self-auto">
           <button
             onClick={() => loadDashboardData(true)}
             disabled={isRefreshing || loadingStats}
             title="Refresh dashboard stats"
-            className="p-2 rounded-xl bg-slate-900 border border-slate-800 text-slate-400 hover:text-white transition disabled:opacity-50"
+            className="p-2 rounded-lg bg-white border border-[#e8e2de] text-[#2a3b4e]/60 hover:text-[#1a2332] hover:bg-[#faf8f6] transition-all disabled:opacity-50 shadow-sm"
           >
-            <span className={`block ${isRefreshing ? "animate-spin" : ""}`}>🔄</span>
+            <RefreshCw className={`h-4 w-4 ${isRefreshing ? "animate-spin text-[#d97706]" : ""}`} />
           </button>
 
-          <div className="flex items-center bg-slate-900/80 p-1 rounded-xl border border-slate-800">
+          <div className="flex items-center bg-white rounded-lg border border-[#e8e2de] p-1 shadow-sm">
             <button
               onClick={() => setActiveTab("subscriptions")}
-              className={`px-4 py-2 text-sm font-medium rounded-lg transition ${
+              className={`flex items-center gap-2 px-3.5 py-1.5 rounded-md text-xs font-semibold transition-all ${
                 activeTab === "subscriptions"
-                  ? "bg-emerald-500 text-slate-950 shadow-md font-semibold"
-                  : "text-slate-400 hover:text-white"
+                  ? "bg-[#1a2332] text-white shadow-sm"
+                  : "text-[#2a3b4e]/50 hover:text-[#1a2332]"
               }`}
             >
-              👥 Users & Subscriptions
+              <Users className="h-3.5 w-3.5" />
+              Users & Subscriptions
             </button>
             <button
               onClick={() => setActiveTab("datasets")}
-              className={`px-4 py-2 text-sm font-medium rounded-lg transition ${
+              className={`flex items-center gap-2 px-3.5 py-1.5 rounded-md text-xs font-semibold transition-all ${
                 activeTab === "datasets"
-                  ? "bg-emerald-500 text-slate-950 shadow-md font-semibold"
-                  : "text-slate-400 hover:text-white"
+                  ? "bg-[#1a2332] text-white shadow-sm"
+                  : "text-[#2a3b4e]/50 hover:text-[#1a2332]"
               }`}
             >
-              🗄️ Dataset & Vector Manager
+              <Database className="h-3.5 w-3.5" />
+              Dataset & Vector Manager
             </button>
           </div>
         </div>
@@ -277,63 +301,88 @@ export default function AdminDashboardPage() {
 
       {/* Global Alerts */}
       {actionSuccess && (
-        <div className="bg-emerald-500/10 border border-emerald-500/30 text-emerald-300 p-4 rounded-xl flex items-center justify-between text-sm">
-          <span>{actionSuccess}</span>
-          <button onClick={() => setActionSuccess(null)} className="text-emerald-400 hover:text-white font-bold ml-4">✕</button>
+        <div className="bg-emerald-50 border border-emerald-200 text-emerald-800 px-4 py-3 rounded-xl flex items-center justify-between text-xs font-medium shadow-sm">
+          <div className="flex items-center gap-2">
+            <CheckCircle2 className="h-4 w-4 text-emerald-600 shrink-0" />
+            <span>{actionSuccess}</span>
+          </div>
+          <button onClick={() => setActionSuccess(null)} className="text-emerald-500 hover:text-emerald-700">
+            <X className="h-4 w-4" />
+          </button>
         </div>
       )}
       {errorMsg && (
-        <div className="bg-red-500/10 border border-red-500/30 text-red-300 p-4 rounded-xl flex items-center justify-between text-sm">
-          <span>{errorMsg}</span>
-          <button onClick={() => setErrorMsg(null)} className="text-red-400 hover:text-white font-bold ml-4">✕</button>
+        <div className="bg-red-50 border border-red-200 text-red-800 px-4 py-3 rounded-xl flex items-center justify-between text-xs font-medium shadow-sm">
+          <div className="flex items-center gap-2">
+            <AlertCircle className="h-4 w-4 text-red-600 shrink-0" />
+            <span>{errorMsg}</span>
+          </div>
+          <button onClick={() => setErrorMsg(null)} className="text-red-500 hover:text-red-700">
+            <X className="h-4 w-4" />
+          </button>
         </div>
       )}
 
       {/* Overview Stat Cards */}
       {loadingStats ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           {[1, 2, 3, 4].map((i) => (
-            <div key={i} className="p-5 rounded-2xl bg-slate-900/40 border border-slate-800 animate-pulse space-y-3">
-              <div className="h-3 bg-slate-800 rounded w-1/2"></div>
-              <div className="h-8 bg-slate-800 rounded w-3/4"></div>
-              <div className="h-3 bg-slate-800 rounded w-2/3"></div>
+            <div key={i} className="p-5 rounded-xl bg-white border border-[#e8e2de] animate-pulse space-y-3 shadow-sm">
+              <div className="h-3 bg-[#e8e2de]/60 rounded w-1/2"></div>
+              <div className="h-7 bg-[#e8e2de]/60 rounded w-3/4"></div>
+              <div className="h-3 bg-[#e8e2de]/60 rounded w-2/3"></div>
             </div>
           ))}
         </div>
       ) : stats ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
-          <div className="p-5 rounded-2xl bg-slate-900/60 border border-slate-800/80 backdrop-blur-sm">
-            <div className="text-xs font-medium text-slate-400 uppercase tracking-wider mb-2">Total Accounts</div>
-            <div className="text-3xl font-extrabold text-white">{stats.total_users ?? 0}</div>
-            <div className="mt-2 text-xs text-slate-500 flex gap-2">
-              <span className="text-emerald-400 font-medium">{stats.users_by_plan?.pro ?? 0} Pro</span> •
-              <span className="text-indigo-400 font-medium">{stats.users_by_plan?.enterprise ?? 0} Enterprise</span>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="p-5 rounded-xl bg-white border border-[#e8e2de] shadow-sm hover:shadow-md transition-shadow">
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-[11px] font-bold text-[#2a3b4e]/40 uppercase tracking-wider">Total Accounts</span>
+              <Users className="h-4 w-4 text-[#2a3b4e]/30" />
+            </div>
+            <div className="text-2xl font-bold font-serif text-[#1a2332]">{stats.total_users ?? 0}</div>
+            <div className="mt-2 text-xs text-[#2a3b4e]/50 flex items-center gap-2 font-medium">
+              <span className="text-emerald-600 font-semibold">{stats.users_by_plan?.pro ?? 0} Pro</span>
+              <span>•</span>
+              <span className="text-purple-600 font-semibold">{stats.users_by_plan?.enterprise ?? 0} Enterprise</span>
             </div>
           </div>
 
-          <div className="p-5 rounded-2xl bg-slate-900/60 border border-slate-800/80 backdrop-blur-sm">
-            <div className="text-xs font-medium text-slate-400 uppercase tracking-wider mb-2">Active Subscriptions</div>
-            <div className="text-3xl font-extrabold text-emerald-400">
+          <div className="p-5 rounded-xl bg-white border border-[#e8e2de] shadow-sm hover:shadow-md transition-shadow">
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-[11px] font-bold text-[#2a3b4e]/40 uppercase tracking-wider">Active Paid Subscriptions</span>
+              <UserCheck className="h-4 w-4 text-emerald-500" />
+            </div>
+            <div className="text-2xl font-bold font-serif text-emerald-700">
               {(stats.users_by_plan?.pro ?? 0) + (stats.users_by_plan?.enterprise ?? 0)}
             </div>
-            <div className="mt-2 text-xs text-slate-400">
+            <div className="mt-2 text-xs text-[#2a3b4e]/50 font-medium">
               {stats.users_by_plan?.free ?? 0} Free Tier users
             </div>
           </div>
 
-          <div className="p-5 rounded-2xl bg-slate-900/60 border border-slate-800/80 backdrop-blur-sm">
-            <div className="text-xs font-medium text-slate-400 uppercase tracking-wider mb-2">Total Queries Processed</div>
-            <div className="text-3xl font-extrabold text-cyan-400">{stats.total_queries ?? 0}</div>
-            <div className="mt-2 text-xs text-slate-400">Across {stats.total_documents ?? 0} legal documents</div>
+          <div className="p-5 rounded-xl bg-white border border-[#e8e2de] shadow-sm hover:shadow-md transition-shadow">
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-[11px] font-bold text-[#2a3b4e]/40 uppercase tracking-wider">Total Queries Processed</span>
+              <Activity className="h-4 w-4 text-blue-500" />
+            </div>
+            <div className="text-2xl font-bold font-serif text-[#1a2332]">{stats.total_queries ?? 0}</div>
+            <div className="mt-2 text-xs text-[#2a3b4e]/50 font-medium">
+              Across {stats.total_documents ?? 0} uploaded legal docs
+            </div>
           </div>
 
-          <div className="p-5 rounded-2xl bg-slate-900/60 border border-slate-800/80 backdrop-blur-sm">
-            <div className="text-xs font-medium text-slate-400 uppercase tracking-wider mb-2">Statutes & Vectors</div>
-            <div className="text-3xl font-extrabold text-purple-400">
+          <div className="p-5 rounded-xl bg-white border border-[#e8e2de] shadow-sm hover:shadow-md transition-shadow">
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-[11px] font-bold text-[#2a3b4e]/40 uppercase tracking-wider">Statutes & Vectors</span>
+              <Database className="h-4 w-4 text-purple-500" />
+            </div>
+            <div className="text-2xl font-bold font-serif text-purple-700">
               {(stats.ipc_section_count ?? 0) + (stats.bns_section_count ?? 0)}
             </div>
-            <div className="mt-2 text-xs text-slate-400">
-              {stats.vector_store?.points_count ?? 0} points in Qdrant
+            <div className="mt-2 text-xs text-[#2a3b4e]/50 font-medium">
+              {stats.vector_store?.points_count ?? 0} points in Qdrant Vector Store
             </div>
           </div>
         </div>
@@ -341,23 +390,25 @@ export default function AdminDashboardPage() {
 
       {/* TAB 1: USERS & SUBSCRIPTIONS */}
       {activeTab === "subscriptions" && (
-        <div className="space-y-6">
+        <div className="space-y-4">
           {/* Search & Filters */}
-          <div className="flex flex-col sm:flex-row gap-4 justify-between items-stretch sm:items-center bg-slate-900/50 p-4 rounded-xl border border-slate-800">
-            <div className="relative flex-1">
+          <div className="flex flex-col sm:flex-row gap-3 justify-between items-center bg-white p-3.5 rounded-xl border border-[#e8e2de] shadow-sm">
+            <div className="relative flex-1 w-full">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#2a3b4e]/30" />
               <input
                 type="text"
                 placeholder="Search user email or Clerk ID..."
                 value={searchQuery}
                 onChange={(e) => handleSearchChange(e.target.value)}
-                className="w-full bg-slate-950 border border-slate-800 rounded-lg px-4 py-2 text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:border-emerald-500 transition"
+                className="w-full bg-[#fcfbf9] border border-[#e8e2de] rounded-lg pl-9 pr-3 py-2 text-xs text-[#1a2332] placeholder-[#2a3b4e]/30 focus:outline-none focus:ring-2 focus:ring-[#d97706]/20 focus:border-[#d97706] transition-all"
               />
             </div>
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2 w-full sm:w-auto">
+              <SlidersHorizontal className="h-4 w-4 text-[#2a3b4e]/40 shrink-0" />
               <select
                 value={selectedPlanFilter}
                 onChange={(e) => handleFilterChange(e.target.value)}
-                className="bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-sm text-slate-200 focus:outline-none focus:border-emerald-500"
+                className="w-full sm:w-auto bg-[#fcfbf9] border border-[#e8e2de] rounded-lg px-3 py-2 text-xs font-medium text-[#1a2332] focus:outline-none focus:ring-2 focus:ring-[#d97706]/20 focus:border-[#d97706]"
               >
                 <option value="">All Subscription Tiers</option>
                 <option value="free">Free Tier</option>
@@ -368,66 +419,67 @@ export default function AdminDashboardPage() {
           </div>
 
           {/* Users Table */}
-          <div className="bg-slate-900/60 border border-slate-800 rounded-2xl overflow-hidden shadow-xl">
+          <div className="bg-white border border-[#e8e2de] rounded-xl overflow-hidden shadow-sm">
             <div className="overflow-x-auto">
-              <table className="w-full text-left text-sm text-slate-300">
-                <thead className="bg-slate-950/80 text-xs font-semibold uppercase tracking-wider text-slate-400 border-b border-slate-800">
+              <table className="w-full text-left text-xs text-[#1a2332]">
+                <thead className="bg-[#fcfbf9] text-[11px] font-bold uppercase tracking-wider text-[#2a3b4e]/50 border-b border-[#e8e2de]">
                   <tr>
-                    <th className="py-3.5 px-6">User Email</th>
-                    <th className="py-3.5 px-6">Subscription Plan</th>
-                    <th className="py-3.5 px-6">Queries Today</th>
-                    <th className="py-3.5 px-6">Role</th>
-                    <th className="py-3.5 px-6 text-right">Actions</th>
+                    <th className="py-3.5 px-5">User Account</th>
+                    <th className="py-3.5 px-5">Subscription Plan</th>
+                    <th className="py-3.5 px-5">Queries Today</th>
+                    <th className="py-3.5 px-5">System Role</th>
+                    <th className="py-3.5 px-5 text-right">Actions</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-slate-800/60">
+                <tbody className="divide-y divide-[#e8e2de]/60">
                   {loadingUsers ? (
                     <tr>
-                      <td colSpan={5} className="py-12 text-center text-slate-400">
+                      <td colSpan={5} className="py-12 text-center text-[#2a3b4e]/40">
                         <div className="flex justify-center items-center gap-2">
-                          <span className="animate-spin text-emerald-400">⏳</span> Loading user accounts...
+                          <RefreshCw className="h-4 w-4 animate-spin text-[#d97706]" />
+                          <span>Loading user accounts...</span>
                         </div>
                       </td>
                     </tr>
                   ) : users.length === 0 ? (
                     <tr>
-                      <td colSpan={5} className="py-12 text-center text-slate-500">
-                        No matching users found.
+                      <td colSpan={5} className="py-12 text-center text-[#2a3b4e]/40">
+                        No matching user accounts found.
                       </td>
                     </tr>
                   ) : (
                     users.map((u) => (
-                      <tr key={u.id || u.clerk_id} className="hover:bg-slate-800/30 transition">
-                        <td className="py-4 px-6 font-medium text-white">
-                          <div>{u.email}</div>
-                          <div className="text-xs text-slate-500 font-mono">{u.clerk_id}</div>
+                      <tr key={u.id || u.clerk_id} className="hover:bg-[#faf8f6] transition-colors">
+                        <td className="py-3.5 px-5 font-medium text-[#1a2332]">
+                          <div className="font-semibold text-xs">{u.email}</div>
+                          <div className="text-[10px] text-[#2a3b4e]/40 font-mono mt-0.5">{u.clerk_id}</div>
                         </td>
-                        <td className="py-4 px-6">
+                        <td className="py-3.5 px-5">
                           <span
-                            className={`px-3 py-1 rounded-full text-xs font-semibold uppercase tracking-wider ${
+                            className={`px-2.5 py-1 rounded-md text-[10px] font-bold uppercase tracking-wider border ${
                               u.plan_tier === "pro"
-                                ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/30"
+                                ? "bg-emerald-50 text-emerald-700 border-emerald-200"
                                 : u.plan_tier === "enterprise"
-                                ? "bg-indigo-500/10 text-indigo-400 border border-indigo-500/30"
-                                : "bg-slate-800 text-slate-400 border border-slate-700"
+                                ? "bg-purple-50 text-purple-700 border-purple-200"
+                                : "bg-gray-100 text-gray-600 border-gray-200"
                             }`}
                           >
                             {u.plan_tier}
                           </span>
                         </td>
-                        <td className="py-4 px-6 font-mono text-slate-300">
+                        <td className="py-3.5 px-5 font-mono text-xs font-medium text-[#2a3b4e]/70">
                           {u.daily_query_count} queries
                         </td>
-                        <td className="py-4 px-6">
+                        <td className="py-3.5 px-5">
                           {u.is_admin ? (
-                            <span className="px-2 py-0.5 rounded text-xs bg-amber-500/10 text-amber-400 border border-amber-500/30 font-semibold">
+                            <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-50 text-amber-700 border border-amber-200">
                               Admin
                             </span>
                           ) : (
-                            <span className="text-xs text-slate-500">User</span>
+                            <span className="text-[11px] text-[#2a3b4e]/40 font-medium">User</span>
                           )}
                         </td>
-                        <td className="py-4 px-6 text-right">
+                        <td className="py-3.5 px-5 text-right">
                           <button
                             onClick={() => {
                               setEditingUser(u);
@@ -435,7 +487,7 @@ export default function AdminDashboardPage() {
                               setEditIsAdmin(u.is_admin);
                               setModalError(null);
                             }}
-                            className="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs font-medium text-slate-200 border border-slate-700 transition"
+                            className="px-3 py-1.5 rounded-lg bg-white border border-[#e8e2de] hover:bg-[#f7f3f1] text-xs font-semibold text-[#1a2332] shadow-sm transition-all"
                           >
                             Edit Plan & Role
                           </button>
@@ -448,25 +500,28 @@ export default function AdminDashboardPage() {
             </div>
 
             {/* Pagination Controls */}
-            <div className="p-4 bg-slate-950/60 border-t border-slate-800 flex items-center justify-between text-xs text-slate-400">
+            <div className="p-3.5 bg-[#fcfbf9] border-t border-[#e8e2de] flex items-center justify-between text-xs text-[#2a3b4e]/50 font-medium">
               <div>
                 Showing {users.length > 0 ? (page - 1) * limit + 1 : 0} to{" "}
                 {Math.min(page * limit, totalUsers)} of {totalUsers} users
               </div>
-              <div className="flex gap-2">
+              <div className="flex items-center gap-1.5">
                 <button
                   disabled={page <= 1 || loadingUsers}
                   onClick={() => setPage((p) => Math.max(1, p - 1))}
-                  className="px-3 py-1.5 rounded bg-slate-900 border border-slate-800 disabled:opacity-50 text-slate-300 hover:text-white transition"
+                  className="p-1.5 rounded-md bg-white border border-[#e8e2de] disabled:opacity-40 text-[#2a3b4e] hover:bg-[#f7f3f1] transition-all shadow-sm"
                 >
-                  Previous
+                  <ChevronLeft className="h-4 w-4" />
                 </button>
+                <span className="px-2 text-xs font-semibold text-[#1a2332]">
+                  Page {page} of {totalPages}
+                </span>
                 <button
                   disabled={page >= totalPages || loadingUsers}
                   onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-                  className="px-3 py-1.5 rounded bg-slate-900 border border-slate-800 disabled:opacity-50 text-slate-300 hover:text-white transition"
+                  className="p-1.5 rounded-md bg-white border border-[#e8e2de] disabled:opacity-40 text-[#2a3b4e] hover:bg-[#f7f3f1] transition-all shadow-sm"
                 >
-                  Next
+                  <ChevronRight className="h-4 w-4" />
                 </button>
               </div>
             </div>
@@ -476,118 +531,118 @@ export default function AdminDashboardPage() {
 
       {/* TAB 2: DATASET & VECTOR MANAGER */}
       {activeTab === "datasets" && (
-        <div className="space-y-6">
+        <div className="space-y-5">
           {!datasetStatus ? (
-            <div className="p-8 text-center text-slate-400 bg-slate-900/40 border border-slate-800 rounded-2xl animate-pulse">
+            <div className="p-8 text-center text-xs text-[#2a3b4e]/40 bg-white border border-[#e8e2de] rounded-xl animate-pulse">
               Loading dataset & vector store status...
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               {/* IPC Dataset Status */}
-              <div className="p-6 rounded-2xl bg-slate-900/60 border border-slate-800 space-y-4">
+              <div className="p-5 rounded-xl bg-white border border-[#e8e2de] shadow-sm space-y-3.5">
                 <div className="flex justify-between items-start">
                   <div>
-                    <h3 className="font-bold text-lg text-white">IPC Statute Dataset</h3>
-                    <p className="text-xs text-slate-400">Indian Penal Code Sections</p>
+                    <h3 className="font-bold text-sm font-serif text-[#1a2332]">IPC Statute Dataset</h3>
+                    <p className="text-[11px] text-[#2a3b4e]/40">Indian Penal Code Sections</p>
                   </div>
                   <span
-                    className={`px-2.5 py-1 text-xs rounded-full font-semibold border ${
+                    className={`px-2 py-0.5 text-[10px] rounded-md font-bold border ${
                       datasetStatus.ipc_csv_exists
-                        ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20"
-                        : "bg-amber-500/10 text-amber-400 border-amber-500/20"
+                        ? "bg-emerald-50 text-emerald-700 border-emerald-200"
+                        : "bg-amber-50 text-amber-700 border-amber-200"
                     }`}
                   >
-                    {datasetStatus.ipc_csv_exists ? "CSV Loaded" : "CSV Missing"}
+                    {datasetStatus.ipc_csv_exists ? "CSV Present" : "CSV Missing"}
                   </span>
                 </div>
-                <div className="py-2 border-y border-slate-800 flex justify-between text-sm">
-                  <span className="text-slate-400">Total DB Sections:</span>
-                  <span className="font-bold font-mono text-emerald-400">{datasetStatus.ipc_count ?? 0}</span>
+                <div className="py-2 border-y border-[#e8e2de]/60 flex justify-between text-xs">
+                  <span className="text-[#2a3b4e]/50 font-medium">Total DB Sections:</span>
+                  <span className="font-bold font-mono text-emerald-700">{datasetStatus.ipc_count ?? 0}</span>
                 </div>
-                <div className="space-y-2 pt-2">
-                  <label className="block text-xs text-slate-400 font-medium">
-                    Upload Updated IPC CSV (<code className="text-slate-300">FIR_DATASET.csv</code>):
+                <div className="space-y-1.5 pt-1">
+                  <label className="block text-[11px] text-[#2a3b4e]/60 font-semibold">
+                    Upload Updated IPC CSV (<code className="text-[#1a2332] bg-[#f7f3f1] px-1 py-0.5 rounded">FIR_DATASET.csv</code>):
                   </label>
                   <input
                     type="file"
                     accept=".csv"
                     disabled={uploadingTarget === "ipc"}
                     onChange={(e) => handleFileUpload("ipc", e)}
-                    className="block w-full text-xs text-slate-400 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-slate-800 file:text-slate-200 hover:file:bg-slate-700 cursor-pointer disabled:opacity-50"
+                    className="block w-full text-xs text-[#2a3b4e]/60 file:mr-3 file:py-1.5 file:px-3 file:rounded-md file:border-0 file:text-xs file:font-semibold file:bg-[#1a2332] file:text-white hover:file:bg-[#2a3b4e] cursor-pointer disabled:opacity-50"
                   />
                   {uploadingTarget === "ipc" && (
-                    <p className="text-xs text-emerald-400 animate-pulse">Uploading and parsing CSV...</p>
+                    <p className="text-[11px] text-emerald-600 animate-pulse font-medium">Uploading and parsing CSV...</p>
                   )}
                 </div>
               </div>
 
               {/* BNS Dataset Status */}
-              <div className="p-6 rounded-2xl bg-slate-900/60 border border-slate-800 space-y-4">
+              <div className="p-5 rounded-xl bg-white border border-[#e8e2de] shadow-sm space-y-3.5">
                 <div className="flex justify-between items-start">
                   <div>
-                    <h3 className="font-bold text-lg text-white">BNS Statute Dataset</h3>
-                    <p className="text-xs text-slate-400">Bharatiya Nyaya Sanhita Sections</p>
+                    <h3 className="font-bold text-sm font-serif text-[#1a2332]">BNS Statute Dataset</h3>
+                    <p className="text-[11px] text-[#2a3b4e]/40">Bharatiya Nyaya Sanhita Sections</p>
                   </div>
                   <span
-                    className={`px-2.5 py-1 text-xs rounded-full font-semibold border ${
+                    className={`px-2 py-0.5 text-[10px] rounded-md font-bold border ${
                       datasetStatus.bns_csv_exists
-                        ? "bg-indigo-500/10 text-indigo-400 border-indigo-500/20"
-                        : "bg-amber-500/10 text-amber-400 border-amber-500/20"
+                        ? "bg-purple-50 text-purple-700 border-purple-200"
+                        : "bg-amber-50 text-amber-700 border-amber-200"
                     }`}
                   >
-                    {datasetStatus.bns_csv_exists ? "CSV Loaded" : "CSV Missing"}
+                    {datasetStatus.bns_csv_exists ? "CSV Present" : "CSV Missing"}
                   </span>
                 </div>
-                <div className="py-2 border-y border-slate-800 flex justify-between text-sm">
-                  <span className="text-slate-400">Total DB Sections:</span>
-                  <span className="font-bold font-mono text-indigo-400">{datasetStatus.bns_count ?? 0}</span>
+                <div className="py-2 border-y border-[#e8e2de]/60 flex justify-between text-xs">
+                  <span className="text-[#2a3b4e]/50 font-medium">Total DB Sections:</span>
+                  <span className="font-bold font-mono text-purple-700">{datasetStatus.bns_count ?? 0}</span>
                 </div>
-                <div className="space-y-2 pt-2">
-                  <label className="block text-xs text-slate-400 font-medium">
-                    Upload Updated BNS CSV (<code className="text-slate-300">bns_sections.csv</code>):
+                <div className="space-y-1.5 pt-1">
+                  <label className="block text-[11px] text-[#2a3b4e]/60 font-semibold">
+                    Upload Updated BNS CSV (<code className="text-[#1a2332] bg-[#f7f3f1] px-1 py-0.5 rounded">bns_sections.csv</code>):
                   </label>
                   <input
                     type="file"
                     accept=".csv"
                     disabled={uploadingTarget === "bns"}
                     onChange={(e) => handleFileUpload("bns", e)}
-                    className="block w-full text-xs text-slate-400 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-slate-800 file:text-slate-200 hover:file:bg-slate-700 cursor-pointer disabled:opacity-50"
+                    className="block w-full text-xs text-[#2a3b4e]/60 file:mr-3 file:py-1.5 file:px-3 file:rounded-md file:border-0 file:text-xs file:font-semibold file:bg-[#1a2332] file:text-white hover:file:bg-[#2a3b4e] cursor-pointer disabled:opacity-50"
                   />
                   {uploadingTarget === "bns" && (
-                    <p className="text-xs text-indigo-400 animate-pulse">Uploading and parsing CSV...</p>
+                    <p className="text-[11px] text-purple-600 animate-pulse font-medium">Uploading and parsing CSV...</p>
                   )}
                 </div>
               </div>
 
               {/* Qdrant Vector DB Status */}
-              <div className="p-6 rounded-2xl bg-slate-900/60 border border-slate-800 space-y-4">
+              <div className="p-5 rounded-xl bg-white border border-[#e8e2de] shadow-sm space-y-3.5">
                 <div className="flex justify-between items-start">
                   <div>
-                    <h3 className="font-bold text-lg text-white">Qdrant Vector Store</h3>
-                    <p className="text-xs text-slate-400">Legal Document Chunks & Embeddings</p>
+                    <h3 className="font-bold text-sm font-serif text-[#1a2332]">Qdrant Vector Store</h3>
+                    <p className="text-[11px] text-[#2a3b4e]/40">Legal Document Chunks & Embeddings</p>
                   </div>
                   <span
-                    className={`px-2.5 py-1 text-xs rounded-full font-semibold border ${
+                    className={`px-2 py-0.5 text-[10px] rounded-md font-bold border ${
                       datasetStatus.vector_store?.status === "green" || datasetStatus.vector_store?.status === "ok"
-                        ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20"
-                        : "bg-cyan-500/10 text-cyan-400 border-cyan-500/20"
+                        ? "bg-emerald-50 text-emerald-700 border-emerald-200"
+                        : "bg-blue-50 text-blue-700 border-blue-200"
                     }`}
                   >
                     {datasetStatus.vector_store?.status || "Ready"}
                   </span>
                 </div>
-                <div className="space-y-2 py-2 border-y border-slate-800 text-xs text-slate-300">
+                <div className="space-y-2 py-2 border-y border-[#e8e2de]/60 text-xs font-medium text-[#2a3b4e]/70">
                   <div className="flex justify-between">
-                    <span className="text-slate-400">Collection:</span>
-                    <span className="font-mono text-slate-200">{datasetStatus.vector_store?.collection_name || "jurisquery"}</span>
+                    <span className="text-[#2a3b4e]/50">Collection:</span>
+                    <span className="font-mono text-[#1a2332]">{datasetStatus.vector_store?.collection_name || "jurisquery"}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-slate-400">Point Count:</span>
-                    <span className="font-mono text-cyan-400 font-bold">{datasetStatus.vector_store?.points_count ?? 0}</span>
+                    <span className="text-[#2a3b4e]/50">Point Count:</span>
+                    <span className="font-mono text-blue-700 font-bold">{datasetStatus.vector_store?.points_count ?? 0}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-slate-400">Dimension:</span>
-                    <span className="font-mono text-slate-300">{datasetStatus.vector_store?.dimension ?? 768} dims</span>
+                    <span className="text-[#2a3b4e]/50">Dimension:</span>
+                    <span className="font-mono text-[#1a2332]">{datasetStatus.vector_store?.dimension ?? 768} dims</span>
                   </div>
                 </div>
               </div>
@@ -595,17 +650,17 @@ export default function AdminDashboardPage() {
           )}
 
           {/* Action Bar for Dataset Reseed */}
-          <div className="p-6 rounded-2xl bg-slate-900/80 border border-slate-800 flex flex-col sm:flex-row items-center justify-between gap-4">
+          <div className="p-5 rounded-xl bg-[#fcfbf9] border border-[#e8e2de] flex flex-col sm:flex-row items-center justify-between gap-4 shadow-sm">
             <div>
-              <h4 className="font-bold text-white text-base">Re-sync Statute Datasets from CSV</h4>
-              <p className="text-xs text-slate-400">
-                Triggers an idempotent background update using <code className="text-emerald-400 bg-slate-950 px-1.5 py-0.5 rounded">ON CONFLICT DO UPDATE</code>.
+              <h4 className="font-bold text-sm font-serif text-[#1a2332]">Re-sync Statute Datasets from CSV</h4>
+              <p className="text-xs text-[#2a3b4e]/50 mt-0.5">
+                Triggers an idempotent background update using <code className="text-[#d97706] bg-white px-1.5 py-0.5 rounded border border-[#e8e2de]">ON CONFLICT DO UPDATE</code>.
               </p>
             </div>
             <button
               onClick={handleReseedDatasets}
               disabled={reseeding}
-              className="px-6 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 disabled:opacity-50 text-slate-950 font-bold text-sm transition shadow-lg shadow-emerald-500/20"
+              className="px-5 py-2.5 rounded-lg bg-[#d97706] hover:bg-[#b45309] disabled:opacity-50 text-white font-bold text-xs transition-all shadow-md shadow-amber-900/10 shrink-0"
             >
               {reseeding ? "Re-syncing..." : "🔄 Re-sync All Datasets"}
             </button>
@@ -616,7 +671,7 @@ export default function AdminDashboardPage() {
       {/* Edit User Plan Modal */}
       {editingUser && (
         <div
-          className="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-50 flex items-center justify-center p-4"
+          className="fixed inset-0 bg-[#1a2332]/40 backdrop-blur-sm z-50 flex items-center justify-center p-4"
           onClick={(e) => {
             if (e.target === e.currentTarget) {
               setEditingUser(null);
@@ -624,37 +679,37 @@ export default function AdminDashboardPage() {
             }
           }}
         >
-          <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 max-w-md w-full space-y-5 shadow-2xl">
-            <div className="flex justify-between items-center border-b border-slate-800 pb-3">
-              <h3 className="text-lg font-bold text-white">Edit Subscription & Role</h3>
+          <div className="bg-white border border-[#e8e2de] rounded-xl p-5 max-w-md w-full space-y-4 shadow-2xl">
+            <div className="flex justify-between items-center border-b border-[#e8e2de] pb-3">
+              <h3 className="text-base font-bold font-serif text-[#1a2332]">Edit Subscription & Role</h3>
               <button
                 onClick={() => {
                   setEditingUser(null);
                   setModalError(null);
                 }}
-                className="text-slate-400 hover:text-white text-sm"
+                className="text-[#2a3b4e]/40 hover:text-[#1a2332] text-sm p-1 rounded-md"
               >
-                ✕
+                <X className="h-4 w-4" />
               </button>
             </div>
 
             {modalError && (
-              <div className="bg-red-500/10 border border-red-500/30 text-red-300 p-3 rounded-lg text-xs">
+              <div className="bg-red-50 border border-red-200 text-red-800 p-3 rounded-lg text-xs font-medium">
                 {modalError}
               </div>
             )}
 
             <div className="space-y-1">
-              <label className="text-xs text-slate-400 font-medium">User Email:</label>
-              <div className="text-sm font-semibold text-slate-200">{editingUser.email}</div>
+              <label className="text-xs text-[#2a3b4e]/50 font-semibold">User Email:</label>
+              <div className="text-xs font-bold text-[#1a2332]">{editingUser.email}</div>
             </div>
 
-            <div className="space-y-2">
-              <label className="text-xs text-slate-400 font-medium">Subscription Tier:</label>
+            <div className="space-y-1.5">
+              <label className="text-xs text-[#2a3b4e]/50 font-semibold">Subscription Tier:</label>
               <select
                 value={editPlan}
                 onChange={(e) => setEditPlan(e.target.value)}
-                className="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-sm text-slate-100 focus:outline-none focus:border-emerald-500"
+                className="w-full bg-[#fcfbf9] border border-[#e8e2de] rounded-lg p-2.5 text-xs text-[#1a2332] font-medium focus:outline-none focus:ring-2 focus:ring-[#d97706]/20 focus:border-[#d97706]"
               >
                 <option value="free">Free Tier</option>
                 <option value="pro">Pro Tier</option>
@@ -662,33 +717,33 @@ export default function AdminDashboardPage() {
               </select>
             </div>
 
-            <div className="flex items-center gap-3 pt-2">
+            <div className="flex items-center gap-2.5 pt-1">
               <input
                 type="checkbox"
                 id="isAdminCheck"
                 checked={editIsAdmin}
                 onChange={(e) => setEditIsAdmin(e.target.checked)}
-                className="w-4 h-4 rounded bg-slate-950 border-slate-800 text-emerald-500 focus:ring-emerald-500 cursor-pointer"
+                className="w-4 h-4 rounded bg-[#fcfbf9] border-[#e8e2de] text-[#d97706] focus:ring-[#d97706] cursor-pointer"
               />
-              <label htmlFor="isAdminCheck" className="text-sm font-medium text-slate-200 cursor-pointer">
+              <label htmlFor="isAdminCheck" className="text-xs font-semibold text-[#1a2332] cursor-pointer">
                 Grant Admin Privileges
               </label>
             </div>
 
-            <div className="flex justify-end gap-3 pt-4 border-t border-slate-800">
+            <div className="flex justify-end gap-2.5 pt-3 border-t border-[#e8e2de]">
               <button
                 onClick={() => {
                   setEditingUser(null);
                   setModalError(null);
                 }}
-                className="px-4 py-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-sm text-slate-300 transition"
+                className="px-4 py-2 rounded-lg bg-[#f7f3f1] hover:bg-[#e8e2de] text-xs font-semibold text-[#2a3b4e] transition-all"
               >
                 Cancel
               </button>
               <button
                 onClick={handleUserPlanSave}
                 disabled={updatingUser}
-                className="px-4 py-2 rounded-lg bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-sm transition disabled:opacity-50"
+                className="px-4 py-2 rounded-lg bg-[#d97706] hover:bg-[#b45309] text-white font-bold text-xs shadow-sm transition-all disabled:opacity-50"
               >
                 {updatingUser ? "Saving..." : "Save Changes"}
               </button>
