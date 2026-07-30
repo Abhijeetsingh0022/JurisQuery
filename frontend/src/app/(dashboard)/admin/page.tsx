@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
+import { useAuth } from "@clerk/nextjs";
 import {
   fetchAdminStats,
   fetchAdminUsers,
@@ -14,6 +15,7 @@ import {
 } from "@/features/admin/api/admin";
 
 export default function AdminDashboardPage() {
+  const { isLoaded, isSignedIn } = useAuth();
   const [activeTab, setActiveTab] = useState<"subscriptions" | "datasets">("subscriptions");
   const [stats, setStats] = useState<AdminStats | null>(null);
   const [datasetStatus, setDatasetStatus] = useState<DatasetStatus | null>(null);
@@ -114,12 +116,18 @@ export default function AdminDashboardPage() {
   }, [debouncedSearch, selectedPlanFilter, page, limit]);
 
   useEffect(() => {
+    if (!isLoaded) return;
+    if (!isSignedIn) {
+      setLoadingStats(false);
+      return;
+    }
     loadDashboardData();
-  }, [loadDashboardData]);
+  }, [isLoaded, isSignedIn, loadDashboardData]);
 
   useEffect(() => {
+    if (!isLoaded || !isSignedIn) return;
     loadUserData();
-  }, [loadUserData]);
+  }, [isLoaded, isSignedIn, loadUserData]);
 
   // Handle modal keyboard Esc key
   useEffect(() => {
@@ -182,6 +190,15 @@ export default function AdminDashboardPage() {
       setUploadingTarget(null);
       e.target.value = "";
     }
+  }
+
+  if (!isLoaded) {
+    return (
+      <div className="min-h-[70vh] flex flex-col items-center justify-center p-6 text-center">
+        <div className="animate-spin text-3xl mb-4 text-emerald-400">⏳</div>
+        <p className="text-slate-400 text-sm">Verifying administrative credentials...</p>
+      </div>
+    );
   }
 
   if (accessDenied) {

@@ -25,9 +25,19 @@ export class ApiClientError extends Error {
 }
 
 export async function getAuthToken(): Promise<string | null> {
+    if (typeof window === 'undefined') return null;
+
     try {
-        // Clerk exposes getToken on the global window object in the browser
-        const clerk = (window as any).Clerk;
+        let clerk = (window as any).Clerk;
+        // Poll for up to 2 seconds if Clerk is initializing on initial page mount
+        if (!clerk || !clerk.session) {
+            for (let i = 0; i < 20; i++) {
+                await new Promise((resolve) => setTimeout(resolve, 100));
+                clerk = (window as any).Clerk;
+                if (clerk?.session) break;
+            }
+        }
+
         if (clerk?.session) {
             return await clerk.session.getToken();
         }
