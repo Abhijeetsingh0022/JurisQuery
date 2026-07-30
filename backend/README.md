@@ -1,169 +1,137 @@
-# JurisQuery Backend
+<div align="center">
+  <h1>🏛️ JurisQuery Backend API</h1>
+  <p><strong>Enterprise-Grade Legal Intelligence & Agentic RAG Framework</strong></p>
+  
+  [![Python](https://img.shields.io/badge/Python-3.10+-blue.svg?logo=python&logoColor=white)](https://python.org)
+  [![FastAPI](https://img.shields.io/badge/FastAPI-0.109+-009688.svg?logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com)
+  [![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16.0+-336791.svg?logo=postgresql&logoColor=white)](https://postgresql.org)
+  [![Qdrant](https://img.shields.io/badge/Qdrant-Vector_Search-FF5252.svg?logo=qdrant&logoColor=white)](https://qdrant.tech)
+</div>
 
-> FastAPI Backend for Legal Document RAG Analysis with AI-Powered IPC Prediction
+---
 
-## 🚀 Quick Start
+## 📖 Overview
+
+The **JurisQuery Backend** is a high-performance, asynchronous REST API built on [FastAPI](https://fastapi.tiangolo.com/). It powers advanced legal document analysis through a meticulously engineered AI pipeline. Designed for high availability and structural rigor, the backend incorporates Agentic Web Research, Reciprocal Rank Fusion (RRF), and real-time Server-Sent Events (SSE) streaming to deliver precise, citation-backed legal insights.
+
+---
+
+## 🏗 System Architecture
+
+The core processing pipeline orchestrates interactions between traditional RDBMS storage, high-dimensional vector space, and multiple LLM providers.
+
+```mermaid
+graph TD
+    Client[Client App / Frontend] -->|REST & SSE| FastAPI[FastAPI Main Router]
+    
+    subgraph Auth & Access
+        FastAPI --> Clerk[Clerk JWKS Validator]
+    end
+    
+    subgraph Core NLP Engine
+        FastAPI --> BrainLLM[Brain LLM: Intent & Decomposition]
+    end
+
+    subgraph Data Retrieval
+        BrainLLM -->|Vector Search| Qdrant[(Qdrant Cloud)]
+        BrainLLM -->|Keyword ILIKE| Postgres[(Neon PostgreSQL)]
+        BrainLLM -->|Autonomous Web Search| Tavily[Tavily Search API]
+        Qdrant -.->|RRF Fusion| Context(Master Context Builder)
+        Postgres -.->|RRF Fusion| Context
+        Tavily -.-> Context
+    end
+
+    subgraph Generation
+        Context --> LLM[Google Gemini 2.5 Flash]
+        Context --> Groq[Groq Llama-3.3 Fallback]
+        LLM -->|Token Streams| FastAPI
+    end
+```
+
+---
+
+## ✨ Core Technical Capabilities
+
+### 1. Multi-Modal Retrieval-Augmented Generation (RAG)
+* **Hierarchical Chunking Strategy:** Documents are parsed into **Child chunks** (~500 chars) for high-accuracy localized vector matching, which then pull in their respective **Parent chunks** (~2000 chars) to provide rich, surrounding context to the LLM.
+* **Hybrid Search with RRF:** Merges semantic similarity (via `models/gemini-embedding-004`) with traditional database keyword search to ensure zero data misses, fused via Reciprocal Rank Fusion.
+* **Branched "Map-Reduce" RAG:** When querying a **Case Folder** (multiple documents), the system autonomously decomposes the user query into localized sub-queries, executes parallel asynchronous retrieval mappings across all documents, and synthesizes a master response.
+
+### 2. Autonomous Agentic Web Research
+* Dynamically identifies out-of-scope or general legal queries.
+* Orchestrates headless web searches via the **Tavily API**, executing multi-step evaluations.
+* Exposes an overarching **Server-Sent Events (SSE)** interface, bridging real-time status updates (e.g., `Searching web for precedence...`) directly to the frontend before seamlessly transitioning into token-by-token text generation.
+
+### 3. The "Brain" Orchestrator
+A specialized supervisor AI layer (`app/llm/brain.py`) controlling traffic flow:
+* **Query Re-Writing & Entity Extraction:** Cleans conversational inputs into optimized boolean and semantic query vectors.
+* **Reflective Output Verification:** Systematically cross-references generated outputs against the retrieved context to aggressively detect and eliminate hallucinations.
+
+### 4. BNS-IPC Transitional Bridge
+Native accommodations for the Indian judicial transition (`app/ipc/bns_service.py`):
+* Context responses referencing legacy **Indian Penal Code (IPC)** infractions dynamically inject cross-references to the modern **Bharatiya Nyaya Sanhita (BNS) 2023** statutes.
+
+---
+
+## 📂 Project Topology
+
+| Module | Purpose | Key Technologies |
+| :--- | :--- | :--- |
+| `app/auth/` | Zero-trust authentication enforcing remote RS256 token verification. | `jose`, JWKS Caching |
+| `app/documents/` | Asynchronous file parsing (PDF/DOCX) and cloud persistence. | `pypdf`, `docx`, Cloudinary |
+| `app/rag/` | Chunking heuristics, Qdrant upserts, and complex retrieval pipelines. | `gemini-cli`, Qdrant |
+| `app/research/` | Headless data acquisition logic and agentic chain loops. | Tavily Search API |
+| `app/chat/` | Persistent historical dialogue tracking and core SSE HTTP bridges. | FastAPI BackgroundTasks |
+| `app/llm/` | Polymorphic generator interfaces and self-reflection layers. | Gemini, Groq, AsyncIO |
+
+---
+
+## 🛠 Deployment & Setup Instructions
+
+JurisQuery utilizes `uv`, the lightning-fast Python package and environment manager written in Rust.
 
 ### Prerequisites
+* Python 3.10+
+* Local or Remote PostgreSQL Server
+* [Qdrant Cloud](https://cloud.qdrant.io/) Cluster
 
-- Python 3.12+
-- [uv](https://github.com/astral-sh/uv) package manager
-
-### Setup
-
-1. **Clone and navigate to backend**
-   ```bash
-   cd backend
-   ```
-
-2. **Install dependencies with uv**
-   ```bash
-   uv sync
-   ```
-
-3. **Copy environment variables**
-   ```bash
-   cp .env.example .env
-   # Edit .env with your credentials
-   ```
-
-4. **Run database migrations**
-   ```bash
-   uv run alembic upgrade head
-   ```
-
-5. **Start the development server**
-   ```bash
-   uv run uvicorn src.main:app --reload
-   ```
-
-6. **Access the API**
-   - API: http://localhost:8000
-   - Docs: http://localhost:8000/docs
-   - ReDoc: http://localhost:8000/redoc
-
-## 📁 Project Structure
-
-```
-backend/
-├── src/
-│   ├── auth/           # JWT validation, Clerk integration
-│   ├── documents/      # Upload, CRUD, status tracking
-│   ├── rag/            # RAG pipeline (hybrid search, embeddings)
-│   ├── chat/           # Chat sessions & message history
-│   ├── ipc/            # IPC Section Prediction feature
-│   ├── llm/            # LLM integrations
-│   │   ├── gemini.py   # Gemini 2.0 Flash (API key rotation)
-│   │   ├── groq_llm.py # Groq LLaMA 3.3 (fallback)
-│   │   └── brain.py    # Meta-reasoning (query analysis, verification)
-│   ├── storage/        # Cloudinary file storage
-│   ├── config.py       # Pydantic settings
-│   ├── database.py     # Async SQLAlchemy
-│   ├── exceptions.py   # Custom error hierarchy
-│   └── main.py         # FastAPI application
-├── alembic/            # Database migrations
-├── dataset/            # IPC dataset (FIR_DATASET.csv)
-├── tests/              # Test suite
-├── pyproject.toml      # uv config & dependencies
-└── .env.example        # Environment template
-```
-
-## 🧠 Core Modules
-
-### RAG Pipeline (`rag/`)
-
-- **Hybrid Search**: Combines Qdrant vector search + PostgreSQL keyword search
-- **RRF Fusion**: Reciprocal Rank Fusion merges and re-ranks results
-- **Parent-Child Chunking**: Search on small chunks, return parent context
-- **BrainLLM Integration**: Query optimization and response verification
-
-### IPC Predictor (`ipc/`)
-
-- **Dataset Loading**: Ingests IPC sections from CSV
-- **LLM Prediction**: Uses Gemini to predict applicable sections
-- **Confidence Scoring**: 0-1 confidence with reasoning
-
-### LLM Module (`llm/`)
-
-| Component | Description |
-|-----------|-------------|
-| **GeminiLLM** | Gemini 2.0 Flash with API key rotation for rate limits |
-| **GroqLLM** | LLaMA 3.3 70B fallback |
-| **BrainLLM** | Query analysis, response verification, refinement |
-
-## 🔧 Development
-
-### Running Tests
+### 1. Environment Configuration
+Duplicate the configuration template to initialize your local environment:
 ```bash
-uv run pytest
+cp .env.example .env
+```
+Ensure the following critical environment matrices are populated:
+* `DATABASE_URL`: Your PostgreSQL connection string.
+* `QDRANT_URL` / `QDRANT_API_KEY`: Vector persistence credentials.
+* `GEMINI_API_KEY` / `GROQ_API_KEY`: Generative AI access tokens.
+* `TAVILY_API_KEY`: API token required for the Agentic Web pipeline.
+* `CLERK_FRONTEND_API`: Origin parameter for verifying stateless JWTs.
+
+### 2. Dependency Resolution
+```bash
+# Initialize isolated virtual environment and fetch strict dependencies
+uv venv
+source .venv/bin/activate
+uv pip install -e .
 ```
 
-### Linting & Formatting
+### 3. Database Introspection & Seeding
 ```bash
-uv run ruff check --fix src
-uv run ruff format src
-```
-
-### Creating Migrations
-```bash
-uv run alembic revision --autogenerate -m "description"
+# Push declarative SQLAlchemy schemas to the remote Postgres provider
 uv run alembic upgrade head
+
+# Seed initial internal data (IPC → BNS lookup tables)
+uv run load_db.py
 ```
 
-## 📡 API Endpoints
+### 4. Launching the Cluster
+Initialize the ASGI web server directly:
+```bash
+uv run uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+```
+---
 
-### Documents API
-
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| POST | `/api/documents/upload` | Upload document |
-| GET | `/api/documents` | List documents |
-| GET | `/api/documents/{id}` | Get document details |
-| GET | `/api/documents/{id}/status` | Polling status |
-| DELETE | `/api/documents/{id}` | Delete document |
-
-### RAG API
-
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| POST | `/api/rag/query` | Query with RAG (hybrid search) |
-
-### Chat API
-
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| POST | `/api/chat/sessions` | Create chat session |
-| GET | `/api/chat/sessions` | List sessions |
-| POST | `/api/chat/sessions/{id}/messages` | Send message |
-| DELETE | `/api/chat/sessions/{id}` | Delete session |
-
-### IPC API
-
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| POST | `/api/v1/ipc/predict` | Predict IPC sections |
-| GET | `/api/v1/ipc/sections` | List IPC sections |
-| GET | `/api/v1/ipc/sections/{num}` | Get section details |
-| POST | `/api/v1/ipc/load-dataset` | Load IPC dataset (admin) |
-
-## 🔑 Environment Variables
-
-See `.env.example` for all required variables:
-
-| Variable | Description |
-|----------|-------------|
-| `DATABASE_URL` | Neon PostgreSQL connection string |
-| `GEMINI_API_KEYS` | Comma-separated Gemini keys (rotation) |
-| `QDRANT_URL` | Qdrant Cloud URL |
-| `QDRANT_API_KEY` | Qdrant Cloud API key |
-| `CLOUDINARY_*` | Cloudinary credentials |
-| `GROQ_API_KEY` | Optional Groq key for fallback |
-| `CLERK_*` | Clerk authentication keys |
-
-## 📊 Architecture Patterns
-
-- **Router → Service → Model** pattern across all modules
-- **Async-first** with SQLAlchemy async sessions
-- **Background tasks** for document processing
-- **Retry with tenacity** for LLM calls
-- **API key rotation** for rate limit resilience
+## 🔐 Security & Reliability
+- **Stateless Tokens:** Zero session state handled internally; strict adherence to remote Identity Provider definitions via asymmetrical key rotation.
+- **Failovers:** Out-of-the-box support for falling back from Gemini to Llama-3 instances in the event of upstream rate-limiting (`429`) or provider degradation.
+- **Data Pruning:** Isolated cascade relationships utilizing `delete-orphan` parameters ensure stringent compliance with user-deletion mandates.

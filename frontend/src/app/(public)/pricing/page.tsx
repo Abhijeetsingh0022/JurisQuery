@@ -1,13 +1,14 @@
 "use client";
 
 import { motion } from "framer-motion";
+import Link from "next/link";
 import { Button } from "@/components/common/Button";
 import { Check } from "lucide-react";
 
 const plans = [
     {
         name: "Starter",
-        price: "$0",
+        price: "₹0",
         description: "Perfect for individuals trying out AI legal analysis.",
         features: [
             "5 Document uploads per month",
@@ -20,7 +21,7 @@ const plans = [
     },
     {
         name: "Professional",
-        price: "$49",
+        price: "₹2,499",
         period: "/month",
         description: "For solo practitioners and small firms needing power.",
         features: [
@@ -71,7 +72,7 @@ export default function PricingPage() {
                             initial={{ opacity: 0, y: 20 }}
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ delay: index * 0.1 }}
-                            className={`relative p-8 rounded-2xl border ${plan.popular
+                            className={`relative p-8 rounded-lg border ${plan.popular
                                     ? "border-primary bg-primary text-primary-foreground shadow-2xl scale-105 z-10"
                                     : "border-gray-200 bg-white text-foreground hover:shadow-xl transition-shadow"
                                 }`}
@@ -94,14 +95,16 @@ export default function PricingPage() {
                                 {plan.period && <span className={`text-sm ${plan.popular ? "text-primary-foreground/70" : "text-foreground/60"}`}>{plan.period}</span>}
                             </div>
 
-                            <Button
-                                className={`w-full mb-8 rounded-xl font-semibold h-12 ${plan.popular
-                                        ? "bg-white text-primary hover:bg-gray-100"
-                                        : "bg-primary text-primary-foreground hover:bg-primary/90"
-                                    }`}
-                            >
-                                {plan.cta}
-                            </Button>
+                            <Link href={plan.name === "Enterprise" ? "/contact" : "/sign-up"} className="w-full">
+                                <Button
+                                    className={`w-full mb-8 rounded-lg font-semibold h-12 ${plan.popular
+                                            ? "bg-white text-primary hover:bg-gray-100"
+                                            : "bg-primary text-primary-foreground hover:bg-primary/90"
+                                        }`}
+                                >
+                                    {plan.cta}
+                                </Button>
+                            </Link>
 
                             <div className="space-y-4">
                                 {plan.features.map((feature, i) => (

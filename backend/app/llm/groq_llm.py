@@ -2,28 +2,40 @@
 Groq LLM integration for JurisQuery.
 Uses Groq's fast inference for LLaMA models as a fallback.
 """
+import asyncio
+import logging
 
-from groq import Groq
+from groq import AsyncGroq
 from tenacity import retry, stop_after_attempt, wait_exponential
 
 from app.config import settings
 
+logger = logging.getLogger(__name__)
+
 
 class GroqLLM:
-    """Groq LLM implementation using LLaMA 3."""
+    """
+    Groq LLM using LLaMA 3 for fast fallback inference.
+    Instantiated with a None client when no API key is configured,
+    allowing callers to check availability via is_available() before use.
+    """
 
-    def __init__(self, model_name: str = "llama-3.3-70b-versatile"):
+    def __init__(self, model_name: str = "llama-3.3-70b-versatile") -> None:
         """
-        Initialize Groq LLM.
-        
         Args:
-            model_name: Groq model to use
+            model_name: Groq model identifier to use for generation
         """
         self.model_name = model_name
-        self.client = Groq(api_key=settings.groq_api_key) if settings.groq_api_key else None
+        self.client: AsyncGroq | None = (
+            AsyncGroq(api_key=settings.groq_api_key) if settings.groq_api_key else None
+        )
+
+    # ------------------------------------------------------------------
+    # Public API
+    # ------------------------------------------------------------------
 
     def is_available(self) -> bool:
-        """Check if Groq is configured."""
+        """Return True if a Groq client has been initialised."""
         return self.client is not None
 
     @retry(
@@ -35,26 +47,36 @@ class GroqLLM:
         prompt: str,
         temperature: float = 0.3,
         max_tokens: int = 2048,
+        json_mode: bool = False,
     ) -> str:
         """
         Generate text using Groq.
-        
+
         Args:
             prompt: Input prompt
-            temperature: Sampling temperature (0-1)
+            temperature: Sampling temperature (0.0 – 1.0)
             max_tokens: Maximum tokens to generate
-            
+            json_mode: If True, enforces JSON response format
+
         Returns:
-            str: Generated text
+            Generated text string
+
+        Raises:
+            RuntimeError: If Groq is not configured
         """
         if not self.client:
-            raise ValueError("Groq API key not configured")
+            raise RuntimeError("Groq API key is not configured")
 
-        response = self.client.chat.completions.create(
-            model=self.model_name,
-            messages=[{"role": "user", "content": prompt}],
-            temperature=temperature,
-            max_tokens=max_tokens,
-        )
-        
-        return response.choices[0].message.content
+        kwargs = {
+            "model": self.model_name,
+            "messages": [{"role": "user", "content": prompt}],
+            "temperature": temperature,
+            "max_tokens": max_tokens,
+        }
+        if json_mode:
+            kwargs["response_format"] = {"type": "json_object"}
+
+        response = await self.client.chat.completions.create(**kwargs)
+        text = response.choices[0].message.content
+        logger.debug("Groq generation complete: %d chars", len(text or ""))
+        return text

@@ -53,7 +53,7 @@ export default function DocumentCard({ document, onSelect, onDelete }: DocumentC
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
             className={`
-        group relative rounded-xl border bg-white p-4
+        group relative rounded-lg border bg-white p-4
         transition-all duration-200 overflow-hidden
         ${isReady ? 'border-gray-200 cursor-pointer hover:shadow-lg hover:border-blue-300' : 'border-gray-200'}
       `}

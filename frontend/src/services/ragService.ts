@@ -99,6 +99,89 @@ export async function sendMessage(
     });
 }
 
+/**
+ * Stream a message response via Server-Sent Events.
+ * Calls `onToken` for each text chunk and `onDone` when the stream ends.
+ * Returns an AbortController so the caller can cancel the stream.
+ */
+export function streamMessage(
+    sessionId: string,
+    content: string,
+    searchMode: 'document' | 'web' | 'auto' | undefined,
+    onToken: (token: string) => void,
+    onDone: () => void,
+    onError?: (err: string) => void,
+    onStatus?: (status: string) => void,
+): AbortController {
+    const controller = new AbortController();
+
+    (async () => {
+        // Get auth token the same way the rest of the app does
+        let token: string | null = null;
+        try {
+            const clerk = (window as any).Clerk;
+            if (clerk?.session) token = await clerk.session.getToken();
+        } catch { /* unauthenticated */ }
+
+        const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+        if (token) headers['Authorization'] = `Bearer ${token}`;
+
+        try {
+            const response = await fetch(`/api/chat/sessions/${sessionId}/stream`, {
+                method: 'POST',
+                headers,
+                body: JSON.stringify({ content, search_mode: searchMode }),
+                signal: controller.signal,
+            });
+
+            if (!response.ok || !response.body) {
+                onError?.(`Stream error: ${response.status}`);
+                onDone();
+                return;
+            }
+
+            const reader = response.body.getReader();
+            const decoder = new TextDecoder();
+            let buffer = '';
+
+            while (true) {
+                const { done, value } = await reader.read();
+                if (done) break;
+
+                buffer += decoder.decode(value, { stream: true });
+                const lines = buffer.split('\n\n');
+                buffer = lines.pop() ?? '';
+
+                for (const line of lines) {
+                    if (!line.startsWith('data: ')) continue;
+                    const payload = line.slice(6); // strip "data: "
+                    if (payload === '[DONE]') { onDone(); return; }
+                    if (payload.startsWith('[ERROR]')) { onError?.(payload.slice(8)); onDone(); return; }
+                    if (payload.startsWith('[STATUS]')) { onStatus?.(payload.slice(9)); continue; }
+                    // Un-escape newlines we escaped on the server
+                    onToken(payload.replace(/\\n/g, '\n'));
+                }
+            }
+            onDone();
+        } catch (err: any) {
+            if (err?.name !== 'AbortError') onError?.(err?.message ?? 'Stream failed');
+            onDone();
+        }
+    })();
+
+    return controller;
+}
+
+export async function createFolderChatSession(
+    folderId: string,
+    title?: string,
+): Promise<ChatSession> {
+    return api.post<ChatSession>('/api/chat/sessions', {
+        folder_id: folderId,
+        title,
+    });
+}
+
 export async function deleteChatSession(sessionId: string): Promise<void> {
     return api.delete(`/api/chat/sessions/${sessionId}`);
 }

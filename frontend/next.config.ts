@@ -2,6 +2,7 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   /* config options here */
+  output: 'standalone',
   reactCompiler: true,
   images: {
     remotePatterns: [
@@ -12,10 +13,13 @@ const nextConfig: NextConfig = {
     ],
   },
   async rewrites() {
+    // BACKEND_URL is set in Render env (http://jurisquery-backend:8000 via private network)
+    // Falls back to localhost for local dev
+    const backendUrl = process.env.BACKEND_URL || 'http://127.0.0.1:8000';
     return [
       {
         source: '/api/:path*',
-        destination: 'http://127.0.0.1:8000/api/:path*',
+        destination: `${backendUrl}/api/:path*`,
       },
     ];
   },

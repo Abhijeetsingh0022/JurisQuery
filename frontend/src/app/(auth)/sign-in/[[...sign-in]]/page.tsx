@@ -26,7 +26,7 @@ export default function SignInPage() {
                     appearance={{
                         elements: {
                             rootBox: "w-full",
-                            card: "shadow-2xl border-0 rounded-2xl bg-white", // Removed transparency/blur to prevent artifacts
+                            card: "shadow-2xl border-0 rounded-lg bg-white", // Removed transparency/blur to prevent artifacts
                             headerTitle: "hidden",
                             headerSubtitle: "hidden",
                             formButtonPrimary: "bg-primary hover:bg-primary/90 text-primary-foreground transition-all duration-200 shadow-md hover:shadow-lg",

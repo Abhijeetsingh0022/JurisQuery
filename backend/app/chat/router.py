@@ -6,6 +6,7 @@ Handles chat sessions and message history.
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, status
+from fastapi.responses import StreamingResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.auth.dependencies import get_current_user
@@ -38,8 +39,9 @@ async def create_session(
     """Create a new chat session."""
     return await service.create_session(
         db=db,
-        document_id=request.document_id,
         user_id=current_user["id"],
+        document_id=request.document_id,
+        folder_id=request.folder_id,
         title=request.title,
     )
 
@@ -52,16 +54,18 @@ async def create_session(
 )
 async def list_sessions(
     document_id: UUID | None = None,
+    folder_id: UUID | None = None,
     skip: int = 0,
     limit: int = 20,
     db: AsyncSession = Depends(get_db),
     current_user: dict = Depends(get_current_user),
 ):
-    """List chat sessions, optionally filtered by document."""
+    """List chat sessions, optionally filtered by document or folder."""
     return await service.list_sessions(
         db=db,
         user_id=current_user["id"],
         document_id=document_id,
+        folder_id=folder_id,
         skip=skip,
         limit=limit,
     )
@@ -105,6 +109,34 @@ async def send_message(
         session_id=session_id,
         user_id=current_user["id"],
         content=request.content,
+    )
+
+
+@router.post(
+    "/sessions/{session_id}/stream",
+    summary="Stream a message response",
+    description="Send a message and receive the AI response as a Server-Sent Events stream.",
+)
+async def stream_message(
+    session_id: UUID,
+    request: MessageCreate,
+    db: AsyncSession = Depends(get_db),
+    current_user: dict = Depends(get_current_user),
+):
+    """Send a message and stream the AI response via SSE."""
+    return StreamingResponse(
+        service.stream_message(
+            db=db,
+            session_id=session_id,
+            user_id=current_user["id"],
+            content=request.content,
+            search_mode=request.search_mode,
+        ),
+        media_type="text/event-stream",
+        headers={
+            "Cache-Control": "no-cache",
+            "X-Accel-Buffering": "no",  # Disable nginx buffering
+        },
     )
 
 

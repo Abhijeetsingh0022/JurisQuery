@@ -30,13 +30,17 @@ class Settings(BaseSettings):
     gemini_api_key: str
     gemini_api_key_2: str | None = None
     groq_api_key: str | None = None
+    tavily_api_key: str | None = None
+
+    # Feature Flags
+    enable_agentic_research: bool = True
 
     @property
     def gemini_api_keys(self) -> list[str]:
         """Return list of available Gemini API keys for rotation."""
         keys = [self.gemini_api_key]
-        if self.gemini_api_key_2:
-            keys.append(self.gemini_api_key_2)
+        if self.gemini_api_key_2 is not None:
+            keys.append(str(self.gemini_api_key_2))
         return keys
 
     # Vector Database (Qdrant)
@@ -54,6 +58,14 @@ class Settings(BaseSettings):
     jwt_algorithm: str = "HS256"
     jwt_expiry_minutes: int = 60
     clerk_secret_key: str | None = None
+    # Clerk JWKS endpoint base, e.g. https://grown-hyena-6.clerk.accounts.dev
+    clerk_frontend_api: str | None = None
+
+    # Stripe Billing
+    stripe_secret_key: str | None = None
+    stripe_webhook_secret: str | None = None
+    stripe_pro_price_id: str | None = None
+    stripe_dummy_mode: bool = True
 
     # CORS
     cors_origins: str = "http://localhost:3000"
@@ -75,4 +87,6 @@ def get_settings() -> Settings:
     return Settings()
 
 
-settings = get_settings()
+settings: Settings = get_settings()
+
+__all__ = ["Settings", "get_settings", "settings"]

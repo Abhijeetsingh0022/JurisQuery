@@ -26,7 +26,7 @@ export default function SignUpPage() {
                     appearance={{
                         elements: {
                             rootBox: "w-full",
-                            card: "shadow-2xl border-0 rounded-2xl bg-white", // Removed transparency/blur
+                            card: "shadow-2xl border-0 rounded-lg bg-white", // Removed transparency/blur
                             headerTitle: "hidden",
                             headerSubtitle: "hidden",
                             formButtonPrimary: "bg-primary hover:bg-primary/90 text-primary-foreground transition-all duration-200 shadow-md hover:shadow-lg",

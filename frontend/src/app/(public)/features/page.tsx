@@ -1,6 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
+import Link from "next/link";
 import { Button } from "@/components/common/Button";
 import { ArrowRight, Brain, FileSearch, Scale, ShieldCheck, Zap } from "lucide-react";
 
@@ -63,7 +64,7 @@ export default function FeaturesPage() {
                             className={`flex flex-col ${index % 2 === 0 ? "md:flex-row" : "md:flex-row-reverse"} items-center gap-12 mb-32`}
                         >
                             <div className="flex-1 w-full">
-                                <div className="relative aspect-video rounded-2xl overflow-hidden shadow-2xl border border-primary/10 group">
+                                <div className="relative aspect-video rounded-lg overflow-hidden shadow-2xl border border-primary/10 group">
                                     <div className="absolute inset-0 bg-primary/20 group-hover:bg-transparent transition-colors duration-500 z-10" />
                                     {/* Using a colored div as placeholder if image fails, or the actual image */}
                                     <div
@@ -73,7 +74,7 @@ export default function FeaturesPage() {
                                 </div>
                             </div>
                             <div className="flex-1 w-full space-y-6">
-                                <div className="w-14 h-14 rounded-xl bg-primary/10 flex items-center justify-center text-primary mb-4">
+                                <div className="w-14 h-14 rounded-lg bg-primary/10 flex items-center justify-center text-primary mb-4">
                                     <feature.icon size={32} />
                                 </div>
                                 <h2 className="text-3xl md:text-4xl font-serif font-bold text-primary">{feature.title}</h2>
@@ -81,9 +82,11 @@ export default function FeaturesPage() {
                                     {feature.description}
                                 </p>
                                 <div className="pt-4">
-                                    <Button variant="outline" className="gap-2 group">
-                                        Learn more <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-                                    </Button>
+                                    <Link href="/contact">
+                                        <Button variant="outline" className="gap-2 group">
+                                            Learn more <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                                        </Button>
+                                    </Link>
                                 </div>
                             </div>
                         </motion.div>
@@ -99,9 +102,11 @@ export default function FeaturesPage() {
                     <p className="text-xl text-primary-foreground/80 mb-10 max-w-2xl mx-auto">
                         Join thousands of legal professionals who trust JurisQuery for their document analysis.
                     </p>
-                    <Button size="lg" className="bg-white text-primary hover:bg-gray-100 shadow-xl text-lg h-14 px-10 rounded-full">
-                        Get Started Now
-                    </Button>
+                    <Link href="/sign-up">
+                        <Button size="lg" className="bg-white text-primary hover:bg-gray-100 shadow-xl text-lg h-14 px-10 rounded-full">
+                            Get Started Now
+                        </Button>
+                    </Link>
                 </div>
             </section>
         </div>

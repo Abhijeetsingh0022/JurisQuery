@@ -34,7 +34,7 @@ export default function PDFViewer({ url, className = '', activeCitation }: PDFVi
 
     // Function to highlight text in the PDF text layer
     const highlightTextInPage = (pageNum: number, searchText: string) => {
-        if (!searchText || searchText.length < 20) return;
+        if (!searchText) return;
 
         // Wait for text layer to render
         setTimeout(() => {
@@ -50,16 +50,18 @@ export default function PDFViewer({ url, className = '', activeCitation }: PDFVi
                 el.classList.remove('citation-highlight');
             });
 
-            // Get first 50 chars of the search text for matching
-            const searchSnippet = searchText.slice(0, 50).toLowerCase().replace(/\s+/g, ' ').trim();
+            // Normalize search text by stripping non-alphanumeric chars
+            const cleanSearch = searchText.toLowerCase().replace(/[^a-z0-9]/g, '');
+            if (cleanSearch.length < 10) return;
 
             // Find and highlight matching text spans
             const textSpans = textLayer.querySelectorAll('span');
             let foundMatch = false;
 
             textSpans.forEach((span) => {
-                const text = span.textContent?.toLowerCase().replace(/\s+/g, ' ').trim() || '';
-                if (text.length > 10 && searchSnippet.includes(text.slice(0, 20))) {
+                const text = span.textContent?.toLowerCase().replace(/[^a-z0-9]/g, '') || '';
+                // Highlight span if its text is substantial (> 5 chars) and forms part of the citation
+                if (text.length > 5 && cleanSearch.includes(text)) {
                     span.classList.add('citation-highlight');
                     foundMatch = true;
                 }
@@ -67,7 +69,7 @@ export default function PDFViewer({ url, className = '', activeCitation }: PDFVi
 
             // If no exact match, just log warning
             if (!foundMatch) {
-                console.warn('Citation text match failed for:', searchSnippet);
+                console.warn('Citation text match failed for normalized text length:', cleanSearch.length);
             }
         }, 800);
     };

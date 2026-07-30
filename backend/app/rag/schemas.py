@@ -1,7 +1,6 @@
 """
 RAG schemas for JurisQuery.
 """
-
 from uuid import UUID
 
 from pydantic import BaseModel, Field
@@ -16,29 +15,30 @@ class QueryRequest(BaseModel):
 
 
 class Citation(BaseModel):
-    """Schema for a citation in the response."""
+    """Schema for a citation in the RAG response."""
 
-    chunk_id: UUID
+    chunk_id: UUID | str
     content: str
+    relevance_score: float = Field(..., ge=0.0, le=1.0)
+    source_id: int | None = None
     page_number: int | None = None
     paragraph_number: int | None = None
-    relevance_score: float = Field(ge=0, le=1)
 
 
 class QueryResponse(BaseModel):
     """Schema for RAG query response."""
 
-    answer: str
-    citations: list[Citation]
     document_id: UUID
     query: str
-    model: str = "gemini-3.5-flash-lite"
+    answer: str
+    citations: list[Citation]
+    model: str = "gemini-2.5-flash"
 
 
 class EmbeddingRequest(BaseModel):
     """Schema for embedding generation request."""
 
-    texts: list[str]
+    texts: list[str] = Field(..., min_length=1)
 
 
 class EmbeddingResponse(BaseModel):

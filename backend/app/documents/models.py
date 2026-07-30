@@ -1,7 +1,6 @@
 """
-Document SQLAlchemy models.
+Document SQLAlchemy models for JurisQuery.
 """
-
 import uuid
 from enum import StrEnum
 from typing import TYPE_CHECKING
@@ -16,47 +15,61 @@ if TYPE_CHECKING:
     from app.chat.models import ChatSession
 
 
+# ---------------------------------------------------------------------------
+# Enums
+# ---------------------------------------------------------------------------
+
 class DocumentStatus(StrEnum):
-    """Document processing status."""
+    """Processing lifecycle states for an uploaded document."""
 
-    PENDING = "pending"
-    UPLOADING = "uploading"
-    PROCESSING = "processing"
+    PENDING     = "pending"
+    UPLOADING   = "uploading"
+    PROCESSING  = "processing"
     VECTORIZING = "vectorizing"
-    READY = "ready"
-    FAILED = "failed"
+    READY       = "ready"
+    FAILED      = "failed"
 
+
+class ChunkType(StrEnum):
+    """Hierarchy role of a document chunk."""
+
+    PARENT = "parent"  # Large context chunk returned to the LLM
+    CHILD  = "child"   # Small search chunk embedded in Qdrant
+
+
+# ---------------------------------------------------------------------------
+# Models
+# ---------------------------------------------------------------------------
 
 class Document(BaseModel):
-    """Document model representing an uploaded legal document."""
+    """Uploaded legal document and its processing metadata."""
 
     __tablename__ = "documents"
 
     # Owner
-    user_id: Mapped[str] = mapped_column(String(255), nullable=False, index=True)
+    user_id: Mapped[str] = mapped_column(String(255), index=True)
 
-    # File info
-    filename: Mapped[str] = mapped_column(String(255), nullable=False)
-    original_filename: Mapped[str] = mapped_column(String(255), nullable=False)
-    file_url: Mapped[str] = mapped_column(String(512), nullable=False)
-    file_type: Mapped[str] = mapped_column(String(50), nullable=False)  # pdf, docx, txt
-    file_size: Mapped[int] = mapped_column(nullable=False)  # bytes
+    # File identity
+    filename: Mapped[str] = mapped_column(String(255))
+    original_filename: Mapped[str] = mapped_column(String(255))
+    file_url: Mapped[str] = mapped_column(String(512))
+    file_type: Mapped[str] = mapped_column(String(50))   # pdf | docx | txt
+    file_size: Mapped[int] = mapped_column()              # bytes
 
-    # Processing status
+    # Processing
     status: Mapped[str] = mapped_column(
         String(50),
         default=DocumentStatus.PENDING,
-        nullable=False,
         index=True,
     )
-    error_message: Mapped[str | None] = mapped_column(Text, nullable=True)
+    error_message: Mapped[str | None] = mapped_column(Text)
 
-    # Content
-    page_count: Mapped[int | None] = mapped_column(nullable=True)
-    chunk_count: Mapped[int | None] = mapped_column(nullable=True)
+    # Content statistics
+    page_count: Mapped[int | None] = mapped_column()
+    chunk_count: Mapped[int | None] = mapped_column()
 
-    # Metadata
-    doc_metadata: Mapped[dict | None] = mapped_column(JSONB, nullable=True)
+    # Arbitrary extra metadata
+    doc_metadata: Mapped[dict | None] = mapped_column(JSONB)
 
     # Relationships
     chunks: Mapped[list["DocumentChunk"]] = relationship(
@@ -67,56 +80,50 @@ class Document(BaseModel):
     chat_sessions: Mapped[list["ChatSession"]] = relationship(
         "ChatSession",
         back_populates="document",
+        cascade="all, delete-orphan",
     )
-
-
-class ChunkType(StrEnum):
-    """Type of document chunk."""
-    PARENT = "parent"
-    CHILD = "child"
 
 
 class DocumentChunk(BaseModel):
-    """Document chunk model for storing text segments."""
+    """Text segment of a document, organised in a parent-child hierarchy."""
 
     __tablename__ = "document_chunks"
 
-    # Parent document
+    # Owning document
     document_id: Mapped[uuid.UUID] = mapped_column(
         UUID(as_uuid=True),
         ForeignKey("documents.id", ondelete="CASCADE"),
-        nullable=False,
         index=True,
     )
 
-    # Chunk info
-    chunk_index: Mapped[int] = mapped_column(nullable=False)
-    content: Mapped[str] = mapped_column(Text, nullable=False)
+    # Content
+    chunk_index: Mapped[int] = mapped_column()
+    content: Mapped[str] = mapped_column(Text)
 
-    # Location in document
-    page_number: Mapped[int | None] = mapped_column(nullable=True)
-    paragraph_number: Mapped[int | None] = mapped_column(nullable=True)
-    section_title: Mapped[str | None] = mapped_column(String(500), nullable=True)
+    # Position within document
+    page_number: Mapped[int | None] = mapped_column()
+    paragraph_number: Mapped[int | None] = mapped_column()
+    section_title: Mapped[str | None] = mapped_column(String(500))
 
-    # Parent-Child Hierarchy
-    chunk_type: Mapped[str] = mapped_column(
-        String(20), default=ChunkType.PARENT, nullable=False
-    )
+    # Parent-child hierarchy
+    chunk_type: Mapped[str] = mapped_column(String(20), default=ChunkType.PARENT)
     parent_chunk_id: Mapped[uuid.UUID | None] = mapped_column(
         UUID(as_uuid=True),
         ForeignKey("document_chunks.id", ondelete="CASCADE"),
-        nullable=True,
         index=True,
     )
 
-    # Vector store reference
-    vector_id: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    # Qdrant point reference
+    vector_id: Mapped[str | None] = mapped_column(String(255))
 
-    # Metadata
-    chunk_metadata: Mapped[dict | None] = mapped_column(JSONB, nullable=True)
+    # Arbitrary extra metadata
+    chunk_metadata: Mapped[dict | None] = mapped_column(JSONB)
 
     # Relationships
-    document: Mapped["Document"] = relationship("Document", back_populates="chunks")
+    document: Mapped["Document"] = relationship(
+        "Document",
+        back_populates="chunks",
+    )
     children: Mapped[list["DocumentChunk"]] = relationship(
         "DocumentChunk",
         back_populates="parent",

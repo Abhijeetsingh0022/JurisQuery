@@ -14,6 +14,7 @@ from app.models import BaseModel
 
 if TYPE_CHECKING:
     from app.documents.models import Document
+    from app.folders.models import CaseFolder
 
 
 class MessageRole(StrEnum):
@@ -32,11 +33,17 @@ class ChatSession(BaseModel):
     # Owner
     user_id: Mapped[str] = mapped_column(String(255), nullable=False, index=True)
 
-    # Document
-    document_id: Mapped[uuid.UUID] = mapped_column(
+    # Target (Document or Folder)
+    document_id: Mapped[uuid.UUID | None] = mapped_column(
         UUID(as_uuid=True),
         ForeignKey("documents.id", ondelete="CASCADE"),
-        nullable=False,
+        nullable=True,
+        index=True,
+    )
+    folder_id: Mapped[uuid.UUID | None] = mapped_column(
+        UUID(as_uuid=True),
+        ForeignKey("case_folders.id", ondelete="CASCADE"),
+        nullable=True,
         index=True,
     )
 
@@ -44,7 +51,8 @@ class ChatSession(BaseModel):
     title: Mapped[str | None] = mapped_column(String(255), nullable=True)
 
     # Relationships
-    document: Mapped["Document"] = relationship("Document", back_populates="chat_sessions")
+    document: Mapped["Document | None"] = relationship("Document", back_populates="chat_sessions")
+    folder: Mapped["CaseFolder | None"] = relationship("CaseFolder", back_populates="chat_sessions")
     messages: Mapped[list["Message"]] = relationship(
         "Message",
         back_populates="session",

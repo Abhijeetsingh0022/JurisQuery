@@ -25,7 +25,7 @@ export default function DocumentsList({
     onUploadClick,
 }: DocumentsListProps) {
     return (
-        <div className="bg-white rounded-xl border border-gray-200 shadow-sm">
+        <div className="bg-white rounded-lg border border-gray-200 shadow-sm">
             <div className="p-6 border-b border-gray-100 flex items-center justify-between">
                 <h3 className="text-lg font-semibold text-gray-900">Your Documents</h3>
                 <button
@@ -42,7 +42,7 @@ export default function DocumentsList({
                     <motion.div
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
-                        className="mb-6 p-4 rounded-xl bg-red-50 border border-red-200 flex items-center gap-3 text-red-600"
+                        className="mb-6 p-4 rounded-lg bg-red-50 border border-red-200 flex items-center gap-3 text-red-600"
                     >
                         <AlertCircle className="h-5 w-5 flex-shrink-0" />
                         <p>{error}</p>
@@ -52,7 +52,7 @@ export default function DocumentsList({
                 {isLoading ? (
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         {[1, 2, 3, 4].map((i) => (
-                            <div key={i} className="h-32 rounded-xl bg-gray-100 animate-pulse" />
+                            <div key={i} className="h-32 rounded-lg bg-gray-100 animate-pulse" />
                         ))}
                     </div>
                 ) : documents.length === 0 ? (

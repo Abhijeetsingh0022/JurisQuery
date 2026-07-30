@@ -1,6 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
+import Link from "next/link";
 import { Button } from "@/components/common/Button";
 import { ArrowRight } from "lucide-react";
 
@@ -58,13 +59,17 @@ export function Hero() {
                         transition={{ duration: 0.5, delay: 0.3 }}
                         className="flex flex-col sm:flex-row gap-5 w-full sm:w-auto"
                     >
-                        <Button size="lg" className="h-14 px-8 rounded-full text-lg shadow-xl shadow-primary/20 hover:shadow-2xl hover:shadow-primary/30 transition-all duration-300 hover:-translate-y-1">
-                            Start Analyzing Free
-                            <ArrowRight className="ml-2 w-5 h-5" />
-                        </Button>
-                        <Button variant="outline" size="lg" className="h-14 px-8 rounded-full text-lg border-2 hover:bg-surface transition-all duration-300">
-                            View Demo
-                        </Button>
+                        <Link href="/sign-up">
+                            <Button size="lg" className="h-14 px-8 rounded-full text-lg shadow-xl shadow-primary/20 hover:shadow-2xl hover:shadow-primary/30 transition-all duration-300 hover:-translate-y-1">
+                                Start Analyzing Free
+                                <ArrowRight className="ml-2 w-5 h-5" />
+                            </Button>
+                        </Link>
+                        <Link href="/features">
+                            <Button variant="outline" size="lg" className="h-14 px-8 rounded-full text-lg border-2 hover:bg-surface transition-all duration-300">
+                                View Demo
+                            </Button>
+                        </Link>
                     </motion.div>
                 </div>
             </div>

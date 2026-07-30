@@ -12,6 +12,7 @@ class MessageCreate(BaseModel):
     """Schema for creating a message."""
 
     content: str = Field(..., min_length=1, max_length=4000)
+    search_mode: str | None = Field(default="document", description="document, web, or auto")
 
 
 class MessageResponse(BaseModel):
@@ -29,7 +30,8 @@ class MessageResponse(BaseModel):
 class ChatSessionCreate(BaseModel):
     """Schema for creating a chat session."""
 
-    document_id: UUID
+    document_id: UUID | None = None
+    folder_id: UUID | None = None
     title: str | None = None
 
 
@@ -37,7 +39,8 @@ class ChatSessionResponse(BaseModel):
     """Schema for chat session response."""
 
     id: UUID
-    document_id: UUID
+    document_id: UUID | None = None
+    folder_id: UUID | None = None
     title: str | None = None
     created_at: datetime
     updated_at: datetime

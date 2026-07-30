@@ -24,11 +24,10 @@ class UserCreate(UserBase):
 class UserResponse(BaseModel):
     """Schema for user response."""
 
-    id: UUID
-    email: EmailStr
+    id: str
+    email: str | None = None
     clerk_id: str
-    created_at: datetime
-
+    
     model_config = {"from_attributes": True}
 
 

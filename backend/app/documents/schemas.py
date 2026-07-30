@@ -1,37 +1,31 @@
 """
-Document schemas for JurisQuery.
+Document Pydantic schemas for JurisQuery.
 """
-
 from datetime import datetime
 from uuid import UUID
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field
 
 from app.documents.models import DocumentStatus
 
-
-class DocumentBase(BaseModel):
-    """Base document schema."""
-
-    filename: str
-    file_type: str
+_ORM_CONFIG = ConfigDict(from_attributes=True)
 
 
-class DocumentCreate(BaseModel):
-    """Schema for document upload metadata."""
-
-    original_filename: str
-
+# ---------------------------------------------------------------------------
+# Document schemas
+# ---------------------------------------------------------------------------
 
 class DocumentResponse(BaseModel):
-    """Schema for document response."""
+    """Full document representation returned by the API."""
+
+    model_config = _ORM_CONFIG
 
     id: UUID
     filename: str
     original_filename: str
     file_url: str
     file_type: str
-    file_size: int
+    file_size: int           # bytes
     status: str
     error_message: str | None = None
     page_count: int | None = None
@@ -40,27 +34,31 @@ class DocumentResponse(BaseModel):
     created_at: datetime
     updated_at: datetime
 
-    model_config = {"from_attributes": True}
-
 
 class DocumentListResponse(BaseModel):
-    """Schema for document list response."""
+    """Paginated list of documents."""
 
     documents: list[DocumentResponse]
     total: int
 
 
 class DocumentStatusResponse(BaseModel):
-    """Schema for document status polling."""
+    """Lightweight status payload for polling document processing progress."""
 
     id: UUID
     status: str
-    progress: int = Field(ge=0, le=100, description="Processing progress percentage")
+    progress: int = Field(0, ge=0, le=100, description="Processing progress (0–100 %)")
     error_message: str | None = None
 
 
+# ---------------------------------------------------------------------------
+# Chunk schemas
+# ---------------------------------------------------------------------------
+
 class DocumentChunkResponse(BaseModel):
-    """Schema for document chunk response."""
+    """Single text chunk of a processed document."""
+
+    model_config = _ORM_CONFIG
 
     id: UUID
     chunk_index: int
@@ -71,12 +69,9 @@ class DocumentChunkResponse(BaseModel):
     chunk_type: str = "parent"
     parent_chunk_id: UUID | None = None
 
-    model_config = {"from_attributes": True}
-
 
 class DocumentChunkListResponse(BaseModel):
-    """Schema for list of document chunks."""
+    """Paginated list of document chunks."""
 
     chunks: list[DocumentChunkResponse]
     total: int
-
