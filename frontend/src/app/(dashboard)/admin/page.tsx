@@ -344,7 +344,7 @@ export default function AdminDashboardPage() {
             <div className="text-2xl font-bold font-serif text-[#1a2332]">{stats.total_users ?? 0}</div>
             <div className="mt-2 text-xs text-[#2a3b4e]/50 flex items-center gap-2 font-medium">
               <span className="text-emerald-600 font-semibold">{stats.users_by_plan?.pro ?? 0} Pro</span>
-              <span>•</span>
+              <span>&middot;</span>
               <span className="text-purple-600 font-semibold">{stats.users_by_plan?.enterprise ?? 0} Enterprise</span>
             </div>
           </div>
@@ -660,9 +660,10 @@ export default function AdminDashboardPage() {
             <button
               onClick={handleReseedDatasets}
               disabled={reseeding}
-              className="px-5 py-2.5 rounded-lg bg-[#d97706] hover:bg-[#b45309] disabled:opacity-50 text-white font-bold text-xs transition-all shadow-md shadow-amber-900/10 shrink-0"
+              className="flex items-center gap-2 px-5 py-2.5 rounded-lg bg-[#d97706] hover:bg-[#b45309] disabled:opacity-50 text-white font-bold text-xs transition-all shadow-md shadow-amber-900/10 shrink-0"
             >
-              {reseeding ? "Re-syncing..." : "🔄 Re-sync All Datasets"}
+              <RefreshCw className={`h-4 w-4 ${reseeding ? "animate-spin" : ""}`} />
+              <span>{reseeding ? "Re-syncing..." : "Re-sync All Datasets"}</span>
             </button>
           </div>
         </div>
