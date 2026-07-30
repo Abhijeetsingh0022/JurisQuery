@@ -27,9 +27,25 @@ const navigation = [
     { name: "Settings", href: "/settings", icon: Settings },
 ];
 
+import { useEffect, useState } from "react";
+import { useUser } from "@clerk/nextjs";
+import { useApi } from "@/hooks/use-api";
+
 export default function Sidebar({ onClose }: { onClose?: () => void }) {
     const pathname = usePathname();
     const { signOut } = useClerk();
+    const { user } = useUser();
+    const { fetcher } = useApi();
+    const [isAdmin, setIsAdmin] = useState(false);
+
+    useEffect(() => {
+        if (!user) return;
+        fetcher("/api/auth/me")
+            .then((res: any) => {
+                if (res?.is_admin) setIsAdmin(true);
+            })
+            .catch(() => {});
+    }, [user, fetcher]);
 
     return (
         <div className="flex h-full md:h-[calc(100vh-2rem)] w-[280px] md:m-4 flex-col bg-[#0f172a] text-white rounded-lg shadow-2xl border-r border-white/5 md:border-0 overflow-hidden relative shrink-0">
@@ -75,7 +91,14 @@ export default function Sidebar({ onClose }: { onClose?: () => void }) {
                                         isActive ? "text-[#d97706] scale-110" : "text-white/20 group-hover:text-white/40"
                                     )}
                                 />
-                                {item.name}
+                                <span className="flex-1 flex items-center justify-between">
+                                    <span>{item.name}</span>
+                                    {item.href === "/admin" && isAdmin && (
+                                        <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-500/20 text-amber-400 border border-amber-500/30">
+                                            Admin
+                                        </span>
+                                    )}
+                                </span>
                             </Link>
                         );
                     })}

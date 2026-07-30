@@ -43,10 +43,49 @@ async def _get_jwks() -> dict:
     return _jwks_cache
 
 
-from sqlalchemy import select
+from sqlalchemy import select, or_
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.database import get_db
 from app.auth.models import User
+
+# Cached email mappings from Clerk API
+_clerk_email_cache: dict[str, str] = {}
+
+async def _fetch_clerk_email(user_id: str) -> str | None:
+    if user_id in _clerk_email_cache:
+        return _clerk_email_cache[user_id]
+    
+    if not settings.clerk_secret_key:
+        return None
+        
+    try:
+        async with httpx.AsyncClient() as client:
+            resp = await client.get(
+                f"https://api.clerk.com/v1/users/{user_id}",
+                headers={"Authorization": f"Bearer {settings.clerk_secret_key}"},
+                timeout=5.0
+            )
+            if resp.status_code == 200:
+                data = resp.json()
+                emails = data.get("email_addresses", [])
+                primary_id = data.get("primary_email_address_id")
+                primary_email = None
+                for e in emails:
+                    if e.get("id") == primary_id:
+                        primary_email = e.get("email_address")
+                        break
+                if not primary_email and emails:
+                    primary_email = emails[0].get("email_address")
+                
+                if primary_email:
+                    clean_email = primary_email.lower().strip()
+                    _clerk_email_cache[user_id] = clean_email
+                    return clean_email
+    except Exception as e:
+        logger.warning("Failed to fetch user email from Clerk API for %s: %s", user_id, e)
+    
+    return None
+
 
 async def get_current_user(
     authorization: str | None = Header(None),
@@ -114,22 +153,70 @@ async def get_current_user(
             )
 
         user_id = payload.get("sub")
-        email = payload.get("email", "").lower()
+        raw_email = (
+            payload.get("email")
+            or payload.get("email_address")
+            or payload.get("primary_email_address")
+            or ""
+        )
+        email = raw_email.lower().strip() if isinstance(raw_email, str) else ""
+
         if not user_id:
             raise UnauthorizedError("Invalid token payload")
 
         # Guarantee Real-time SaaS Entitlement Synced State
-        result = await db.execute(select(User).where(User.clerk_id == user_id))
-        db_user = result.scalar_one_or_none()
-        
+        stmt = select(User).where(
+            or_(User.clerk_id == user_id, (User.email == email) & (User.email != ""))
+        )
+        result = await db.execute(stmt)
+        db_user = result.scalars().first()
+
+        # If email missing from JWT, resolve via db_user or Clerk Backend API
+        if not email and db_user and db_user.email:
+            email = db_user.email.lower().strip()
+
+        if not email:
+            fetched = await _fetch_clerk_email(user_id)
+            if fetched:
+                email = fetched
+
+        # Determine admin privileges
+        is_admin = False
+        if email and email in settings.admin_emails_list:
+            is_admin = True
+        elif db_user and getattr(db_user, "is_admin", False):
+            is_admin = True
+
         plan_tier = "free"
         stripe_customer_id = None
-        is_admin = email in settings.admin_emails_list
+
         if db_user:
+            if db_user.clerk_id != user_id:
+                db_user.clerk_id = user_id
+            if is_admin:
+                db_user.is_admin = True
+                if db_user.plan_tier == "free":
+                    db_user.plan_tier = "enterprise"
+            
             plan_tier = db_user.plan_tier
             stripe_customer_id = db_user.stripe_customer_id
-            if getattr(db_user, "is_admin", False):
-                is_admin = True
+            await db.commit()
+        else:
+            # Auto-provision user record in DB on first login
+            plan_tier = "enterprise" if is_admin else "free"
+            new_user = User(
+                clerk_id=user_id,
+                email=email or f"{user_id}@clerk.user",
+                is_admin=is_admin,
+                plan_tier=plan_tier,
+            )
+            db.add(new_user)
+            try:
+                await db.commit()
+                db_user = new_user
+            except Exception as err:
+                await db.rollback()
+                logger.warning("Failed to auto-provision user %s: %s", user_id, err)
 
         return {
             "id": user_id,
